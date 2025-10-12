@@ -1,0 +1,24 @@
+# Ignore temporary files
+*.swp
+*.swo
+*~
+
+# Ignore local config
+config/local.yml
+
+# Ignore logs
+*.log
+
+# Ignore development databases
+*.sqlite3
+*.db
+
+# Ignore coverage reports
+coverage/
+
+# Ignore node modules if any
+node_modules/
+
+# Ignore local environment files
+.env.local
+
