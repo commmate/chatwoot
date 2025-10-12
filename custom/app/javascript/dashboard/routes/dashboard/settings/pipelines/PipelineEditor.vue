@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useAlert } from 'dashboard/composables';
-import axios from 'axios';
+import PipelinesAPI from '../../../../api/pipelines';
 import Button from 'dashboard/components-next/button/Button.vue';
 import StageManager from './StageManager.vue';
 
@@ -30,9 +30,7 @@ const fetchPipeline = async () => {
 
   isLoading.value = true;
   try {
-    const response = await axios.get(
-      `/api/v1/accounts/${accountId.value}/pipelines/${pipelineId.value}`
-    );
+    const response = await PipelinesAPI.show(pipelineId.value);
     pipelineName.value = response.data.name;
     pipelineDescription.value = response.data.description || '';
     stages.value = response.data.stages || [];
@@ -64,16 +62,10 @@ const savePipeline = async () => {
     };
 
     if (isEditMode.value) {
-      await axios.put(
-        `/api/v1/accounts/${accountId.value}/pipelines/${pipelineId.value}`,
-        { pipeline: pipelineData }
-      );
+      await PipelinesAPI.update(pipelineId.value, pipelineData);
       useAlert(t('PIPELINES.EDIT.SUCCESS'));
     } else {
-      await axios.post(
-        `/api/v1/accounts/${accountId.value}/pipelines`,
-        { pipeline: pipelineData }
-      );
+      await PipelinesAPI.create(pipelineData);
       useAlert(t('PIPELINES.ADD.SUCCESS'));
     }
 

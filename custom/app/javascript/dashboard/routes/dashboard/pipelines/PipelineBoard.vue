@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
+import PipelinesAPI from '../../../api/pipelines';
 import axios from 'axios';
 import draggable from 'vuedraggable';
 import ConversationCard from 'dashboard/components/widgets/conversation/ConversationCard.vue';
@@ -30,9 +31,7 @@ const pipelineId = computed(() => route.params.pipelineId);
 
 const fetchPipeline = async () => {
   try {
-    const response = await axios.get(
-      `/api/v1/accounts/${accountId.value}/pipelines/${pipelineId.value}`
-    );
+    const response = await PipelinesAPI.show(pipelineId.value);
     pipeline.value = response.data;
   } catch (error) {
     console.error('Failed to fetch pipeline:', error);

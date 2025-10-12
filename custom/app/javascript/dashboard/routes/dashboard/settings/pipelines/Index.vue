@@ -3,11 +3,11 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { useAlert } from 'dashboard/composables';
-import BaseSettingsHeader from '../../../../../../app/javascript/dashboard/routes/dashboard/settings/components/BaseSettingsHeader.vue';
-import SettingsLayout from '../../../../../../app/javascript/dashboard/routes/dashboard/settings/SettingsLayout.vue';
+import BaseSettingsHeader from 'dashboard/routes/dashboard/settings/components/BaseSettingsHeader.vue';
+import SettingsLayout from 'dashboard/routes/dashboard/settings/SettingsLayout.vue';
 import Button from 'dashboard/components-next/button/Button.vue';
 import PipelineTableRow from './PipelineTableRow.vue';
-import axios from 'axios';
+import PipelinesAPI from '../../../../api/pipelines';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -22,7 +22,7 @@ const accountId = computed(() => route.params.accountId);
 const fetchPipelines = async () => {
   isLoading.value = true;
   try {
-    const response = await axios.get(`/api/v1/accounts/${accountId.value}/pipelines`);
+    const response = await PipelinesAPI.get();
     pipelines.value = response.data;
   } catch (error) {
     useAlert(t('PIPELINES.LIST.LOAD_ERROR'));
@@ -43,7 +43,7 @@ const closeDeletePopup = () => {
 
 const confirmDeletion = async () => {
   try {
-    await axios.delete(`/api/v1/accounts/${accountId.value}/pipelines/${selectedPipeline.value.id}`);
+    await PipelinesAPI.delete(selectedPipeline.value.id);
     useAlert(t('PIPELINES.DELETE.SUCCESS'));
     fetchPipelines();
   } catch (error) {
