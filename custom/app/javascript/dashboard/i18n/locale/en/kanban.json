@@ -1,0 +1,25 @@
+{
+  "KANBAN": {
+    "TITLE": "Kanban Board",
+    "DESCRIPTION": "Visualize and manage conversations by status",
+    "TOTAL_CONVERSATIONS": "conversations",
+    "EMPTY_COLUMN": "No conversations",
+    "COLUMNS": {
+      "OPEN": "Open",
+      "PENDING": "Pending",
+      "SNOOZED": "Snoozed",
+      "RESOLVED": "Resolved"
+    },
+    "ACTIONS": {
+      "MOVE_TO_OPEN": "Move to Open",
+      "MOVE_TO_PENDING": "Move to Pending",
+      "MOVE_TO_SNOOZED": "Move to Snoozed",
+      "MOVE_TO_RESOLVED": "Move to Resolved"
+    },
+    "MESSAGES": {
+      "SUCCESS": "Conversation status updated",
+      "ERROR": "Failed to update conversation status"
+    }
+  }
+}
+

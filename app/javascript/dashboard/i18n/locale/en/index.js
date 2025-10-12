@@ -37,6 +37,7 @@ import teamsSettings from './teamsSettings.json';
 import whatsappTemplates from './whatsappTemplates.json';
 import contentTemplates from './contentTemplates.json';
 import mfa from './mfa.json';
+import kanban from '../../../../../../custom/app/javascript/dashboard/i18n/locale/en/kanban.json';
 
 export default {
   ...advancedFilters,
@@ -78,4 +79,5 @@ export default {
   ...whatsappTemplates,
   ...contentTemplates,
   ...mfa,
+  ...kanban,
 };
