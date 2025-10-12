@@ -24,7 +24,7 @@ import teams from './teams/teams.routes';
 import customRoles from './customRoles/customRole.routes';
 import profile from './profile/profile.routes';
 import security from './security/security.routes';
-import customSettingsRoutes from '../../../../../custom/app/javascript/dashboard/routes/dashboard/settings/customSettingsRoutes';
+import customSettingsRoutes from '../../../../../../custom/app/javascript/dashboard/routes/dashboard/settings/customSettingsRoutes';
 
 export default {
   routes: [
