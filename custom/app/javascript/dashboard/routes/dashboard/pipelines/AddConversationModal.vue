@@ -1,8 +1,9 @@
+/* global axios */
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAlert } from 'dashboard/composables';
-import axios from 'axios';
+import ConversationApi from 'dashboard/api/conversations';
 import Button from 'dashboard/components-next/button/Button.vue';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
 
@@ -36,14 +37,7 @@ const filteredConversations = computed(() => {
 const fetchAvailableConversations = async () => {
   isLoading.value = true;
   try {
-    const response = await axios.get(
-      `/api/v1/accounts/${props.accountId}/conversations`,
-      {
-        params: {
-          status: 'open',
-        },
-      }
-    );
+    const response = await ConversationApi.get({ status: 'open' });
 
     const fieldKey = props.pipeline.custom_field_key;
     

@@ -3,7 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import PipelinesAPI from '../../../api/pipelines';
-import axios from 'axios';
+import ConversationApi from 'dashboard/api/conversations';
 import draggable from 'vuedraggable';
 import ConversationCard from 'dashboard/components/widgets/conversation/ConversationCard.vue';
 import Spinner from 'dashboard/components-next/spinner/Spinner.vue';
@@ -45,17 +45,13 @@ const fetchConversations = async () => {
   try {
     const params = {
       status: 'open',
-      // Add filter params
     };
 
     if (selectedTeam.value !== 'all') params.team_id = selectedTeam.value;
     if (selectedInbox.value !== 'all') params.inbox_id = selectedInbox.value;
     if (selectedAgent.value !== 'all') params.assignee_id = selectedAgent.value;
 
-    const response = await axios.get(
-      `/api/v1/accounts/${accountId.value}/conversations`,
-      { params }
-    );
+    const response = await ConversationApi.get(params);
 
     // Filter conversations that have this pipeline's custom field set
     const fieldKey = pipeline.value.custom_field_key;
