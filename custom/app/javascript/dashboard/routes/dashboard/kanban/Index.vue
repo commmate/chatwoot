@@ -2,6 +2,8 @@
 import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'dashboard/composables/store';
 import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
+import axios from 'axios';
 import draggable from 'vuedraggable';
 import ConversationCard from 'dashboard/components/widgets/conversation/ConversationCard.vue';
 import Spinner from 'dashboard/components-next/spinner/Spinner.vue';
@@ -9,6 +11,7 @@ import Icon from 'dashboard/components-next/icon/Icon.vue';
 
 const { t } = useI18n();
 const store = useStore();
+const route = useRoute();
 
 const columns = ref([
   { 
@@ -45,16 +48,13 @@ const columns = ref([
   },
 ]);
 
-const isLoading = computed(() => 
-  store.getters['conversations/getUIFlags'].isFetchingList
-);
+// Kanban board maintains its own conversation state
+// This prevents interfering with the main conversation list
+const conversations = ref([]);
+const isLoading = ref(false);
 
-const allConversations = computed(() => 
-  store.getters['conversations/getAllConversations']
-);
-
-const getConversationsByStatus = (statusValue) => {
-  return allConversations.value.filter(conv => conv.status === statusValue);
+const getConversationsByStatus = (statusString) => {
+  return conversations.value.filter(conv => conv.status === statusString);
 };
 
 const getColumnColor = (color) => {
@@ -84,7 +84,7 @@ const onDrop = async (evt, column) => {
   const newStatus = column.status;
   
   try {
-    await store.dispatch('conversations/toggleStatus', {
+    await store.dispatch('toggleStatus', {
       conversationId: conversation.id,
       status: newStatus,
     });
@@ -93,28 +93,50 @@ const onDrop = async (evt, column) => {
   }
 };
 
-onMounted(() => {
-  // Fetch conversations if not already loaded
-  if (allConversations.value.length === 0) {
-    store.dispatch('fetchAllConversations');
+const fetchKanbanConversations = async () => {
+  isLoading.value = true;
+  try {
+    const accountId = route.params.accountId;
+    
+    // Fetch conversations for each status independently
+    const statuses = ['open', 'pending', 'snoozed', 'resolved'];
+    const promises = statuses.map(status =>
+      axios.get(`/api/v1/accounts/${accountId}/conversations`, {
+        params: { status }
+      })
+    );
+    
+    const results = await Promise.all(promises);
+    const allConvs = results.flatMap(response => response.data.data.payload || []);
+    
+    conversations.value = allConvs;
+    console.log('Kanban - Loaded conversations:', allConvs.length);
+  } catch (error) {
+    console.error('Kanban - Failed to fetch:', error);
+  } finally {
+    isLoading.value = false;
   }
+};
+
+onMounted(() => {
+  fetchKanbanConversations();
 });
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-slate-50">
+  <div class="flex flex-col h-full bg-n-solid-1">
     <!-- Header -->
-    <div class="flex items-center justify-between px-6 py-4 bg-white border-b border-slate-200">
+    <div class="flex items-center justify-between px-6 py-4 bg-n-solid-2 border-b border-n-weak">
       <div>
-        <h1 class="text-2xl font-semibold text-slate-900">
+        <h1 class="text-2xl font-semibold text-n-slate-12">
           {{ t('KANBAN.TITLE') }}
         </h1>
-        <p class="text-sm text-slate-600">
+        <p class="text-sm text-n-slate-11">
           {{ t('KANBAN.DESCRIPTION') }}
         </p>
       </div>
-      <div class="text-sm text-slate-600">
-        {{ allConversations.length }} {{ t('KANBAN.TOTAL_CONVERSATIONS') }}
+      <div class="text-sm text-n-slate-11">
+        {{ conversations.length }} {{ t('KANBAN.TOTAL_CONVERSATIONS') }}
       </div>
     </div>
 
@@ -124,7 +146,7 @@ onMounted(() => {
     </div>
 
     <!-- Kanban Board -->
-    <div v-else class="flex flex-1 gap-4 p-6 overflow-x-auto">
+    <div v-else class="flex flex-1 gap-4 p-6 overflow-x-auto bg-n-solid-1">
       <div
         v-for="column in columns"
         :key="column.id"
@@ -132,35 +154,33 @@ onMounted(() => {
       >
         <!-- Column Header -->
         <div 
-          class="flex items-center justify-between px-4 py-3 mb-3 rounded-lg border"
-          :class="getColumnHeaderColor(column.color)"
+          class="flex items-center justify-between px-4 py-3 mb-3 rounded-lg border bg-n-solid-2 border-n-weak"
         >
           <div class="flex items-center gap-2">
-            <Icon :icon="column.icon" class="size-5" />
-            <h3 class="text-sm font-semibold">
+            <Icon :icon="column.icon" class="size-5 text-n-slate-11" />
+            <h3 class="text-sm font-semibold text-n-slate-12">
               {{ t(column.title) }}
             </h3>
           </div>
           <span 
-            class="px-2 py-0.5 text-xs font-medium rounded-full bg-white/60"
+            class="px-2 py-0.5 text-xs font-medium rounded-full bg-n-alpha-2 text-n-slate-11"
           >
-            {{ getConversationsByStatus(column.statusValue).length }}
+            {{ getConversationsByStatus(column.status).length }}
           </span>
         </div>
 
         <!-- Droppable Area -->
         <draggable
-          :model-value="getConversationsByStatus(column.statusValue)"
+          :model-value="getConversationsByStatus(column.status)"
           :group="{ name: 'conversations', pull: true, put: true }"
-          class="flex-1 p-2 space-y-2 overflow-y-auto rounded-lg border min-h-[200px]"
-          :class="getColumnColor(column.color)"
+          class="flex-1 p-2 space-y-2 overflow-y-auto rounded-lg border bg-n-solid-2 border-n-weak min-h-[200px]"
           item-key="id"
           :animation="200"
           ghost-class="opacity-50"
           @change="(evt) => onDrop(evt, column)"
         >
           <template #item="{ element }">
-            <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-move">
+            <div class="bg-n-solid-3 rounded-lg border border-n-weak hover:border-n-alpha-4 transition-all duration-200 cursor-move">
               <ConversationCard
                 :chat="element"
                 :hide-inbox-name="false"
@@ -172,8 +192,8 @@ onMounted(() => {
           <!-- Empty State -->
           <template #footer>
             <div 
-              v-if="getConversationsByStatus(column.statusValue).length === 0"
-              class="flex items-center justify-center py-8 text-sm text-slate-500"
+              v-if="getConversationsByStatus(column.status).length === 0"
+              class="flex items-center justify-center py-8 text-sm text-n-slate-10"
             >
               {{ t('KANBAN.EMPTY_COLUMN') }}
             </div>
