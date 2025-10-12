@@ -1,6 +1,6 @@
 import { frontendURL } from 'dashboard/helper/URLHelper';
-import SettingsWrapper from '../../../../../app/javascript/dashboard/routes/dashboard/settings/SettingsWrapper.vue';
-import SettingsContent from '../../../../../app/javascript/dashboard/routes/dashboard/settings/Wrapper.vue';
+import SettingsWrapper from '../../../../../../app/javascript/dashboard/routes/dashboard/settings/SettingsWrapper.vue';
+import SettingsContent from '../../../../../../app/javascript/dashboard/routes/dashboard/settings/Wrapper.vue';
 
 const PipelinesList = () => import('./Index.vue');
 const PipelineEditor = () => import('./PipelineEditor.vue');
