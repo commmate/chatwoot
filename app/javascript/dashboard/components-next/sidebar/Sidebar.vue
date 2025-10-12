@@ -72,6 +72,13 @@ const conversationCustomViews = useMapGetter(
   'customViews/getConversationCustomViews'
 );
 
+// Fetch pipelines from custom module
+const pipelines = computed(() => {
+  // This will be populated by the custom store module
+  // For now, return empty array - will be implemented when store is registered
+  return [];
+});
+
 onMounted(() => {
   store.dispatch('labels/get');
   store.dispatch('inboxes/get');
@@ -210,6 +217,23 @@ const menuItems = computed(() => {
             }),
           })),
         },
+      ],
+    },
+    {
+      name: 'Pipelines',
+      label: t('PIPELINES.TITLE'),
+      icon: 'i-lucide-git-branch',
+      children: [
+        {
+          name: 'Manage Pipelines',
+          label: t('PIPELINES.MANAGE'),
+          to: accountScopedRoute('pipelines_list'),
+        },
+        ...pipelines.value.map(pipeline => ({
+          name: `pipeline-${pipeline.id}`,
+          label: pipeline.name,
+          to: accountScopedRoute('pipeline_board', { pipelineId: pipeline.id }),
+        })),
       ],
     },
     {
@@ -468,6 +492,12 @@ const menuItems = computed(() => {
           label: t('SIDEBAR.MACROS'),
           icon: 'i-lucide-toy-brick',
           to: accountScopedRoute('macros_wrapper'),
+        },
+        {
+          name: 'Settings Pipelines',
+          label: t('PIPELINES.TITLE'),
+          icon: 'i-lucide-git-branch',
+          to: accountScopedRoute('pipelines_list'),
         },
         {
           name: 'Settings Canned Responses',
