@@ -303,6 +303,16 @@ Rails.application.routes.draw do
               end
             end
           end
+          
+          resources :custom_assets do
+            member do
+              get :fetch_assets
+            end
+            collection do
+              post :test_connection
+            end
+          end
+          
           resources :working_hours, only: [:update]
 
           resources :portals do
