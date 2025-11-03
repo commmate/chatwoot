@@ -1,0 +1,65 @@
+{
+  "name": "Chatwoot - Products API Example",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chatwoot-products",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Sample products database\nconst allProducts = [\n  {\n    id: '1',\n    name: 'Laptop Pro 15\"',\n    price: 1299.00,\n    status: 'In Stock',\n    sku: 'LAP-PRO-15',\n    category: 'Electronics',\n    description: 'High-performance laptop',\n    link: 'https://example.com/products/1'\n  },\n  {\n    id: '2',\n    name: 'Wireless Mouse',\n    price: 29.99,\n    status: 'In Stock',\n    sku: 'MSE-WLS-01',\n    category: 'Accessories',\n    description: 'Ergonomic wireless mouse',\n    link: 'https://example.com/products/2'\n  },\n  {\n    id: '3',\n    name: 'USB-C Cable 2m',\n    price: 15.50,\n    status: 'Low Stock',\n    sku: 'CBL-USC-20',\n    category: 'Accessories',\n    description: 'Fast charging cable',\n    link: 'https://example.com/products/3'\n  },\n  {\n    id: '4',\n    name: 'Mechanical Keyboard',\n    price: 149.99,\n    status: 'In Stock',\n    sku: 'KBD-MCH-01',\n    category: 'Electronics',\n    description: 'RGB mechanical keyboard',\n    link: 'https://example.com/products/4'\n  },\n  {\n    id: '5',\n    name: 'Monitor 27\"',\n    price: 349.00,\n    status: 'Out of Stock',\n    sku: 'MON-27-4K',\n    category: 'Electronics',\n    description: '4K Ultra HD monitor',\n    link: 'https://example.com/products/5'\n  }\n];\n\n// Get contact data from Chatwoot\nconst contact = $input.first().json;\n\n// Filter by search query if provided\nconst searchQuery = contact.search_query?.toLowerCase();\nlet products = allProducts;\n\nif (searchQuery) {\n  products = allProducts.filter(p => \n    p.name.toLowerCase().includes(searchQuery) ||\n    p.sku.toLowerCase().includes(searchQuery) ||\n    p.category.toLowerCase().includes(searchQuery)\n  );\n}\n\n// Filter by customer email (simulate personalization)\nif (contact.email) {\n  // In a real scenario, you'd query your database/API\n  console.log(`Fetching products for customer: ${contact.email}`);\n}\n\n// Return products\nreturn { items: products };"
+      },
+      "id": "code-node",
+      "name": "Get Products",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "respond-node",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get Products",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Products": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}
+

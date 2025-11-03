@@ -1,0 +1,33 @@
+version: '3.8'
+
+# Docker Compose override for testing Custom Assets with n8n
+# Usage: podman-compose -f docker-compose.commmate.yaml -f docker-compose.custom-assets.yaml up
+
+services:
+  # Add n8n to the stack
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: commmate-n8n
+    restart: unless-stopped
+    ports:
+      - '5678:5678'
+    environment:
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - N8N_HOST=localhost
+      - WEBHOOK_URL=http://localhost:5678/
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+    volumes:
+      - n8n-data:/home/node/.n8n
+
+  # Update rails service to include n8n URL
+  rails:
+    environment:
+      - N8N_URL=http://n8n:5678
+    depends_on:
+      - n8n
+
+volumes:
+  n8n-data:
+    driver: local
+
