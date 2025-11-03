@@ -1,0 +1,102 @@
+{
+  "CUSTOM_ASSETS": {
+    "HEADER": "Custom Assets",
+    "DESCRIPTION": "Configure external API integrations using n8n workflows",
+    "ADD": "Add Custom Asset",
+    "EDIT": "Edit Custom Asset",
+    "DELETE": "Delete Custom Asset",
+    "ENABLE": "Enable",
+    "DISABLE": "Disable",
+    "ENABLED": "Enabled",
+    "DISABLED": "Disabled",
+    "SIDEBAR_TITLE": "Custom Assets",
+    "EMPTY_STATE": {
+      "TITLE": "No custom assets configured",
+      "DESCRIPTION": "Create your first custom asset to fetch external data from any API",
+      "NO_ASSETS": "Contact your administrator to set up custom assets"
+    },
+    "FORM": {
+      "NAME": "Asset Name",
+      "NAME_PLACEHOLDER": "e.g., Products, Invoices, Orders",
+      "TYPE": "Asset Type",
+      "TYPE_PLACEHOLDER": "e.g., products, invoices (lowercase, no spaces)",
+      "DESCRIPTION": "Description",
+      "DESCRIPTION_PLACEHOLDER": "What data does this asset provide?",
+      "WEBHOOK_URL": "n8n Webhook URL",
+      "WEBHOOK_URL_PLACEHOLDER": "https://your-n8n.com/webhook/...",
+      "WORKFLOW_ID": "n8n Workflow ID",
+      "WORKFLOW_ID_PLACEHOLDER": "abc123 (for easy access to workflow)",
+      "TEST_CONNECTION": "Test Connection",
+      "TESTING": "Testing...",
+      "CONNECTION_SUCCESS": "Connection successful!",
+      "CONNECTION_FAILED": "Connection failed",
+      "SAVE": "Save",
+      "SAVING": "Saving...",
+      "CANCEL": "Cancel",
+      "CREATE": "Create",
+      "UPDATE": "Update",
+      "REQUIRED": "Required field"
+    },
+    "N8N_GUIDE": {
+      "TITLE": "n8n Workflow Setup",
+      "STEP_1": "Open n8n and create a new workflow",
+      "STEP_2": "Add a 'Webhook' trigger node (POST method)",
+      "STEP_3": "Build your API integration (HTTP requests, auth, etc.)",
+      "STEP_4": "Add data transformation/filtering as needed",
+      "STEP_5": "Return JSON: array or {items: [...]} or {data: [...]}",
+      "STEP_6": "Activate the workflow and copy webhook URL below",
+      "OPEN_N8N": "Open n8n Workflow Editor",
+      "POWERED_BY": "Powered by n8n",
+      "DESCRIPTION": "Build visual workflows in n8n to fetch data from any API. No coding required!"
+    },
+    "DISPLAY_FIELDS": {
+      "TITLE": "Display Fields",
+      "DESCRIPTION": "Configure which fields from n8n response to display in Chatwoot",
+      "FIELD_KEY": "Field key",
+      "FIELD_KEY_PLACEHOLDER": "e.g., name, price",
+      "FIELD_LABEL": "Label",
+      "FIELD_LABEL_PLACEHOLDER": "e.g., Product Name",
+      "FIELD_TYPE": "Type",
+      "ADD_FIELD": "Add Field",
+      "TYPES": {
+        "TEXT": "Text",
+        "NUMBER": "Number",
+        "CURRENCY": "Currency",
+        "DATE": "Date",
+        "LINK": "Link"
+      }
+    },
+    "PAYLOAD": {
+      "TITLE": "Webhook Payload Structure",
+      "DESCRIPTION": "This is what n8n receives from Chatwoot"
+    },
+    "TABLE": {
+      "NAME": "Name",
+      "TYPE": "Type",
+      "WORKFLOW": "n8n Workflow",
+      "STATUS": "Status",
+      "ACTIONS": "Actions",
+      "VIEW_WORKFLOW": "View Workflow"
+    },
+    "MESSAGES": {
+      "CREATED": "Asset created successfully!",
+      "UPDATED": "Asset updated successfully!",
+      "DELETED": "Asset deleted successfully!",
+      "ENABLED": "Asset enabled successfully!",
+      "DISABLED": "Asset disabled successfully!",
+      "CREATE_FAILED": "Failed to create asset",
+      "UPDATE_FAILED": "Failed to update asset",
+      "DELETE_FAILED": "Failed to delete asset",
+      "DELETE_CONFIRM": "Are you sure you want to delete this asset?",
+      "FETCH_FAILED": "Failed to load assets",
+      "NO_RESULTS": "No assets found",
+      "FILL_REQUIRED": "Please fill in all required fields"
+    },
+    "SHARE": {
+      "BUTTON": "Share via WhatsApp",
+      "SUCCESS": "Asset shared successfully!",
+      "FAILED": "Failed to share asset"
+    }
+  }
+}
+
