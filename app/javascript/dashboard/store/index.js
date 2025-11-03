@@ -58,6 +58,7 @@ import copilotMessages from './captain/copilotMessages';
 import captainScenarios from './captain/scenarios';
 import captainTools from './captain/tools';
 import captainCustomTools from './captain/customTools';
+import customAssets from '../../../../../custom/app/javascript/dashboard/store/modules/customAssets';
 
 const plugins = [];
 
@@ -121,6 +122,7 @@ export default createStore({
     captainScenarios,
     captainTools,
     captainCustomTools,
+    customAssets,
   },
   plugins,
 });

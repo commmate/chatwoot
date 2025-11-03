@@ -21,6 +21,7 @@ import ShopifyOrdersList from 'dashboard/components/widgets/conversation/Shopify
 import SidebarActionsHeader from 'dashboard/components-next/SidebarActionsHeader.vue';
 import LinearIssuesList from 'dashboard/components/widgets/conversation/linear/IssuesList.vue';
 import LinearSetupCTA from 'dashboard/components/widgets/conversation/linear/LinearSetupCTA.vue';
+import CustomAssetsList from '../../../../../../custom/app/javascript/dashboard/components/widgets/conversation/CustomAssetsList.vue';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 
 const props = defineProps({
@@ -57,6 +58,12 @@ const shopifyIntegration = useFunctionGetter(
 
 const isShopifyFeatureEnabled = computed(
   () => shopifyIntegration.value.enabled
+);
+
+const customAssets = useMapGetter('customAssets/getEnabledAssets');
+
+const hasCustomAssetsEnabled = computed(
+  () => customAssets.value && customAssets.value.length > 0
 );
 
 const linearIntegration = useFunctionGetter(
@@ -121,12 +128,42 @@ const closeContactPanel = () => {
   });
 };
 
+const handleAssetShare = async (asset, config) => {
+  try {
+    // Format asset data as text
+    let formattedMessage = `*${config.name}*\n\n`;
+
+    config.display_config.fields.forEach(field => {
+      const value = asset[field.key];
+      if (value) {
+        formattedMessage += `${field.label}: ${value}\n`;
+      }
+    });
+
+    // Copy to clipboard for now
+    // TODO: Integrate with reply box when API is available
+    await navigator.clipboard.writeText(formattedMessage);
+
+    // Show success notification
+    window.bus.$emit(
+      'newToastMessage',
+      'Asset copied to clipboard! Paste it in the message box.'
+    );
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Failed to share asset:', error);
+    window.bus.$emit('newToastMessage', 'Failed to copy asset to clipboard');
+  }
+};
+
 onMounted(() => {
   conversationSidebarItems.value = conversationSidebarItemsOrder.value;
   getContactDetails();
   store.dispatch('attributes/get', 0);
   // Load integrations to ensure linear integration state is available
   store.dispatch('integrations/get', 'linear');
+  // Load custom assets
+  store.dispatch('customAssets/get');
 });
 </script>
 
@@ -281,6 +318,25 @@ onMounted(() => {
               "
             >
               <ShopifyOrdersList :contact-id="contactId" />
+            </AccordionItem>
+          </div>
+          <div
+            v-else-if="
+              element.name === 'custom_assets' && hasCustomAssetsEnabled
+            "
+          >
+            <AccordionItem
+              :title="$t('CONVERSATION_SIDEBAR.ACCORDION.CUSTOM_ASSETS')"
+              :is-open="isContactSidebarItemOpen('is_custom_assets_open')"
+              compact
+              @toggle="
+                value => toggleSidebarUIState('is_custom_assets_open', value)
+              "
+            >
+              <CustomAssetsList
+                :contact-id="contactId"
+                @share="handleAssetShare"
+              />
             </AccordionItem>
           </div>
           <div v-else-if="element.name === 'contact_notes'">
