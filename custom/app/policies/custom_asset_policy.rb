@@ -31,3 +31,4 @@ class CustomAssetPolicy < ApplicationPolicy
   end
 end
 
+

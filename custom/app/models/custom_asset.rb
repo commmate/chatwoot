@@ -24,3 +24,4 @@ class CustomAsset < ApplicationRecord
   end
 end
 
+

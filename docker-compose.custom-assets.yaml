@@ -31,3 +31,4 @@ volumes:
   n8n-data:
     driver: local
 
+
