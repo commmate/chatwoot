@@ -176,5 +176,87 @@ describe Whatsapp::OneoffCampaignService do
         expect(campaign.reload.completed?).to be true
       end
     end
+
+    context 'with Liquid template variables in template_params' do
+      let(:agent) { create(:user, account: account) }
+      let(:campaign) do
+        create(:campaign, inbox: whatsapp_inbox, account: account, sender: agent,
+                          audience: [{ type: 'Label', id: label1.id }],
+                          template_params: template_params_with_liquid)
+      end
+      let(:template_params_with_liquid) do
+        {
+          'name' => 'personalized_template',
+          'namespace' => '23423423_2342423_324234234_2343224',
+          'category' => 'MARKETING',
+          'language' => 'en',
+          'processed_params' => {
+            'body' => {
+              '1' => '{{contact.first_name}}',
+              '2' => 'Special offer'
+            }
+          }
+        }
+      end
+
+      it 'processes liquid variables for each contact individually' do
+        contact1 = create(:contact, :with_phone_number, account: account, name: 'John Silva')
+        contact2 = create(:contact, :with_phone_number, account: account, name: 'Maria Santos')
+        contact1.update_labels([label1.title])
+        contact2.update_labels([label1.title])
+
+        calls = []
+        allow(Whatsapp::TemplateProcessorService).to receive(:new) do |args|
+          calls << args
+          instance_double(Whatsapp::TemplateProcessorService, call: ['template', 'namespace', 'en', []])
+        end
+
+        described_class.new(campaign: campaign).perform
+
+        # Verify two different personalized param sets were created
+        expect(calls.length).to eq(2)
+        expect(calls[0][:template_params]['processed_params']['body']['1']).not_to eq('{{contact.first_name}}')
+        expect(calls[1][:template_params]['processed_params']['body']['1']).not_to eq('{{contact.first_name}}')
+        # Verify each contact got different personalization
+        expect(calls[0][:template_params]['processed_params']['body']['1']).not_to eq(
+          calls[1][:template_params]['processed_params']['body']['1']
+        )
+      end
+
+      it 'preserves original template_params (does not mutate)' do
+        contact = create(:contact, :with_phone_number, account: account, name: 'John Silva')
+        contact.update_labels([label1.title])
+
+        original_params = campaign.template_params.deep_dup
+
+        allow(whatsapp_channel).to receive(:send_template)
+        described_class.new(campaign: campaign).perform
+
+        # Original params should remain unchanged
+        expect(campaign.template_params).to eq(original_params)
+        expect(campaign.template_params['processed_params']['body']['1']).to eq('{{contact.first_name}}')
+      end
+
+      it 'handles contacts without name gracefully' do
+        contact = create(:contact, :with_phone_number, account: account, name: nil)
+        contact.update_labels([label1.title])
+
+        allow(whatsapp_channel).to receive(:send_template)
+
+        # Should not raise error, ContactDrop handles nil names
+        expect { described_class.new(campaign: campaign).perform }.not_to raise_error
+      end
+
+      it 'handles malformed liquid syntax gracefully' do
+        template_params_with_liquid['processed_params']['body']['1'] = '{{contact.name missing closing'
+        contact = create(:contact, :with_phone_number, account: account, name: 'John')
+        contact.update_labels([label1.title])
+
+        allow(whatsapp_channel).to receive(:send_template)
+
+        # Should not raise error, just use original string
+        expect { described_class.new(campaign: campaign).perform }.not_to raise_error
+      end
+    end
   end
 end
