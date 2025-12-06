@@ -11,4 +11,3 @@ class SuperAdmin::CustomRolesController < SuperAdmin::ApplicationController
     end
   end
 end
-

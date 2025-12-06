@@ -9,4 +9,3 @@ class PermissionsField < Administrate::Field::Base
     CustomRole::PERMISSIONS
   end
 end
-

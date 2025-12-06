@@ -32,4 +32,3 @@ version_config = CommMate::Version.load_config
 # Define CommMate version constants
 COMMMATE_VERSION = version_config[:commmate_version].freeze
 COMMMATE_BASE_VERSION = version_config[:base_chatwoot_version].freeze
-

@@ -1,5 +1,6 @@
 <%#
 # Javascript Partial
+# CommMate override - Support widget disabled
 
 This partial imports the necessary javascript on each page.
 By default, it includes the application JS,
@@ -20,7 +21,11 @@ by providing a `content_for(:javascript)` block.
   <% end %>
 <% end %>
 
+<!-- CommMate: Chatwoot support widget disabled -->
 <script>
+// Support widget removed for CommMate
+// Original Chatwoot support widget code commented out
+/*
 window.chatwootSettings = {
   hideMessageBubble: true,
 };
@@ -46,4 +51,6 @@ window.addEventListener('chatwoot:ready', function() {
     name: '<%= SuperAdmin.first.name %>'
   });
 })
+*/
 </script>
+

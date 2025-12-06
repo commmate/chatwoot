@@ -45,4 +45,3 @@ class CustomRoleDashboard < Administrate::BaseDashboard
     "##{custom_role.id} - #{custom_role.name}"
   end
 end
-
