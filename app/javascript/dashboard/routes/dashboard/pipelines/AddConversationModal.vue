@@ -1,5 +1,5 @@
-/* global axios */
 <script setup>
+import axios from 'axios';
 import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAlert } from 'dashboard/composables';
@@ -88,7 +88,7 @@ const addConversations = async () => {
     // Update each selected conversation
     await Promise.all(
       selectedConversations.value.map(conversationId =>
-        axios.patch(
+        axios.post(
           `/api/v1/accounts/${props.accountId}/conversations/${conversationId}/custom_attributes`,
           {
             custom_attributes: {

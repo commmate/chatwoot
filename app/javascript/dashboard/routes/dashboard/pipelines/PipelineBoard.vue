@@ -1,8 +1,9 @@
-/* global axios */
 <script setup>
+import axios from 'axios';
 import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
+import { useStore } from 'dashboard/composables/store';
 import PipelinesAPI from '../../../api/pipelines';
 import ConversationApi from 'dashboard/api/conversations';
 import draggable from 'vuedraggable';
@@ -14,6 +15,7 @@ import AddConversationModal from './AddConversationModal.vue';
 
 const { t } = useI18n();
 const route = useRoute();
+const store = useStore();
 
 const pipeline = ref(null);
 const conversations = ref([]);
@@ -58,12 +60,24 @@ const fetchConversations = async () => {
     const fieldKey = pipeline.value.custom_field_key;
     const stageNames = pipeline.value.stages.map(s => s.name);
 
-    conversations.value = (response.data.data.payload || []).filter(
+    const filteredConversations = (response.data.data.payload || []).filter(
       conv =>
         conv.custom_attributes &&
         conv.custom_attributes[fieldKey] &&
         stageNames.includes(conv.custom_attributes[fieldKey])
     );
+
+    // Populate Vuex store with contacts from conversations
+    // This ensures ConversationCard has access to contact data
+    const contacts = filteredConversations
+      .map(conv => conv.meta?.sender)
+      .filter(Boolean);
+
+    if (contacts.length > 0) {
+      store.commit('contacts/SET_CONTACTS', contacts);
+    }
+
+    conversations.value = filteredConversations;
   } catch (error) {
     // Error handled by empty conversations state
   } finally {
@@ -87,7 +101,7 @@ const onDrop = async (evt, stage) => {
   const fieldKey = pipeline.value.custom_field_key;
 
   try {
-    await axios.patch(
+    await axios.post(
       `/api/v1/accounts/${accountId.value}/conversations/${conversation.id}/custom_attributes`,
       {
         custom_attributes: {
@@ -95,6 +109,12 @@ const onDrop = async (evt, stage) => {
         },
       }
     );
+
+    // Update local state immediately for better UX
+    const conv = conversations.value.find(c => c.id === conversation.id);
+    if (conv && conv.custom_attributes) {
+      conv.custom_attributes[fieldKey] = stage.name;
+    }
   } catch (error) {
     // Error handled - conversation will stay in original stage
     // Refresh to revert
@@ -112,8 +132,8 @@ const closeAddModal = () => {
   selectedStage.value = null;
 };
 
-const onConversationAdded = () => {
-  fetchConversations();
+const onConversationAdded = async () => {
+  await fetchConversations();
   closeAddModal();
 };
 
@@ -129,9 +149,9 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-n-solid-1">
+  <div class="flex flex-col h-full w-full overflow-hidden bg-n-solid-1">
     <!-- Header -->
-    <div class="px-6 py-4 bg-n-solid-2 border-b border-n-weak">
+    <div class="flex-shrink-0 px-6 py-4 bg-n-solid-2 border-b border-n-weak">
       <div class="flex items-center justify-between mb-4">
         <div>
           <h1 class="text-2xl font-semibold text-n-slate-12">
@@ -189,13 +209,16 @@ onMounted(async () => {
     <!-- Loading State -->
     <div
       v-if="isLoading || !pipeline"
-      class="flex items-center justify-center flex-1"
+      class="flex items-center justify-center flex-1 min-h-0"
     >
       <Spinner />
     </div>
 
     <!-- Pipeline Board -->
-    <div v-else class="flex flex-1 gap-4 p-6 overflow-x-auto bg-n-solid-1">
+    <div
+      v-else
+      class="flex flex-1 gap-4 p-6 overflow-x-auto overflow-y-hidden bg-n-solid-1 min-h-0"
+    >
       <div
         v-for="stage in pipeline.stages"
         :key="stage.order"

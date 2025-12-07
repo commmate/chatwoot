@@ -13,6 +13,33 @@ File overrides are BAD - they silently ignore upstream improvements.
 
 ---
 
+## 🚫 Critical Rule: NEVER Modify enterprise/ Folder
+
+**IMPORTANT:** The `enterprise/` folder is managed by Chatwoot's Enterprise team and should NEVER be modified by CommMate.
+
+**Why?**
+- ❌ Enterprise code is maintained separately by Chatwoot
+- ❌ We don't have visibility into their upgrade process
+- ❌ Changes would be lost on Enterprise updates
+- ❌ Could break Enterprise functionality
+- ❌ Creates maintenance nightmares
+
+**What to do instead:**
+- ✅ Make changes in `app/` (core Chatwoot files)
+- ✅ Enterprise will override our changes if they need to
+- ✅ Let Enterprise handle their own folder
+- ✅ Focus on OSS features that work with Enterprise
+
+**This applies to:**
+- `enterprise/app/` - NO modifications
+- `enterprise/lib/` - NO modifications
+- `enterprise/spec/` - NO modifications
+- All other `enterprise/` subdirectories - NO modifications
+
+**Exception:** None. If a feature needs Enterprise changes, request it from Chatwoot Enterprise team.
+
+---
+
 ## 📁 Directory Structure
 
 ### custom/ - Configuration & Non-Code Only
