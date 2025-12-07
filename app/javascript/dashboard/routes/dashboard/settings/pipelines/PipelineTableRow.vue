@@ -9,38 +9,19 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  canManage: {
+    type: Boolean,
+    default: false,
+  },
+  canCreate: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-const emit = defineEmits(['delete']);
+const emit = defineEmits(['edit', 'delete']);
 
 const route = useRoute();
-const store = useStore();
-
-const currentUser = computed(() => store.getters.getCurrentUser);
-
-// Permission checks
-const canCreatePipelines = computed(() => {
-  const { role, custom_role } = currentUser.value;
-  if (role === 'administrator') return true;
-  if (custom_role?.permissions) {
-    return custom_role.permissions.includes('pipeline_create');
-  }
-  return false;
-});
-
-const canManagePipelines = computed(() => {
-  const { role, custom_role } = currentUser.value;
-  if (role === 'administrator') return true;
-  if (custom_role?.permissions) {
-    return custom_role.permissions.includes('pipeline_manage');
-  }
-  return false;
-});
-
-const editRoute = computed(() => ({
-  name: 'pipelines_edit',
-  params: { accountId: route.params.accountId, pipelineId: props.pipeline.id },
-}));
 
 const viewBoardRoute = computed(() => ({
   name: 'pipeline_board',
@@ -65,7 +46,7 @@ const stagesCount = computed(() => props.pipeline.stages?.length || 0);
     </td>
     <td class="py-4 ltr:pr-4 rtl:pl-4">
       <span class="px-2 py-1 text-xs rounded-full bg-n-alpha-2 text-n-slate-11">
-        {{ stagesCount }} stages
+        {{ stagesCount }}
       </span>
     </td>
     <td class="py-4 ltr:pr-4 rtl:pl-4">
@@ -84,17 +65,17 @@ const stagesCount = computed(() => props.pipeline.stages?.length || 0);
             faded
           />
         </router-link>
-        <router-link v-if="canManagePipelines" :to="editRoute">
-          <Button
-            v-tooltip.top="'Edit'"
-            icon="i-lucide-pen"
-            slate
-            xs
-            faded
-          />
-        </router-link>
         <Button
-          v-if="canCreatePipelines"
+          v-if="canManage"
+          v-tooltip.top="'Edit'"
+          icon="i-lucide-pen"
+          slate
+          xs
+          faded
+          @click="emit('edit', pipeline)"
+        />
+        <Button
+          v-if="canCreate"
           v-tooltip.top="'Delete'"
           icon="i-lucide-trash-2"
           xs

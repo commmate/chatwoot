@@ -428,7 +428,12 @@ const menuItems = computed(() => {
       label: t('PIPELINES.TITLE'),
       icon: 'i-lucide-git-branch',
       to: accountScopedRoute('pipelines_list'),
-      activeOn: ['pipelines_list', 'pipelines_new', 'pipelines_edit', 'pipeline_board'],
+      activeOn: [
+        'pipelines_list',
+        'pipelines_new',
+        'pipelines_edit',
+        'pipeline_board',
+      ],
     },
     {
       name: 'Portals',

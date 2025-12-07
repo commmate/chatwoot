@@ -1,0 +1,81 @@
+{
+  "PIPELINES": {
+    "HEADER": "Pipelines",
+    "TITLE": "Pipelines",
+    "SECTION_TITLE": "Pipelines",
+    "NO_STAGE": "Sem Etapa",
+    "NOT_IN_PIPELINE": "Esta conversa não está em nenhum pipeline",
+    "STAGE_UPDATED": "Etapa do pipeline atualizada com sucesso",
+    "UPDATE_FAILED": "Falha ao atualizar etapa do pipeline",
+    "MANAGE": "Gerenciar Pipelines",
+    "DESCRIPTION": "Crie e gerencie pipelines de conversas com etapas personalizadas",
+    "LEARN_MORE": "Saiba mais sobre pipelines",
+    "LOADING": "Carregando pipelines...",
+    "HEADER_BTN_TXT": "Adicionar Pipeline",
+    "LIST": {
+      "404": "Nenhum pipeline encontrado. Crie seu primeiro pipeline para começar.",
+      "LOAD_ERROR": "Falha ao carregar pipelines",
+      "TABLE_HEADER": {
+        "NAME": "Nome",
+        "DESCRIPTION": "Descrição",
+        "STAGES": "Etapas",
+        "CONVERSATIONS": "Conversas",
+        "ACTIONS": "Ações"
+      }
+    },
+    "ADD": {
+      "TITLE": "Criar Pipeline",
+      "SUCCESS": "Pipeline criado com sucesso",
+      "ERROR": "Falha ao criar pipeline"
+    },
+    "EDIT": {
+      "TITLE": "Editar Pipeline",
+      "SUCCESS": "Pipeline atualizado com sucesso",
+      "ERROR": "Falha ao atualizar pipeline",
+      "LOAD_ERROR": "Falha ao carregar pipeline"
+    },
+    "DELETE": {
+      "SUCCESS": "Pipeline excluído com sucesso",
+      "ERROR": "Falha ao excluir pipeline",
+      "CONFIRM": {
+        "TITLE": "Excluir Pipeline",
+        "MESSAGE": "Tem certeza que deseja excluir este pipeline? Isso removerá o campo personalizado e limpará todos os valores das conversas.",
+        "YES": "Excluir",
+        "NO": "Cancelar"
+      }
+    },
+    "FORM": {
+      "NAME_LABEL": "Nome do Pipeline",
+      "NAME_PLACEHOLDER": "ex: Pipeline de Vendas, Fluxo de Suporte",
+      "NAME_REQUIRED": "Nome do pipeline é obrigatório",
+      "DESCRIPTION_LABEL": "Descrição",
+      "DESCRIPTION_PLACEHOLDER": "Descreva o propósito deste pipeline",
+      "STAGES_LABEL": "Etapas do Pipeline",
+      "STAGES_DESCRIPTION": "Defina as etapas pelas quais as conversas passarão. Arraste para reordenar.",
+      "STAGES_REQUIRED": "Pelo menos uma etapa é necessária",
+      "STAGE_PLACEHOLDER": "Digite o nome da etapa (ex: Lead, Qualificado, Proposta)",
+      "ADD_STAGE": "Adicionar Etapa",
+      "NO_STAGES": "Nenhuma etapa adicionada ainda. Adicione sua primeira etapa abaixo.",
+      "SAVE": "Salvar Pipeline",
+      "CANCEL": "Cancelar"
+    },
+    "BOARD": {
+      "EMPTY_STAGE": "Nenhuma conversa nesta etapa",
+      "ADD_TO_STAGE": "Adicionar a {stage}",
+      "ADD_DESCRIPTION": "Selecione conversas para adicionar a esta etapa",
+      "SEARCH_PLACEHOLDER": "Buscar conversas...",
+      "NO_AVAILABLE_CONVERSATIONS": "Nenhuma conversa disponível para adicionar",
+      "ADD_SUCCESS": "{count} conversa(s) adicionada(s) ao pipeline",
+      "ADD_ERROR": "Falha ao adicionar conversas",
+      "ADD_SELECTED": "Adicionar ({count})",
+      "CANCEL": "Cancelar",
+      "FILTERS": {
+        "ALL_TEAMS": "Todos os Times",
+        "ALL_INBOXES": "Todas as Caixas de Entrada",
+        "ALL_AGENTS": "Todos os Agentes",
+        "ALL_LABELS": "Todas as Etiquetas"
+      }
+    }
+  }
+}
+

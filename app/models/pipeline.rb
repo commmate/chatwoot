@@ -4,15 +4,25 @@
 #
 # Table name: pipelines
 #
-#  id                              :bigint           not null, primary key
-#  name                            :string           not null
-#  description                     :text
-#  stages                          :jsonb            default([])
-#  account_id                      :bigint           not null
-#  custom_attribute_definition_id  :bigint
-#  position                        :integer          default(0)
-#  created_at                      :datetime         not null
-#  updated_at                      :datetime         not null
+#  id                             :bigint           not null, primary key
+#  description                    :text
+#  name                           :string           not null
+#  position                       :integer          default(0)
+#  stages                         :jsonb
+#  created_at                     :datetime         not null
+#  updated_at                     :datetime         not null
+#  account_id                     :bigint           not null
+#  custom_attribute_definition_id :bigint
+#
+# Indexes
+#
+#  index_pipelines_on_account_id                      (account_id)
+#  index_pipelines_on_account_id_and_name             (account_id,name) UNIQUE
+#  index_pipelines_on_custom_attribute_definition_id  (custom_attribute_definition_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (account_id => accounts.id)
 #
 
 class Pipeline < ApplicationRecord

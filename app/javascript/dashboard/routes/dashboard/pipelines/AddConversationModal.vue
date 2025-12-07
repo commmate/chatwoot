@@ -8,10 +8,22 @@ import Button from 'dashboard/components-next/button/Button.vue';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
 
 const props = defineProps({
-  show: Boolean,
-  pipeline: Object,
-  stage: Object,
-  accountId: [String, Number],
+  show: {
+    type: Boolean,
+    default: false,
+  },
+  pipeline: {
+    type: Object,
+    default: () => ({}),
+  },
+  stage: {
+    type: Object,
+    default: () => ({}),
+  },
+  accountId: {
+    type: [String, Number],
+    default: null,
+  },
 });
 
 const emit = defineEmits(['close', 'added']);
@@ -26,11 +38,12 @@ const searchQuery = ref('');
 
 const filteredConversations = computed(() => {
   if (!searchQuery.value) return availableConversations.value;
-  
+
   const query = searchQuery.value.toLowerCase();
-  return availableConversations.value.filter(conv => 
-    conv.meta?.sender?.name?.toLowerCase().includes(query) ||
-    conv.display_id?.toString().includes(query)
+  return availableConversations.value.filter(
+    conv =>
+      conv.meta?.sender?.name?.toLowerCase().includes(query) ||
+      conv.display_id?.toString().includes(query)
   );
 });
 
@@ -40,19 +53,19 @@ const fetchAvailableConversations = async () => {
     const response = await ConversationApi.get({ status: 'open' });
 
     const fieldKey = props.pipeline.custom_field_key;
-    
+
     // Only show conversations that don't have this pipeline field set
-    availableConversations.value = (response.data.data.payload || []).filter(conv =>
-      !conv.custom_attributes || !conv.custom_attributes[fieldKey]
+    availableConversations.value = (response.data.data.payload || []).filter(
+      conv => !conv.custom_attributes || !conv.custom_attributes[fieldKey]
     );
   } catch (error) {
-    console.error('Failed to fetch conversations:', error);
+    // Error silently handled - empty list will show
   } finally {
     isLoading.value = false;
   }
 };
 
-const toggleConversation = (conversationId) => {
+const toggleConversation = conversationId => {
   const index = selectedConversations.value.indexOf(conversationId);
   if (index > -1) {
     selectedConversations.value.splice(index, 1);
@@ -61,7 +74,7 @@ const toggleConversation = (conversationId) => {
   }
 };
 
-const isSelected = (conversationId) => {
+const isSelected = conversationId => {
   return selectedConversations.value.includes(conversationId);
 };
 
@@ -71,7 +84,7 @@ const addConversations = async () => {
   isSaving.value = true;
   try {
     const fieldKey = props.pipeline.custom_field_key;
-    
+
     // Update each selected conversation
     await Promise.all(
       selectedConversations.value.map(conversationId =>
@@ -86,7 +99,11 @@ const addConversations = async () => {
       )
     );
 
-    useAlert(t('PIPELINES.BOARD.ADD_SUCCESS', { count: selectedConversations.value.length }));
+    useAlert(
+      t('PIPELINES.BOARD.ADD_SUCCESS', {
+        count: selectedConversations.value.length,
+      })
+    );
     emit('added');
   } catch (error) {
     useAlert(t('PIPELINES.BOARD.ADD_ERROR'));
@@ -101,10 +118,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <woot-modal
-    :show="show"
-    :on-close="() => emit('close')"
-  >
+  <woot-modal :show="show" :on-close="() => emit('close')">
     <div class="flex flex-col h-[600px]">
       <!-- Header -->
       <div class="px-6 py-4 border-b border-n-weak">
@@ -129,10 +143,16 @@ onMounted(() => {
       <!-- Conversation List -->
       <div class="flex-1 overflow-y-auto px-6 py-4">
         <div v-if="isLoading" class="flex items-center justify-center py-8">
-          <Spinner />
+          <Icon
+            icon="i-lucide-loader-2"
+            class="size-6 text-woot-500 animate-spin"
+          />
         </div>
 
-        <div v-else-if="!filteredConversations.length" class="flex flex-col items-center justify-center py-8">
+        <div
+          v-else-if="!filteredConversations.length"
+          class="flex flex-col items-center justify-center py-8"
+        >
           <Icon icon="i-lucide-inbox" class="size-12 text-n-slate-10 mb-2" />
           <p class="text-sm text-n-slate-11">
             {{ t('PIPELINES.BOARD.NO_AVAILABLE_CONVERSATIONS') }}
@@ -154,7 +174,7 @@ onMounted(() => {
             />
             <div class="flex-grow min-w-0">
               <div class="text-sm font-medium text-n-slate-12">
-                #{{ conv.display_id }} - {{ conv.meta?.sender?.name || 'Unknown' }}
+                #{{ conv.display_id }} {{ conv.meta?.sender?.name || '' }}
               </div>
               <div class="text-xs text-n-slate-11 truncate">
                 {{ conv.messages?.[0]?.content || 'No messages' }}
@@ -172,7 +192,11 @@ onMounted(() => {
           @click="emit('close')"
         />
         <Button
-          :label="t('PIPELINES.BOARD.ADD_SELECTED', { count: selectedConversations.length })"
+          :label="
+            t('PIPELINES.BOARD.ADD_SELECTED', {
+              count: selectedConversations.length,
+            })
+          "
           :disabled="!selectedConversations.length"
           :loading="isSaving"
           @click="addConversations"
@@ -181,4 +205,3 @@ onMounted(() => {
     </div>
   </woot-modal>
 </template>
-

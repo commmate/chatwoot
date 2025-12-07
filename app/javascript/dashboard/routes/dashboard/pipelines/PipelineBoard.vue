@@ -1,3 +1,4 @@
+/* global axios */
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -34,7 +35,7 @@ const fetchPipeline = async () => {
     const response = await PipelinesAPI.show(pipelineId.value);
     pipeline.value = response.data;
   } catch (error) {
-    console.error('Failed to fetch pipeline:', error);
+    // Error handled by empty pipeline state
   }
 };
 
@@ -56,25 +57,26 @@ const fetchConversations = async () => {
     // Filter conversations that have this pipeline's custom field set
     const fieldKey = pipeline.value.custom_field_key;
     const stageNames = pipeline.value.stages.map(s => s.name);
-    
-    conversations.value = (response.data.data.payload || []).filter(conv => 
-      conv.custom_attributes && 
-      conv.custom_attributes[fieldKey] &&
-      stageNames.includes(conv.custom_attributes[fieldKey])
+
+    conversations.value = (response.data.data.payload || []).filter(
+      conv =>
+        conv.custom_attributes &&
+        conv.custom_attributes[fieldKey] &&
+        stageNames.includes(conv.custom_attributes[fieldKey])
     );
   } catch (error) {
-    console.error('Failed to fetch conversations:', error);
+    // Error handled by empty conversations state
   } finally {
     isLoading.value = false;
   }
 };
 
-const getConversationsByStage = (stageName) => {
+const getConversationsByStage = stageName => {
   if (!pipeline.value) return [];
-  
+
   const fieldKey = pipeline.value.custom_field_key;
-  return conversations.value.filter(conv => 
-    conv.custom_attributes?.[fieldKey] === stageName
+  return conversations.value.filter(
+    conv => conv.custom_attributes?.[fieldKey] === stageName
   );
 };
 
@@ -94,13 +96,13 @@ const onDrop = async (evt, stage) => {
       }
     );
   } catch (error) {
-    console.error('Failed to update conversation:', error);
+    // Error handled - conversation will stay in original stage
     // Refresh to revert
     fetchConversations();
   }
 };
 
-const openAddModal = (stage) => {
+const openAddModal = stage => {
   selectedStage.value = stage;
   showAddModal.value = true;
 };
@@ -140,7 +142,7 @@ onMounted(async () => {
           </p>
         </div>
         <div class="text-sm text-n-slate-11">
-          {{ conversations.length }} conversations
+          {{ conversations.length }}
         </div>
       </div>
 
@@ -150,34 +152,45 @@ onMounted(async () => {
           v-model="selectedTeam"
           class="px-3 py-1.5 text-sm border border-n-weak rounded-lg bg-n-solid-3 text-n-slate-12"
         >
-          <option value="all">All Teams</option>
+          <option value="all">
+            {{ $t('PIPELINES.BOARD.FILTERS.ALL_TEAMS') }}
+          </option>
         </select>
 
         <select
           v-model="selectedInbox"
           class="px-3 py-1.5 text-sm border border-n-weak rounded-lg bg-n-solid-3 text-n-slate-12"
         >
-          <option value="all">All Inboxes</option>
+          <option value="all">
+            {{ $t('PIPELINES.BOARD.FILTERS.ALL_INBOXES') }}
+          </option>
         </select>
 
         <select
           v-model="selectedAgent"
           class="px-3 py-1.5 text-sm border border-n-weak rounded-lg bg-n-solid-3 text-n-slate-12"
         >
-          <option value="all">All Agents</option>
+          <option value="all">
+            {{ $t('PIPELINES.BOARD.FILTERS.ALL_AGENTS') }}
+          </option>
         </select>
 
         <select
           v-model="selectedLabel"
           class="px-3 py-1.5 text-sm border border-n-weak rounded-lg bg-n-solid-3 text-n-slate-12"
         >
-          <option value="all">All Labels</option>
+          <option value="all">
+            {{ $t('PIPELINES.BOARD.FILTERS.ALL_LABELS') }}
+          </option>
         </select>
       </div>
     </div>
 
     <!-- Loading State -->
-    <div v-if="isLoading || !pipeline" class="flex items-center justify-center flex-1">
+    <div
+      v-if="isLoading || !pipeline"
+      class="flex items-center justify-center flex-1"
+    >
       <Spinner />
     </div>
 
@@ -189,14 +202,18 @@ onMounted(async () => {
         class="flex flex-col w-80 flex-shrink-0"
       >
         <!-- Column Header -->
-        <div class="flex items-center justify-between px-4 py-3 mb-3 rounded-lg border bg-n-solid-2 border-n-weak">
+        <div
+          class="flex items-center justify-between px-4 py-3 mb-3 rounded-lg border bg-n-solid-2 border-n-weak"
+        >
           <div class="flex items-center gap-2">
             <h3 class="text-sm font-semibold text-n-slate-12">
               {{ stage.name }}
             </h3>
           </div>
           <div class="flex items-center gap-2">
-            <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-n-alpha-2 text-n-slate-11">
+            <span
+              class="px-2 py-0.5 text-xs font-medium rounded-full bg-n-alpha-2 text-n-slate-11"
+            >
               {{ getConversationsByStage(stage.name).length }}
             </span>
             <Button
@@ -217,10 +234,12 @@ onMounted(async () => {
           item-key="id"
           :animation="200"
           ghost-class="opacity-50"
-          @change="(evt) => onDrop(evt, stage)"
+          @change="evt => onDrop(evt, stage)"
         >
           <template #item="{ element }">
-            <div class="bg-n-solid-3 rounded-lg border border-n-weak hover:border-n-alpha-4 transition-all duration-200 cursor-move">
+            <div
+              class="bg-n-solid-3 rounded-lg border border-n-weak hover:border-n-alpha-4 transition-all duration-200 cursor-move"
+            >
               <ConversationCard
                 :chat="element"
                 :hide-inbox-name="false"
@@ -255,4 +274,3 @@ onMounted(async () => {
     />
   </div>
 </template>
-

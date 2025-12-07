@@ -32,4 +32,3 @@ class PipelinesAPI extends ApiClient {
 }
 
 export default new PipelinesAPI();
-

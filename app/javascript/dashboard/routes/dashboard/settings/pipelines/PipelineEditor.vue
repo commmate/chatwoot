@@ -1,44 +1,45 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
 import { useAlert } from 'dashboard/composables';
 import PipelinesAPI from '../../../../api/pipelines';
-import Button from 'dashboard/components-next/button/Button.vue';
 import StageManager from './StageManager.vue';
 
 const { t } = useI18n();
-const route = useRoute();
-const router = useRouter();
+
+const props = defineProps({
+  pipeline: {
+    type: Object,
+    default: null,
+  },
+  onClose: {
+    type: Function,
+    default: () => {},
+  },
+});
+
+const emit = defineEmits(['save']);
 
 const pipelineName = ref('');
 const pipelineDescription = ref('');
 const stages = ref([]);
-const isLoading = ref(false);
 const isSaving = ref(false);
 
-const accountId = computed(() => route.params.accountId);
-const pipelineId = computed(() => route.params.pipelineId);
-const isEditMode = computed(() => !!pipelineId.value);
+const isEditMode = computed(() => !!props.pipeline);
 
-const pageTitle = computed(() => 
+const modalTitle = computed(() =>
   isEditMode.value ? t('PIPELINES.EDIT.TITLE') : t('PIPELINES.ADD.TITLE')
 );
 
-const fetchPipeline = async () => {
-  if (!isEditMode.value) return;
-
-  isLoading.value = true;
-  try {
-    const response = await PipelinesAPI.show(pipelineId.value);
-    pipelineName.value = response.data.name;
-    pipelineDescription.value = response.data.description || '';
-    stages.value = response.data.stages || [];
-  } catch (error) {
-    useAlert(t('PIPELINES.EDIT.LOAD_ERROR'));
-    router.push({ name: 'pipelines_list' });
-  } finally {
-    isLoading.value = false;
+const loadPipeline = () => {
+  if (props.pipeline) {
+    pipelineName.value = props.pipeline.name || '';
+    pipelineDescription.value = props.pipeline.description || '';
+    stages.value = props.pipeline.stages || [];
+  } else {
+    pipelineName.value = '';
+    pipelineDescription.value = '';
+    stages.value = [];
   }
 };
 
@@ -62,16 +63,16 @@ const savePipeline = async () => {
     };
 
     if (isEditMode.value) {
-      await PipelinesAPI.update(pipelineId.value, pipelineData);
+      await PipelinesAPI.update(props.pipeline.id, pipelineData);
       useAlert(t('PIPELINES.EDIT.SUCCESS'));
     } else {
       await PipelinesAPI.create(pipelineData);
       useAlert(t('PIPELINES.ADD.SUCCESS'));
     }
 
-    router.push({ name: 'pipelines_list' });
+    emit('save');
   } catch (error) {
-    const message = isEditMode.value 
+    const message = isEditMode.value
       ? t('PIPELINES.EDIT.ERROR')
       : t('PIPELINES.ADD.ERROR');
     useAlert(message);
@@ -80,85 +81,45 @@ const savePipeline = async () => {
   }
 };
 
-const cancel = () => {
-  router.push({ name: 'pipelines_list' });
-};
-
 onMounted(() => {
-  fetchPipeline();
+  loadPipeline();
 });
 </script>
 
 <template>
-  <div class="flex flex-col h-full">
-    <!-- Header -->
-    <div class="flex items-center justify-between px-6 py-4 border-b border-n-weak bg-n-solid-2">
-      <div class="flex items-center gap-3">
-        <Button
-          icon="i-lucide-arrow-left"
-          slate
-          faded
-          @click="cancel"
-        />
-        <div>
-          <h1 class="text-xl font-semibold text-n-slate-12">
-            {{ pageTitle }}
-          </h1>
-        </div>
-      </div>
-      <div class="flex gap-2">
-        <Button
-          :label="$t('PIPELINES.FORM.CANCEL')"
-          slate
-          @click="cancel"
-        />
-        <Button
-          :label="$t('PIPELINES.FORM.SAVE')"
-          :loading="isSaving"
-          @click="savePipeline"
-        />
-      </div>
-    </div>
-
-    <!-- Loading State -->
-    <div v-if="isLoading" class="flex items-center justify-center flex-1">
-      <div class="text-n-slate-11">Loading...</div>
-    </div>
-
-    <!-- Form Content -->
-    <div v-else class="flex-1 overflow-y-auto p-6">
-      <div class="max-w-3xl space-y-6">
+  <div>
+    <woot-modal-header :header-title="modalTitle" />
+    <div class="flex flex-col modal-content">
+      <div class="w-full space-y-4">
         <!-- Name Field -->
-        <div>
-          <label class="block text-sm font-medium text-n-slate-12 mb-2">
-            {{ t('PIPELINES.FORM.NAME_LABEL') }}
-            <span class="text-red-500">*</span>
-          </label>
-          <input
-            v-model="pipelineName"
-            type="text"
-            :placeholder="t('PIPELINES.FORM.NAME_PLACEHOLDER')"
-            class="w-full px-3 py-2 border border-n-weak rounded-lg bg-n-solid-2 text-n-slate-12 placeholder-n-slate-10 focus:outline-none focus:border-n-brand"
-          />
-        </div>
+        <woot-input
+          v-model="pipelineName"
+          :label="t('PIPELINES.FORM.NAME_LABEL')"
+          type="text"
+          :placeholder="t('PIPELINES.FORM.NAME_PLACEHOLDER')"
+        />
 
         <!-- Description Field -->
-        <div>
-          <label class="block text-sm font-medium text-n-slate-12 mb-2">
-            {{ t('PIPELINES.FORM.DESCRIPTION_LABEL') }}
-          </label>
-          <textarea
-            v-model="pipelineDescription"
-            rows="3"
-            :placeholder="t('PIPELINES.FORM.DESCRIPTION_PLACEHOLDER')"
-            class="w-full px-3 py-2 border border-n-weak rounded-lg bg-n-solid-2 text-n-slate-12 placeholder-n-slate-10 focus:outline-none focus:border-n-brand resize-none"
-          />
-        </div>
+        <woot-input
+          v-model="pipelineDescription"
+          :label="t('PIPELINES.FORM.DESCRIPTION_LABEL')"
+          type="text"
+          :placeholder="t('PIPELINES.FORM.DESCRIPTION_PLACEHOLDER')"
+        />
 
         <!-- Stages Manager -->
         <StageManager v-model="stages" />
+
+        <!-- Modal Footer -->
+        <div class="flex items-center justify-end gap-2 pt-4">
+          <woot-button variant="clear" @click="onClose">
+            {{ $t('PIPELINES.FORM.CANCEL') }}
+          </woot-button>
+          <woot-button :is-loading="isSaving" @click="savePipeline">
+            {{ $t('PIPELINES.FORM.SAVE') }}
+          </woot-button>
+        </div>
       </div>
     </div>
   </div>
 </template>
-

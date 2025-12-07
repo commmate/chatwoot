@@ -12,7 +12,8 @@ const state = {
 
 const getters = {
   getPipelines: $state => $state.records,
-  getPipelineById: $state => id => $state.records.find(pipeline => pipeline.id === id),
+  getPipelineById: $state => id =>
+    $state.records.find(pipeline => pipeline.id === id),
   getUIFlags: $state => $state.uiFlags,
 };
 
@@ -20,10 +21,10 @@ const actions = {
   async get({ commit }, accountId) {
     commit('SET_UI_FLAG', { isFetching: true });
     try {
-      const response = await axios.get(`/api/v1/accounts/${accountId}/pipelines`);
+      const response = await axios.get(
+        `/api/v1/accounts/${accountId}/pipelines`
+      );
       commit('SET_PIPELINES', response.data);
-    } catch (error) {
-      console.error('Error fetching pipelines:', error);
     } finally {
       commit('SET_UI_FLAG', { isFetching: false });
     }
@@ -38,8 +39,6 @@ const actions = {
       );
       commit('ADD_PIPELINE', response.data);
       return response.data;
-    } catch (error) {
-      throw error;
     } finally {
       commit('SET_UI_FLAG', { isCreating: false });
     }
@@ -54,8 +53,6 @@ const actions = {
       );
       commit('UPDATE_PIPELINE', response.data);
       return response.data;
-    } catch (error) {
-      throw error;
     } finally {
       commit('SET_UI_FLAG', { isUpdating: false });
     }
@@ -64,26 +61,22 @@ const actions = {
   async delete({ commit }, { accountId, pipelineId }) {
     commit('SET_UI_FLAG', { isDeleting: true });
     try {
-      await axios.delete(`/api/v1/accounts/${accountId}/pipelines/${pipelineId}`);
+      await axios.delete(
+        `/api/v1/accounts/${accountId}/pipelines/${pipelineId}`
+      );
       commit('DELETE_PIPELINE', pipelineId);
-    } catch (error) {
-      throw error;
     } finally {
       commit('SET_UI_FLAG', { isDeleting: false });
     }
   },
 
   async reorderStages({ commit }, { accountId, pipelineId, stages }) {
-    try {
-      const response = await axios.post(
-        `/api/v1/accounts/${accountId}/pipelines/${pipelineId}/reorder_stages`,
-        { stages }
-      );
-      commit('UPDATE_PIPELINE', response.data);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await axios.post(
+      `/api/v1/accounts/${accountId}/pipelines/${pipelineId}/reorder_stages`,
+      { stages }
+    );
+    commit('UPDATE_PIPELINE', response.data);
+    return response.data;
   },
 };
 
@@ -119,4 +112,3 @@ export default {
   actions,
   mutations,
 };
-

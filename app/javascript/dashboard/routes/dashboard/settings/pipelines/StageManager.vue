@@ -18,7 +18,7 @@ const { t } = useI18n();
 
 const localStages = computed({
   get: () => props.modelValue,
-  set: (value) => {
+  set: value => {
     // Update order property when dragged
     const orderedStages = value.map((stage, index) => ({
       ...stage,
@@ -42,7 +42,7 @@ const addStage = () => {
   newStageName.value = '';
 };
 
-const removeStage = (index) => {
+const removeStage = index => {
   const updatedStages = localStages.value.filter((_, i) => i !== index);
   // Reorder after removal
   const reordered = updatedStages.map((stage, idx) => ({
@@ -80,7 +80,9 @@ const removeStage = (index) => {
             icon="i-lucide-grip-vertical"
             class="size-4 text-n-slate-10 cursor-move drag-handle"
           />
-          <span class="px-2 py-1 text-xs rounded bg-n-alpha-2 text-n-slate-11 font-medium min-w-[2rem] text-center">
+          <span
+            class="px-2 py-1 text-xs rounded bg-n-alpha-2 text-n-slate-11 font-medium min-w-[2rem] text-center"
+          >
             {{ index + 1 }}
           </span>
           <span class="flex-grow text-sm text-n-slate-12 font-medium">
@@ -102,7 +104,10 @@ const removeStage = (index) => {
       v-if="!localStages.length"
       class="p-6 text-center border border-dashed border-n-weak rounded-lg bg-n-solid-1"
     >
-      <Icon icon="i-lucide-list-ordered" class="size-8 text-n-slate-10 mx-auto mb-2" />
+      <Icon
+        icon="i-lucide-list-ordered"
+        class="size-8 text-n-slate-10 mx-auto mb-2"
+      />
       <p class="text-sm text-n-slate-11">
         {{ t('PIPELINES.FORM.NO_STAGES') }}
       </p>
@@ -125,4 +130,3 @@ const removeStage = (index) => {
     </div>
   </div>
 </template>
-
