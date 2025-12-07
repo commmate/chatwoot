@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { useAlert } from 'dashboard/composables';
 import PipelinesAPI from '../../../../api/pipelines';
 import StageManager from './StageManager.vue';
+import NextButton from 'dashboard/components-next/button/Button.vue';
 
 const { t } = useI18n();
 
@@ -111,13 +112,22 @@ onMounted(() => {
         <StageManager v-model="stages" />
 
         <!-- Modal Footer -->
-        <div class="flex items-center justify-end gap-2 pt-4">
-          <woot-button variant="clear" @click="onClose">
-            {{ $t('PIPELINES.FORM.CANCEL') }}
-          </woot-button>
-          <woot-button :is-loading="isSaving" @click="savePipeline">
-            {{ $t('PIPELINES.FORM.SAVE') }}
-          </woot-button>
+        <div class="w-full">
+          <div class="flex flex-row justify-end w-full gap-2 px-0 py-2">
+            <NextButton
+              faded
+              slate
+              :label="$t('PIPELINES.FORM.CANCEL')"
+              @click="onClose"
+            />
+            <NextButton
+              solid
+              blue
+              :is-loading="isSaving"
+              :label="$t('PIPELINES.FORM.SAVE')"
+              @click="savePipeline"
+            />
+          </div>
         </div>
       </div>
     </div>
