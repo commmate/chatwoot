@@ -17,6 +17,7 @@ import inbox from './inbox/inbox.routes';
 import integrations from './integrations/integrations.routes';
 import labels from './labels/labels.routes';
 import macros from './macros/macros.routes';
+import pipelines from './pipelines/pipelines.routes';
 import reports from './reports/reports.routes';
 import store from '../../../store';
 import sla from './sla/sla.routes';
@@ -57,6 +58,7 @@ export default {
     ...integrations.routes,
     ...labels.routes,
     ...macros.routes,
+    ...pipelines.routes,
     ...reports.routes,
     ...sla.routes,
     ...teams.routes,

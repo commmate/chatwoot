@@ -424,6 +424,13 @@ const menuItems = computed(() => {
       ],
     },
     {
+      name: 'Pipelines',
+      label: t('PIPELINES.TITLE'),
+      icon: 'i-lucide-git-branch',
+      to: accountScopedRoute('pipelines_list'),
+      activeOn: ['pipelines_list', 'pipelines_new', 'pipelines_edit', 'pipeline_board'],
+    },
+    {
       name: 'Portals',
       label: t('SIDEBAR.HELP_CENTER.TITLE'),
       icon: 'i-lucide-library-big',
@@ -534,6 +541,12 @@ const menuItems = computed(() => {
           label: t('SIDEBAR.MACROS'),
           icon: 'i-lucide-toy-brick',
           to: accountScopedRoute('macros_wrapper'),
+        },
+        {
+          name: 'Settings Pipelines',
+          label: t('PIPELINES.TITLE'),
+          icon: 'i-lucide-git-branch',
+          to: accountScopedRoute('pipelines_list'),
         },
         {
           name: 'Settings Canned Responses',

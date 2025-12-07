@@ -36,6 +36,8 @@ class CustomRole < ApplicationRecord
     report_manage
     knowledge_base_manage
     campaign_manage
+    pipeline_create
+    pipeline_manage
   ].freeze
 
   validates :name, presence: true, uniqueness: { scope: :account_id, message: 'already exists for this account' }

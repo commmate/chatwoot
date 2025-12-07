@@ -8,6 +8,7 @@
 # =============================================================================
 
 ## Controllers (NEW)
+app/controllers/api/v1/accounts/pipelines_controller.rb
 app/controllers/super_admin/custom_roles_controller.rb
 
 ## Dashboards (NEW)
@@ -19,8 +20,18 @@ app/views/fields/permissions_field/_form.html.erb
 app/views/fields/permissions_field/_index.html.erb
 app/views/fields/permissions_field/_show.html.erb
 
+## Views - API (NEW)
+app/views/api/v1/accounts/pipelines/index.json.jbuilder
+app/views/api/v1/accounts/pipelines/show.json.jbuilder
+
+## Models (NEW)
+app/models/pipeline.rb
+
 ## Models (NEW - Enterprise)
 enterprise/app/models/custom_role.rb
+
+## Policies (NEW)
+app/policies/pipeline_policy.rb
 
 ## Policies (NEW - Enterprise)
 enterprise/app/policies/custom_role_policy.rb
@@ -32,10 +43,23 @@ enterprise/app/controllers/api/v1/accounts/custom_roles_controller.rb
 app/javascript/dashboard/routes/dashboard/settings/customRoles/customRole.routes.js
 app/javascript/dashboard/routes/dashboard/settings/customRoles/Index.vue
 app/javascript/dashboard/api/customRole.js
+app/javascript/dashboard/api/pipelines.js
+app/javascript/dashboard/components-next/conversation/ConversationPipelines.vue
 app/javascript/dashboard/i18n/locale/en/customRole.json
+app/javascript/dashboard/i18n/locale/en/pipelines.json
+app/javascript/dashboard/routes/dashboard/pipelines/AddConversationModal.vue
+app/javascript/dashboard/routes/dashboard/pipelines/PipelineBoard.vue
+app/javascript/dashboard/routes/dashboard/pipelines/pipelines.routes.js
+app/javascript/dashboard/routes/dashboard/settings/pipelines/Index.vue
+app/javascript/dashboard/routes/dashboard/settings/pipelines/PipelineEditor.vue
+app/javascript/dashboard/routes/dashboard/settings/pipelines/PipelineTableRow.vue
+app/javascript/dashboard/routes/dashboard/settings/pipelines/StageManager.vue
+app/javascript/dashboard/routes/dashboard/settings/pipelines/pipelines.routes.js
+app/javascript/dashboard/store/modules/pipelines.js
 
 ## Migrations (NEW)
 db/migrate/20240726220747_add_custom_roles.rb
+db/migrate/20251012222355_create_pipelines.rb
 db/migrate/20251202140000_add_campaign_manage_to_manager_roles.rb
 
 ## Seeds (NEW)
@@ -94,10 +118,30 @@ app/javascript/dashboard/constants/permissions.js
 # Changes: Added campaign_manage to AVAILABLE_CUSTOM_ROLE_PERMISSIONS
 # Impact: Campaign permission available in custom role UI
 
+app/javascript/dashboard/components-next/sidebar/Sidebar.vue
+# Changes: Added Pipelines menu item in main nav and settings section
+# Impact: Pipelines accessible from sidebar
+
+app/javascript/dashboard/routes/dashboard/dashboard.routes.js
+# Changes: Imported and spread pipelinesRoutes
+# Impact: Pipeline board routes registered
+
+app/javascript/dashboard/routes/dashboard/settings/settings.routes.js
+# Changes: Imported and spread pipelines settings routes
+# Impact: Pipeline settings routes registered
+
+app/javascript/dashboard/i18n/locale/en/index.js
+# Changes: Imported and spread pipelines translations
+# Impact: Pipeline translations available
+
+app/javascript/dashboard/store/index.js
+# Changes: Imported and registered pipelines Vuex module
+# Impact: Pipeline state management
+
 ## Configuration (MODIFIED)
 config/routes.rb
-# Changes: Added resources :custom_roles in super_admin namespace
-# Impact: Custom roles routes in super admin
+# Changes: Added resources :custom_roles in super_admin namespace, added resources :pipelines in accounts namespace
+# Impact: Custom roles routes in super admin, Pipeline API routes
 
 config/initializers/git_sha.rb
 # Changes: Added CommMate git SHA tracking (fetch_commmate_git_sha, CHATWOOT_GIT_HASH)
@@ -107,6 +151,11 @@ config/initializers/git_sha.rb
 db/seeds.rb
 # Changes: Load CommMate seeds from db/seeds/commmate.rb
 # Impact: Run CommMate-specific seed data
+
+## Enterprise (MODIFIED)
+enterprise/app/models/custom_role.rb
+# Changes: Added pipeline_create and pipeline_manage to PERMISSIONS constant
+# Impact: Pipeline permissions available for custom roles
 
 # =============================================================================
 # CUSTOM DIRECTORY (No conflicts - CommMate-only)
