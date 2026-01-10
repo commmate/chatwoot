@@ -45,6 +45,7 @@ module EvolutionApi
     def provision!
       validate_evolution_enabled!
       validate_inbox_name_uniqueness!
+      validate_meta_token! if cloud_api?
       ensure_integration_user_membership!
 
       create_evolution_instance!
@@ -246,6 +247,7 @@ module EvolutionApi
       if cloud_api?
         metadata['evolution_business_id'] = meta_credentials[:business_id]
         metadata['evolution_number'] = meta_credentials[:number]
+        metadata['phone_number'] = meta_credentials[:phone_number] if meta_credentials[:phone_number].present?
       end
 
       metadata
@@ -261,6 +263,44 @@ module EvolutionApi
 
     def cloud_api?
       channel.to_s == 'whatsapp_cloud_api'
+    end
+
+    def validate_meta_token!
+      return unless meta_credentials[:token].present? && meta_credentials[:number].present?
+
+      # Test the token by calling Meta Graph API
+      api_version = GlobalConfigService.load('WHATSAPP_API_VERSION', 'v22.0')
+      url = "https://graph.facebook.com/#{api_version}/#{meta_credentials[:number]}"
+      
+      response = HTTParty.get(url, {
+        query: {
+          fields: 'id',
+          access_token: meta_credentials[:token]
+        },
+        timeout: 10
+      })
+
+      unless response.success?
+        error_data = response.parsed_response
+        error_message = if error_data.is_a?(Hash) && error_data['error']
+                          case error_data['error']['code']
+                          when 190
+                            'Meta access token is invalid or expired. Please generate a new token from Meta Business Manager.'
+                          when 100
+                            'Invalid Phone Number ID or insufficient permissions. Please verify your credentials in Meta Business Manager.'
+                          else
+                            "Meta API error: #{error_data['error']['message']}"
+                          end
+                        else
+                          'Failed to validate Meta access token. Please check your credentials.'
+                        end
+        
+        raise ProvisioningError, error_message
+      end
+
+      Rails.logger.info("Meta token validated successfully for Phone Number ID: #{meta_credentials[:number]}")
+    rescue HTTParty::Error, Timeout::Error => e
+      raise ProvisioningError, "Failed to validate Meta token: #{e.message}"
     end
 
     def cleanup_on_failure!

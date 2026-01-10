@@ -250,7 +250,7 @@ const createCloudAPIInbox = async () => {
     const payload = {
       inbox_name: inboxName.value.trim(),
       channel: CHANNEL_TYPES.CLOUD_API,
-      phone_number: '+' + phoneNumberId.value.trim().replace(/^\+/, ''), // Actual phone number for display
+      phone_number: phoneNumber.value.trim(), // Display phone number for inbox title (e.g., +555196403630)
       token: metaToken.value.trim(),
       number: phoneNumberId.value.trim(), // Phone Number ID - Evolution uses this for sending messages
       business_id: businessAccountId.value.trim(), // Business Account ID - Evolution uses this for templates

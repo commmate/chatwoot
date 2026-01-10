@@ -300,7 +300,7 @@ class Api::V1::Accounts::EvolutionInboxesController < Api::V1::Accounts::BaseCon
 
   def meta_credentials_params
     if params[:evolution_inbox][:channel] == 'whatsapp_cloud_api'
-      params.require(:evolution_inbox).permit(:token, :number, :business_id).to_h.symbolize_keys
+      params.require(:evolution_inbox).permit(:token, :number, :business_id, :phone_number).to_h.symbolize_keys
     else
       {}
     end

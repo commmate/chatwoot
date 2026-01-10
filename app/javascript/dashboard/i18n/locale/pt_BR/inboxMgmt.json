@@ -392,7 +392,9 @@
         "ERROR_TITLE": "Falha ao Criar Caixa de Entrada",
         "API": {
           "ERROR_MESSAGE": "Falha ao criar caixa de entrada Evolution. Por favor, tente novamente.",
-          "DUPLICATE_NAME_ERROR": "Já existe uma caixa de entrada com este nome na sua conta. A Evolution requer nomes únicos para rotear mensagens corretamente. Por favor, escolha um nome diferente."
+          "DUPLICATE_NAME_ERROR": "Já existe uma caixa de entrada com este nome na sua conta. A Evolution requer nomes únicos para rotear mensagens corretamente. Por favor, escolha um nome diferente.",
+          "TOKEN_EXPIRED": "Token de acesso Meta está inválido ou expirado. Por favor, gere um novo token no Meta Business Manager.",
+          "TOKEN_INVALID": "ID do número de telefone inválido ou permissões insuficientes. Por favor, verifique suas credenciais no Meta Business Manager."
         },
         "CONNECT": {
           "TITLE": "Conectar WhatsApp",

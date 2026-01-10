@@ -116,6 +116,10 @@ if resource.api?
   json.webhook_url resource.channel.try(:webhook_url)
   json.inbox_identifier resource.channel.try(:identifier)
   json.additional_attributes resource.channel.try(:additional_attributes)
+  # For Evolution Cloud API, expose phone_number if stored in additional_attributes
+  if resource.channel.additional_attributes&.dig('phone_number').present?
+    json.phone_number resource.channel.additional_attributes['phone_number']
+  end
 end
 
 json.provider resource.channel.try(:provider)

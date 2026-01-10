@@ -351,7 +351,9 @@
         "ERROR_TITLE": "Failed to Create Inbox",
         "API": {
           "ERROR_MESSAGE": "Failed to create Evolution inbox. Please try again.",
-          "DUPLICATE_NAME_ERROR": "An inbox with this name already exists in your account. Evolution requires unique inbox names to route messages correctly. Please choose a different name."
+          "DUPLICATE_NAME_ERROR": "An inbox with this name already exists in your account. Evolution requires unique inbox names to route messages correctly. Please choose a different name.",
+          "TOKEN_EXPIRED": "Meta access token is invalid or expired. Please generate a new token from Meta Business Manager.",
+          "TOKEN_INVALID": "Invalid Phone Number ID or insufficient permissions. Please verify your credentials in Meta Business Manager."
         },
         "CONNECT": {
           "TITLE": "Connect WhatsApp",
