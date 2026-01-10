@@ -2,6 +2,7 @@ import * as MutationHelpers from 'shared/helpers/vuex/mutationHelpers';
 import * as types from '../mutation-types';
 import { INBOX_TYPES } from 'dashboard/helper/inbox';
 import InboxesAPI from '../../api/inboxes';
+import EvolutionAPI from '../../api/evolution';
 import WebChannel from '../../api/channel/webChannel';
 import FBChannel from '../../api/channel/fbChannel';
 import TwilioChannel from '../../api/channel/twilioChannel';
@@ -142,9 +143,18 @@ export const getters = {
     );
   },
   getWhatsAppInboxes($state) {
-    return $state.records.filter(
-      item => item.channel_type === INBOX_TYPES.WHATSAPP
-    );
+    return $state.records.filter(item => {
+      // Native WhatsApp inboxes
+      if (item.channel_type === INBOX_TYPES.WHATSAPP) return true;
+      // Evolution Cloud WhatsApp API inboxes (Channel::Api with evolution_channel == whatsapp_cloud_api)
+      if (
+        item.channel_type === INBOX_TYPES.API &&
+        item.additional_attributes?.evolution_channel === 'whatsapp_cloud_api'
+      ) {
+        return true;
+      }
+      return false;
+    });
   },
   dialogFlowEnabledInboxes($state) {
     return $state.records.filter(
@@ -342,6 +352,41 @@ export const actions = {
       await InboxesAPI.syncTemplates(inboxId);
     } catch (error) {
       throw new Error(error);
+    }
+  },
+  // Fetch templates from Evolution API and update the inbox store
+  fetchEvolutionTemplates: async ({ commit, state: $state }, inboxId) => {
+    try {
+      // Find the inbox to check if it's an Evolution Cloud inbox
+      const inbox = $state.records.find(r => r.id === Number(inboxId));
+      if (!inbox) return;
+
+      // Only fetch for Evolution Cloud API inboxes
+      if (
+        inbox.channel_type !== INBOX_TYPES.API ||
+        inbox.additional_attributes?.evolution_channel !== 'whatsapp_cloud_api'
+      ) {
+        return;
+      }
+
+      const response = await EvolutionAPI.getTemplates(inboxId);
+      // API returns { templates: [...] }, extract the array
+      const templates = response.data?.templates || [];
+
+      // Update the inbox with the fetched templates
+      const updatedInbox = {
+        ...inbox,
+        additional_attributes: {
+          ...inbox.additional_attributes,
+          message_templates: templates,
+        },
+      };
+
+      commit(types.default.EDIT_INBOXES, updatedInbox);
+    } catch (error) {
+      // Log but don't throw - templates fetch failure shouldn't block UI
+      // eslint-disable-next-line no-console
+      console.error('Failed to fetch Evolution templates:', error);
     }
   },
 };

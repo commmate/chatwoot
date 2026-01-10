@@ -10,6 +10,7 @@ import InboxChannel from './InboxChannels.vue';
 import ChannelList from './ChannelList.vue';
 import AddAgents from './AddAgents.vue';
 import FinishSetup from './FinishSetup.vue';
+import EvolutionWhatsappConnect from './channels/EvolutionWhatsappConnect.vue';
 
 export default {
   routes: [
@@ -71,6 +72,25 @@ export default {
               },
             },
             {
+              path: ':inbox_id/agents',
+              name: 'settings_inboxes_add_agents',
+              meta: {
+                featureFlag: FEATURE_FLAGS.INBOX_MANAGEMENT,
+                permissions: ['administrator'],
+              },
+              component: AddAgents,
+            },
+            {
+              path: ':inbox_id/evolution/connect',
+              name: 'settings_inboxes_evolution_connect',
+              meta: {
+                featureFlag: FEATURE_FLAGS.INBOX_MANAGEMENT,
+                permissions: ['administrator'],
+              },
+              component: EvolutionWhatsappConnect,
+            },
+            {
+              // This must be last as it's a catch-all for channel sub-pages
               path: ':sub_page',
               name: 'settings_inboxes_page_channel',
               component: ChannelFactory,
@@ -81,15 +101,6 @@ export default {
               props: route => {
                 return { channelName: route.params.sub_page };
               },
-            },
-            {
-              path: ':inbox_id/agents',
-              name: 'settings_inboxes_add_agents',
-              meta: {
-                featureFlag: FEATURE_FLAGS.INBOX_MANAGEMENT,
-                permissions: ['administrator'],
-              },
-              component: AddAgents,
             },
           ],
         },

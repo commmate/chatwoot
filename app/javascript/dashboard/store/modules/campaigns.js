@@ -40,9 +40,33 @@ export const getters = {
     const smsChannelTypes = [INBOX_TYPES.SMS, INBOX_TYPES.TWILIO];
     return _getters.getCampaigns(CAMPAIGN_TYPES.ONE_OFF, smsChannelTypes);
   },
-  getWhatsAppCampaigns: (_state, _getters) => {
-    const whatsappChannelTypes = [INBOX_TYPES.WHATSAPP];
-    return _getters.getCampaigns(CAMPAIGN_TYPES.ONE_OFF, whatsappChannelTypes);
+  getWhatsAppCampaigns: _state => {
+    // Include both native WhatsApp inboxes AND Evolution Cloud API inboxes
+    return _state.records
+      .filter(record => {
+        if (record.campaign_type !== CAMPAIGN_TYPES.ONE_OFF) return false;
+        if (!record.inbox) return false;
+
+        // Native WhatsApp inboxes
+        if (record.inbox.channel_type === INBOX_TYPES.WHATSAPP) return true;
+
+        // Evolution Cloud API WhatsApp inboxes
+        if (
+          record.inbox.channel_type === INBOX_TYPES.API &&
+          record.inbox.additional_attributes?.evolution_channel ===
+            'whatsapp_cloud_api'
+        ) {
+          return true;
+        }
+
+        return false;
+      })
+      .sort((a1, a2) => {
+        // Sort by scheduled_at descending (newest first)
+        const date1 = new Date(a1.scheduled_at);
+        const date2 = new Date(a2.scheduled_at);
+        return date2 - date1;
+      });
   },
   getLiveChatCampaigns: (_state, _getters) => {
     const liveChatChannelTypes = [INBOX_TYPES.WEB];

@@ -51,6 +51,10 @@ en:
   errors:
     validations:
       presence: must not be blank
+    evolution:
+      duplicate_inbox_name: 'An inbox with this name already exists. Evolution requires unique inbox names per account.'
+      not_enabled: 'Evolution API is not enabled for this installation'
+      not_configured: 'Evolution API is not properly configured'
     webhook:
       invalid: Invalid events
     signup:

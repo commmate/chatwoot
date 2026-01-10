@@ -282,6 +282,27 @@ Rails.application.routes.draw do
             resource :authorization, only: [:create]
           end
 
+          # Evolution API integration routes
+          get 'evolution/status', to: 'evolution_inboxes#status'
+          resources :evolution_inboxes, path: 'evolution/inboxes', only: [:create] do
+            member do
+              get :chatwoot, action: :chatwoot_settings
+              put :chatwoot, action: :update_chatwoot_settings
+              get :connection
+              get :qrcode
+              post :enable_integration
+              post :restart
+              post :logout
+              post :refresh
+              get :instance_settings
+              put :instance_settings, action: :update_instance_settings
+              get :templates
+              post :templates, action: :create_template
+              patch 'templates/:template_id', action: :update_template
+              delete :templates, action: :destroy_template
+            end
+          end
+
           resources :webhooks, only: [:index, :create, :update, :destroy]
           namespace :integrations do
             resources :apps, only: [:index, :show]

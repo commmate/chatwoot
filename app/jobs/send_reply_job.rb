@@ -17,9 +17,13 @@ class SendReplyJob < ApplicationJob
 
   def perform(message_id)
     message = Message.find(message_id)
-    channel_name = message.conversation.inbox.channel.class.to_s
+    inbox = message.conversation.inbox
+    channel_name = inbox.channel.class.to_s
 
     return send_on_facebook_page(message) if channel_name == 'Channel::FacebookPage'
+
+    # Evolution Cloud WhatsApp inboxes need special handling
+    return send_on_evolution_cloud(message) if inbox.evolution_cloud_whatsapp?
 
     service_class = CHANNEL_SERVICES[channel_name]
     return unless service_class
@@ -35,5 +39,9 @@ class SendReplyJob < ApplicationJob
     else
       ::Facebook::SendOnFacebookService.new(message: message).perform
     end
+  end
+
+  def send_on_evolution_cloud(message)
+    ::Evolution::SendOnEvolutionCloudService.new(message: message).perform
   end
 end

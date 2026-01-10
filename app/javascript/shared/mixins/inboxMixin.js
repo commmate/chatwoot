@@ -79,11 +79,31 @@ export default {
       const { medium: medium = '' } = this.inbox;
       return this.isATwilioChannel && medium === 'whatsapp';
     },
+    // Check if inbox is an Evolution Cloud WhatsApp API inbox
+    isEvolutionCloudWhatsApp() {
+      if (this.channelType !== INBOX_TYPES.API) return false;
+      const { additional_attributes: additionalAttributes = {} } = this.inbox;
+      return additionalAttributes?.evolution_channel === 'whatsapp_cloud_api';
+    },
+    // Check if inbox is an Evolution Baileys inbox
+    isEvolutionBaileys() {
+      if (this.channelType !== INBOX_TYPES.API) return false;
+      const { additional_attributes: additionalAttributes = {} } = this.inbox;
+      return additionalAttributes?.evolution_channel === 'baileys';
+    },
+    // Check if inbox is any Evolution API inbox (Cloud or Baileys)
+    isEvolutionApiInbox() {
+      if (this.channelType !== INBOX_TYPES.API) return false;
+      const { additional_attributes: additionalAttributes = {} } = this.inbox;
+      return !!additionalAttributes?.evolution_instance_name;
+    },
     isAWhatsAppCloudChannel() {
-      return (
+      // Native WhatsApp Cloud
+      const isNativeCloud =
         this.channelType === INBOX_TYPES.WHATSAPP &&
-        this.whatsAppAPIProvider === 'whatsapp_cloud'
-      );
+        this.whatsAppAPIProvider === 'whatsapp_cloud';
+      // Evolution Cloud API should also be treated as WhatsApp Cloud
+      return isNativeCloud || this.isEvolutionCloudWhatsApp;
     },
     is360DialogWhatsAppChannel() {
       return (
@@ -125,7 +145,8 @@ export default {
     isAWhatsAppChannel() {
       return (
         this.channelType === INBOX_TYPES.WHATSAPP ||
-        this.isATwilioWhatsAppChannel
+        this.isATwilioWhatsAppChannel ||
+        this.isEvolutionCloudWhatsApp
       );
     },
     isAnInstagramChannel() {

@@ -4,6 +4,7 @@ import { mapGetters } from 'vuex';
 import { useAlert } from 'dashboard/composables';
 
 import InboxMembersAPI from '../../../../api/inboxMembers';
+import EvolutionAPI from 'dashboard/api/evolution';
 import NextButton from 'dashboard/components-next/button/Button.vue';
 import router from '../../../index';
 import PageHeader from '../SettingsSubPageHeader.vue';
@@ -37,8 +38,56 @@ export default {
   },
   mounted() {
     this.$store.dispatch('agents/get');
+    this.checkEvolutionBaileysConnection();
   },
   methods: {
+    async checkEvolutionBaileysConnection() {
+      // Only check during new inbox flow (not when editing)
+      if (this.$route.params.page !== 'new') {
+        return;
+      }
+
+      const inboxId = this.$route.params.inbox_id;
+      if (!inboxId) return;
+
+      try {
+        // Fetch inbox to check if it's Evolution Baileys
+        await this.$store.dispatch('inboxes/get', inboxId);
+        const inbox = this.$store.getters['inboxes/getInbox'](inboxId);
+
+        if (!inbox) return;
+
+        const isEvolutionBaileys =
+          inbox.channel_type === 'Channel::Api' &&
+          inbox.additional_attributes?.evolution_channel === 'baileys';
+
+        if (!isEvolutionBaileys) return;
+
+        // Check if WhatsApp is connected
+        const connectionResponse = await EvolutionAPI.getConnectionState(
+          inboxId
+        );
+        const isConnected =
+          connectionResponse.data?.instance?.state === 'open';
+
+        if (!isConnected) {
+          // Redirect back to connect step
+          useAlert(
+            this.$t('INBOX_MGMT.ADD.EVOLUTION.CONNECT.NOT_CONNECTED')
+          );
+          router.replace({
+            name: 'settings_inboxes_evolution_connect',
+            params: {
+              page: 'new',
+              inbox_id: inboxId,
+            },
+          });
+        }
+      } catch (error) {
+        // If we can't check, don't block - just log and continue
+        console.error('Failed to check Evolution connection:', error);
+      }
+    },
     async addAgents() {
       this.isCreating = true;
       const inboxId = this.$route.params.inbox_id;

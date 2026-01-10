@@ -236,7 +236,9 @@
           "WHATSAPP_CLOUD": "Cloud do WhatsApp",
           "WHATSAPP_CLOUD_DESC": "Configuração rápida via Meta",
           "TWILIO_DESC": "Conectar através de credenciais Twilio",
-          "360_DIALOG": "360Dialog"
+          "360_DIALOG": "360Dialog",
+          "EVOLUTION": "Evolution API",
+          "EVOLUTION_DESC": "Conectar via Evolution API (Baileys ou Cloud API)"
         },
         "SELECT_PROVIDER": {
           "TITLE": "Selecione seu provedor de API",
@@ -351,6 +353,69 @@
         "SUBMIT_BUTTON": "Criar Canal de Voz",
         "API": {
           "ERROR_MESSAGE": "Não conseguimos criar o canal de voz"
+        }
+      },
+      "EVOLUTION": {
+        "TITLE": "Canal WhatsApp Evolution API",
+        "DESC": "Conecte o WhatsApp via Evolution API com suporte a Baileys e Cloud API.",
+        "INBOX_NAME": {
+          "LABEL": "Nome da Caixa de Entrada",
+          "PLACEHOLDER": "Digite o nome da caixa de entrada (ex.: Suporte WhatsApp)",
+          "ERROR": "Nome da caixa de entrada é obrigatório"
+        },
+        "CHANNEL_TYPE": {
+          "LABEL": "Tipo de Conexão",
+          "HELP_TEXT": "Escolha Baileys para números de WhatsApp pessoais ou empresariais ou Cloud API para números gerenciados pela Meta."
+        },
+        "CHANNEL_TYPES": {
+          "BAILEYS": "Baileys (WhatsApp Pessoal)",
+          "CLOUD_API": "WhatsApp Cloud API (Business)"
+        },
+        "BAILEYS": {
+          "INFO": "Após criar a caixa de entrada, você precisará escanear um QR code para conectar seu número de WhatsApp. Vá para as configurações da caixa de entrada para conectar.",
+          "LOAD_QR_BUTTON": "Carregar QR Code",
+          "LOAD_QR_HELP": "Digite o nome da caixa de entrada e clique no botão para gerar um QR code para conectar seu WhatsApp."
+        },
+        "PHONE_NUMBER": {
+          "LABEL": "ID do Número de Telefone",
+          "PLACEHOLDER": "Digite o ID do número de telefone do Meta Business Manager",
+          "ERROR": "ID do número de telefone é obrigatório",
+          "HELP_TEXT": "Encontre em Meta Business Manager → WhatsApp Manager → Números de telefone → Selecione seu número → 'Identificação do número de telefone' (ex.: 775893372283514)"
+        },
+        "META_TOKEN": {
+          "LABEL": "Token de Acesso Meta",
+          "PLACEHOLDER": "Digite seu token de acesso permanente da Meta",
+          "ERROR": "Token de acesso Meta é obrigatório",
+          "HELP_TEXT": "Obtenha isso no Meta Business Manager em Usuários do Sistema"
+        },
+        "SUBMIT_BUTTON": "Criar Caixa de Entrada Evolution",
+        "ERROR_TITLE": "Falha ao Criar Caixa de Entrada",
+        "API": {
+          "ERROR_MESSAGE": "Falha ao criar caixa de entrada Evolution. Por favor, tente novamente.",
+          "DUPLICATE_NAME_ERROR": "Já existe uma caixa de entrada com este nome na sua conta. A Evolution requer nomes únicos para rotear mensagens corretamente. Por favor, escolha um nome diferente."
+        },
+        "CONNECT": {
+          "TITLE": "Conectar WhatsApp",
+          "DESCRIPTION": "Escaneie o QR code abaixo com seu aplicativo WhatsApp para conectar esta caixa de entrada.",
+          "STATUS": {
+            "OPEN": "Conectado",
+            "CONNECTING": "Conectando...",
+            "DISCONNECTED": "Desconectado",
+            "UNKNOWN": "Verificando status..."
+          },
+          "QR_INSTRUCTION": "Abra o WhatsApp no seu telefone, vá em Configurações → Aparelhos Conectados → Conectar um Aparelho, então escaneie este QR code.",
+          "QR_LOADING": "Carregando QR code...",
+          "QR_ERROR": "Falha ao gerar QR code. Por favor, tente novamente.",
+          "REFRESH_QR": "Atualizar QR Code",
+          "CONNECTED": "WhatsApp conectado com sucesso!",
+          "NOT_CONNECTED": "WhatsApp ainda não está conectado. Por favor, escaneie o QR code primeiro.",
+          "CONTINUE": "Continuar",
+          "RETRY": "Tentar Novamente",
+          "INTEGRATION_ENABLED": "Integração habilitada! Configurando sua caixa de entrada...",
+          "INTEGRATION_ERROR": "Falha ao habilitar integração do Chatwoot. Por favor, tente novamente.",
+          "ENABLE_ERROR": "Falha ao habilitar integração. Por favor, tente novamente.",
+          "NOT_CONNECTED_ERROR": "Por favor, conecte seu número de WhatsApp antes de continuar.",
+          "QR_REFRESHED": "QR Code atualizado com sucesso!"
         }
       },
       "API_CHANNEL": {
@@ -623,7 +688,116 @@
       "WIDGET_BUILDER": "Construtor de Widget",
       "BOT_CONFIGURATION": "Configuração do Bot",
       "ACCOUNT_HEALTH": "Saúde da conta",
-      "CSAT": "CSAT"
+      "CSAT": "CSAT",
+      "EVOLUTION_SETTINGS": "Evolution API",
+      "EVOLUTION_TEMPLATES": "Templates"
+    },
+    "EVOLUTION": {
+      "SETTINGS": {
+        "CONNECTION": {
+          "TITLE": "Status da Conexão",
+          "DESCRIPTION": "Monitore e gerencie sua conexão WhatsApp através da Evolution API."
+        },
+        "STATUS": {
+          "OPEN": "Conectado",
+          "CONNECTING": "Conectando",
+          "DISCONNECTED": "Desconectado",
+          "CLOSE": "Desconectado",
+          "UNKNOWN": "Desconhecido"
+        },
+        "INSTANCE_NAME": "Nome da Instância",
+        "CHANNEL_TYPE": "Tipo de Canal",
+        "CONNECT_BUTTON": "Conectar WhatsApp",
+        "QR_INSTRUCTION": "Escaneie este QR code com seu aplicativo WhatsApp para conectar",
+        "REFRESH_STATUS": "Atualizar Status",
+        "GET_NEW_QR": "Obter Novo QR Code",
+        "QR_LOADING": "Gerando QR code... Por favor, aguarde.",
+        "CONNECTED": "WhatsApp conectado com sucesso!",
+        "QR_ERROR": "Falha ao gerar QR code",
+        "RESTART_BUTTON": "Reiniciar",
+        "DISCONNECT_BUTTON": "Desconectar",
+        "REFRESH_BUTTON": "Atualizar",
+        "RESTART_SUCCESS": "Instância reiniciada com sucesso",
+        "RESTART_ERROR": "Falha ao reiniciar instância",
+        "DISCONNECT_SUCCESS": "Instância desconectada com sucesso",
+        "DISCONNECT_ERROR": "Falha ao desconectar instância",
+        "DISCONNECT_CONFIRM_TITLE": "Desconectar WhatsApp?",
+        "DISCONNECT_CONFIRM_MESSAGE": "Desconectar irá parar imediatamente a recepção de mensagens do WhatsApp para esta caixa de entrada. Seus clientes não poderão entrar em contato até você reconectar. Você precisará escanear o QR code novamente para restaurar a conexão. Tem certeza que deseja continuar?",
+        "CANCEL_BUTTON": "Cancelar",
+        "REFRESH_SUCCESS": "Conexão atualizada com sucesso",
+        "REFRESH_ERROR": "Falha ao atualizar conexão",
+        "INTEGRATION": {
+          "TITLE": "Configurações de Integração",
+          "DESCRIPTION": "Configure como a Evolution API integra com o Chatwoot."
+        },
+        "SIGN_MSG": "Adicionar assinatura do agente às mensagens",
+        "REOPEN_CONVERSATION": "Reabrir conversa em nova mensagem",
+        "CONVERSATION_PENDING": "Definir novas conversas como pendentes",
+        "MERGE_BRAZIL_CONTACTS": "Mesclar contatos brasileiros (9º dígito)",
+        "IMPORT_CONTACTS": "Importar contatos do WhatsApp",
+        "IMPORT_MESSAGES": "Importar histórico de mensagens",
+        "DAYS_LIMIT_IMPORT": "Dias para importar mensagens",
+        "SAVE_BUTTON": "Salvar Configurações",
+        "SAVE_SUCCESS": "Configurações salvas com sucesso",
+        "SAVE_ERROR": "Falha ao salvar configurações",
+        "FETCH_ERROR": "Falha ao buscar configurações",
+        "INSTANCE_SAVE_SUCCESS": "Configurações da instância salvas com sucesso",
+        "INSTANCE_SAVE_ERROR": "Falha ao salvar configurações da instância",
+        "INSTANCE": {
+          "TITLE": "Configurações da Instância",
+          "DESCRIPTION": "Configure o comportamento da instância do WhatsApp.",
+          "REJECT_CALL": "Rejeitar Chamadas",
+          "REJECT_CALL_DESC": "Rejeitar todas as chamadas recebidas",
+          "GROUPS_IGNORE": "Ignorar Grupos",
+          "GROUPS_IGNORE_DESC": "Ignorar todas as mensagens de grupos",
+          "ALWAYS_ONLINE": "Sempre Online",
+          "ALWAYS_ONLINE_DESC": "Manter o WhatsApp sempre online",
+          "READ_MESSAGES": "Ler Mensagens",
+          "READ_MESSAGES_DESC": "Marcar todas as mensagens como lidas",
+          "SYNC_FULL_HISTORY": "Sincronizar Histórico Completo",
+          "SYNC_FULL_HISTORY_DESC": "Sincronizar todo o histórico de conversas ao escanear QR code",
+          "READ_STATUS": "Ler Status",
+          "READ_STATUS_DESC": "Marcar todos os status como vistos"
+        },
+        "INTEGRATION_STATUS": "Integração",
+        "INTEGRATION_ACTIVE": "Ativa",
+        "INTEGRATION_INACTIVE": "Inativa",
+        "INTEGRATION_ENABLED": "Integração habilitada com sucesso! As mensagens agora serão sincronizadas com o Chatwoot.",
+        "INTEGRATION_ENABLE_ERROR": "Falha ao habilitar integração. Por favor, tente novamente.",
+        "INTEGRATION_NOT_ENABLED_TITLE": "Integração Inativa",
+        "INTEGRATION_NOT_ENABLED_DESC": "O WhatsApp está conectado, mas a integração com o Chatwoot não está habilitada. As mensagens não serão sincronizadas até você habilitar a integração.",
+        "ENABLE_INTEGRATION_BUTTON": "Habilitar Integração"
+      },
+      "TEMPLATES": {
+        "TITLE": "Templates de Mensagem",
+        "DESCRIPTION": "Crie e gerencie templates de mensagens do WhatsApp para seu negócio.",
+        "CREATE_BUTTON": "Criar Template",
+        "CREATE_TITLE": "Criar Novo Template",
+        "EMPTY": "Nenhum template encontrado. Crie seu primeiro template para começar.",
+        "LANGUAGE": "Idioma",
+        "DELETE_BUTTON": "Excluir",
+        "DELETE_CONFIRM_TITLE": "Excluir Template",
+        "DELETE_CONFIRM_MESSAGE": "Tem certeza que deseja excluir o template \"{name}\"? Esta ação não pode ser desfeita.",
+        "FETCH_ERROR": "Falha ao buscar templates",
+        "CREATE_SUCCESS": "Template criado com sucesso! Pode levar algum tempo para ser aprovado pela Meta.",
+        "CREATE_ERROR": "Falha ao criar template",
+        "DELETE_SUCCESS": "Template excluído com sucesso",
+        "DELETE_ERROR": "Falha ao excluir template",
+        "VALIDATION_ERROR": "Por favor, preencha todos os campos obrigatórios",
+        "FORM": {
+          "NAME": "Nome do Template",
+          "NAME_PLACEHOLDER": "ex.: confirmacao_pedido",
+          "NAME_HELP": "Use apenas letras minúsculas, números e sublinhados",
+          "CATEGORY": "Categoria",
+          "LANGUAGE": "Idioma",
+          "BODY": "Corpo da Mensagem",
+          "BODY_PLACEHOLDER": "Digite o texto do seu template de mensagem aqui. Use '{'{1}'}', '{'{2}'}', etc. para variáveis.",
+          "BODY_HELP": "Use '{'{1}'}', '{'{2}'}', etc. para variáveis dinâmicas que serão substituídas ao enviar",
+          "ALLOW_CATEGORY_CHANGE": "Permitir que a Meta altere a categoria se necessário",
+          "CANCEL": "Cancelar",
+          "SUBMIT": "Criar Template"
+        }
+      }
     },
     "ACCOUNT_HEALTH": {
       "TITLE": "Gerencie sua conta do WhatsApp",

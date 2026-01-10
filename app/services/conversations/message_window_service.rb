@@ -38,6 +38,9 @@ class Conversations::MessageWindowService
   end
 
   def api_messaging_window
+    # Evolution Cloud WhatsApp inboxes should use 24h window like native WhatsApp Cloud
+    return MESSAGING_WINDOW_24_HOURS if @conversation.inbox.evolution_cloud_whatsapp?
+
     return if @conversation.inbox.channel.additional_attributes['agent_reply_time_window'].blank?
 
     @conversation.inbox.channel.additional_attributes['agent_reply_time_window'].to_i.hours

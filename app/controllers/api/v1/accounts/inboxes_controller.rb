@@ -66,7 +66,19 @@ class Api::V1::Accounts::InboxesController < Api::V1::Accounts::BaseController
   end
 
   def destroy
+    # Capture Evolution instance name before deletion (for cleanup after job completes)
+    evolution_instance_name = nil
+    if @inbox.present? && @inbox.channel_type == 'Channel::Api'
+      evolution_instance_name = @inbox.channel&.additional_attributes&.dig('evolution_instance_name')
+    end
+
     ::DeleteObjectJob.perform_later(@inbox, Current.user, request.ip) if @inbox.present?
+
+    # Enqueue Evolution instance cleanup if needed
+    if evolution_instance_name.present?
+      Evolution::DeleteInstanceOnInboxDestroyJob.perform_later(evolution_instance_name)
+    end
+
     render status: :ok, json: { message: I18n.t('messages.inbox_deletetion_response') }
   end
 
@@ -80,6 +92,14 @@ class Api::V1::Accounts::InboxesController < Api::V1::Accounts::BaseController
   end
 
   def health
+    # For Evolution Cloud API inboxes, fetch health from Meta API
+    if @inbox.evolution_cloud_whatsapp?
+      health_data = fetch_evolution_health_data
+      render json: health_data
+      return
+    end
+
+    # For native WhatsApp channels
     health_data = Whatsapp::HealthService.new(@inbox.channel).fetch_health_status
     render json: health_data
   rescue StandardError => e
@@ -88,6 +108,69 @@ class Api::V1::Accounts::InboxesController < Api::V1::Accounts::BaseController
   end
 
   private
+
+  def fetch_evolution_health_data
+    # Get Evolution instance details
+    instance_name = @inbox.channel.additional_attributes['evolution_instance_name']
+    
+    # Fetch phone number ID and token from Evolution
+    evolution_client = EvolutionApi::Client.new
+    instances = evolution_client.fetch_instance(instance_name: instance_name)
+    
+    # fetch_instance returns an array, get the first item
+    instance_data = instances.is_a?(Array) ? instances.first : instances
+    
+    # Evolution returns the instance data at the root level
+    phone_number_id = instance_data['number']
+    token = instance_data['token']
+    
+    # Fetch health data directly from Meta API using the same format as Whatsapp::HealthService
+    api_version = GlobalConfigService.load('WHATSAPP_API_VERSION', 'v22.0')
+    url = "https://graph.facebook.com/#{api_version}/#{phone_number_id}"
+    health_fields = %w[
+      quality_rating
+      messaging_limit_tier
+      code_verification_status
+      account_mode
+      id
+      display_phone_number
+      name_status
+      verified_name
+      webhook_configuration
+      throughput
+      last_onboarded_time
+      platform_type
+      certificate
+    ].join(',')
+    
+    response = HTTParty.get(url, {
+      query: {
+        fields: health_fields,
+        access_token: token
+      }
+    })
+    
+    if response.success?
+      data = response.parsed_response
+      # Format response to match Whatsapp::HealthService format
+      {
+        display_phone_number: data['display_phone_number'],
+        verified_name: data['verified_name'],
+        name_status: data['name_status'],
+        quality_rating: data['quality_rating'],
+        messaging_limit_tier: data['messaging_limit_tier'],
+        account_mode: data['account_mode'],
+        code_verification_status: data['code_verification_status'],
+        throughput: data['throughput'],
+        last_onboarded_time: data['last_onboarded_time'],
+        platform_type: data['platform_type'],
+        business_id: instance_data['businessId']
+      }
+    else
+      Rails.logger.error "[EVOLUTION HEALTH] Meta API error: #{response.body}"
+      raise "Failed to fetch health data from Meta API: #{response.code}"
+    end
+  end
 
   def fetch_inbox
     @inbox = Current.account.inboxes.find(params[:id])
@@ -100,6 +183,7 @@ class Api::V1::Accounts::InboxesController < Api::V1::Accounts::BaseController
 
   def validate_whatsapp_cloud_channel
     return if @inbox.channel.is_a?(Channel::Whatsapp) && @inbox.channel.provider == 'whatsapp_cloud'
+    return if @inbox.evolution_cloud_whatsapp?
 
     render json: { error: 'Health data only available for WhatsApp Cloud API channels' }, status: :bad_request
   end

@@ -59,3 +59,10 @@ periodic_assignment_job:
   cron: '*/30 * * * *'
   class: 'AutoAssignment::PeriodicAssignmentJob'
   queue: scheduled_jobs
+
+# executed daily at 0300 UTC
+# to remove orphan Evolution instances not linked to any Chatwoot inbox
+remove_orphan_evolution_instances_job:
+  cron: '0 3 * * *'
+  class: 'Internal::RemoveOrphanEvolutionInstancesJob'
+  queue: scheduled_jobs

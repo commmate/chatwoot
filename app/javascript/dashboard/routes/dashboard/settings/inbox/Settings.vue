@@ -24,6 +24,8 @@ import CollaboratorsPage from './settingsPage/CollaboratorsPage.vue';
 import WidgetBuilder from './WidgetBuilder.vue';
 import BotConfiguration from './components/BotConfiguration.vue';
 import AccountHealth from './components/AccountHealth.vue';
+import EvolutionSettings from './evolution/EvolutionSettings.vue';
+import EvolutionTemplates from './evolution/Templates.vue';
 import { FEATURE_FLAGS } from '../../../../featureFlags';
 import SenderNameExamplePreview from './components/SenderNameExamplePreview.vue';
 import NextButton from 'dashboard/components-next/button/Button.vue';
@@ -55,6 +57,8 @@ export default {
     Editor,
     Avatar,
     AccountHealth,
+    EvolutionSettings,
+    EvolutionTemplates,
   },
   mixins: [inboxMixin],
   setup() {
@@ -98,7 +102,26 @@ export default {
       return this.tabs[this.selectedTabIndex]?.key;
     },
     shouldShowWhatsAppConfiguration() {
-      return this.isAWhatsAppCloudChannel;
+      return this.isAWhatsAppCloudChannel || this.isEvolutionCloudApi;
+    },
+    isEvolutionInbox() {
+      return (
+        this.isAPIInbox &&
+        this.inbox?.additional_attributes?.evolution_instance_name
+      );
+    },
+    isEvolutionCloudApi() {
+      return (
+        this.isEvolutionInbox &&
+        this.inbox?.additional_attributes?.evolution_channel ===
+          'whatsapp_cloud_api'
+      );
+    },
+    isEvolutionBaileys() {
+      return (
+        this.isEvolutionInbox &&
+        this.inbox?.additional_attributes?.evolution_channel === 'baileys'
+      );
     },
     whatsAppAPIProviderName() {
       if (this.isAWhatsAppCloudChannel) {
@@ -189,6 +212,28 @@ export default {
             name: this.$t('INBOX_MGMT.TABS.ACCOUNT_HEALTH'),
           },
         ];
+      }
+
+      // Evolution API inbox tabs
+      if (this.isEvolutionInbox) {
+        visibleToAllChannelTabs = [
+          ...visibleToAllChannelTabs,
+          {
+            key: 'evolution-settings',
+            name: this.$t('INBOX_MGMT.TABS.EVOLUTION_SETTINGS'),
+          },
+        ];
+
+        // Templates tab only for Cloud API
+        if (this.isEvolutionCloudApi) {
+          visibleToAllChannelTabs = [
+            ...visibleToAllChannelTabs,
+            {
+              key: 'evolution-templates',
+              name: this.$t('INBOX_MGMT.TABS.EVOLUTION_TEMPLATES'),
+            },
+          ];
+        }
       }
 
       return visibleToAllChannelTabs;
@@ -946,6 +991,12 @@ export default {
       </div>
       <div v-if="selectedTabKey === 'whatsapp-health'">
         <AccountHealth :health-data="healthData" />
+      </div>
+      <div v-if="selectedTabKey === 'evolution-settings'">
+        <EvolutionSettings :inbox="inbox" />
+      </div>
+      <div v-if="selectedTabKey === 'evolution-templates'">
+        <EvolutionTemplates :inbox="inbox" />
       </div>
     </section>
   </div>

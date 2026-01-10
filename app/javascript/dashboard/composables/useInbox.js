@@ -105,11 +105,34 @@ export const useInbox = (inboxId = null) => {
     return isATwilioChannel.value && medium === 'whatsapp';
   });
 
+  // Check if inbox is an Evolution Cloud WhatsApp API inbox
+  const isEvolutionCloudWhatsApp = computed(() => {
+    if (channelType.value !== INBOX_TYPES.API) return false;
+    const { additionalAttributes } = inbox.value || {};
+    return additionalAttributes?.evolutionChannel === 'whatsapp_cloud_api';
+  });
+
+  // Check if inbox is an Evolution Baileys inbox
+  const isEvolutionBaileys = computed(() => {
+    if (channelType.value !== INBOX_TYPES.API) return false;
+    const { additionalAttributes } = inbox.value || {};
+    return additionalAttributes?.evolutionChannel === 'baileys';
+  });
+
+  // Check if inbox is any Evolution API inbox (Cloud or Baileys)
+  const isEvolutionApiInbox = computed(() => {
+    if (channelType.value !== INBOX_TYPES.API) return false;
+    const { additionalAttributes } = inbox.value || {};
+    return !!additionalAttributes?.evolutionInstanceName;
+  });
+
   const isAWhatsAppCloudChannel = computed(() => {
-    return (
+    // Native WhatsApp Cloud
+    const isNativeCloud =
       channelType.value === INBOX_TYPES.WHATSAPP &&
-      whatsAppAPIProvider.value === 'whatsapp_cloud'
-    );
+      whatsAppAPIProvider.value === 'whatsapp_cloud';
+    // Evolution Cloud API should also be treated as WhatsApp Cloud
+    return isNativeCloud || isEvolutionCloudWhatsApp.value;
   });
 
   const is360DialogWhatsAppChannel = computed(() => {
@@ -122,7 +145,8 @@ export const useInbox = (inboxId = null) => {
   const isAWhatsAppChannel = computed(() => {
     return (
       channelType.value === INBOX_TYPES.WHATSAPP ||
-      isATwilioWhatsAppChannel.value
+      isATwilioWhatsAppChannel.value ||
+      isEvolutionCloudWhatsApp.value
     );
   });
 
@@ -157,5 +181,8 @@ export const useInbox = (inboxId = null) => {
     isAnInstagramChannel,
     isATiktokChannel,
     isAVoiceChannel,
+    isEvolutionCloudWhatsApp,
+    isEvolutionBaileys,
+    isEvolutionApiInbox,
   };
 };

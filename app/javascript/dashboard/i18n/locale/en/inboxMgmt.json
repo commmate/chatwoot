@@ -236,7 +236,9 @@
           "WHATSAPP_CLOUD": "WhatsApp Cloud",
           "WHATSAPP_CLOUD_DESC": "Quick setup through Meta",
           "TWILIO_DESC": "Connect via Twilio credentials",
-          "360_DIALOG": "360Dialog"
+          "360_DIALOG": "360Dialog",
+          "EVOLUTION": "Evolution API",
+          "EVOLUTION_DESC": "Connect via Evolution API (Baileys or Cloud API)"
         },
         "SELECT_PROVIDER": {
           "TITLE": "Select your API provider",
@@ -310,6 +312,69 @@
         },
         "API": {
           "ERROR_MESSAGE": "We were not able to save the WhatsApp channel"
+        }
+      },
+      "EVOLUTION": {
+        "TITLE": "Evolution API WhatsApp Channel",
+        "DESC": "Connect WhatsApp via Evolution API supporting both Baileys and Cloud API.",
+        "INBOX_NAME": {
+          "LABEL": "Inbox Name",
+          "PLACEHOLDER": "Enter your inbox name (e.g., Support WhatsApp)",
+          "ERROR": "Inbox name is required"
+        },
+        "CHANNEL_TYPE": {
+          "LABEL": "Connection Type",
+          "HELP_TEXT": "Choose Baileys for personal or business WhatsApp numbers or Cloud API for Meta Managed numbers."
+        },
+        "CHANNEL_TYPES": {
+          "BAILEYS": "Baileys (Personal WhatsApp)",
+          "CLOUD_API": "WhatsApp Cloud API (Business)"
+        },
+        "BAILEYS": {
+          "INFO": "After creating the inbox, you'll need to scan a QR code to connect your WhatsApp number. Go to inbox settings to connect.",
+          "LOAD_QR_BUTTON": "Load QR Code",
+          "LOAD_QR_HELP": "Enter an inbox name and click the button to generate a QR code for connecting your WhatsApp."
+        },
+        "PHONE_NUMBER": {
+          "LABEL": "Phone Number ID",
+          "PLACEHOLDER": "Enter your Phone Number ID from Meta Business Manager",
+          "ERROR": "Phone Number ID is required",
+          "HELP_TEXT": "Find this in Meta Business Manager → WhatsApp Manager → Phone Numbers → Select your number → 'Phone Number ID' (e.g., 775893372283514)"
+        },
+        "META_TOKEN": {
+          "LABEL": "Meta Access Token",
+          "PLACEHOLDER": "Enter your permanent Meta access token",
+          "ERROR": "Meta access token is required",
+          "HELP_TEXT": "Get this from Meta Business Manager under System Users"
+        },
+        "SUBMIT_BUTTON": "Create Evolution Inbox",
+        "ERROR_TITLE": "Failed to Create Inbox",
+        "API": {
+          "ERROR_MESSAGE": "Failed to create Evolution inbox. Please try again.",
+          "DUPLICATE_NAME_ERROR": "An inbox with this name already exists in your account. Evolution requires unique inbox names to route messages correctly. Please choose a different name."
+        },
+        "CONNECT": {
+          "TITLE": "Connect WhatsApp",
+          "DESCRIPTION": "Scan the QR code below with your WhatsApp app to connect this inbox.",
+          "STATUS": {
+            "OPEN": "Connected",
+            "CONNECTING": "Connecting...",
+            "DISCONNECTED": "Disconnected",
+            "UNKNOWN": "Checking status..."
+          },
+          "QR_INSTRUCTION": "Open WhatsApp on your phone, go to Settings → Linked Devices → Link a Device, then scan this QR code.",
+          "QR_LOADING": "Loading QR code...",
+          "QR_ERROR": "Failed to generate QR code. Please try again.",
+          "REFRESH_QR": "Refresh QR Code",
+          "CONNECTED": "WhatsApp connected successfully!",
+          "NOT_CONNECTED": "WhatsApp is not connected yet. Please scan the QR code first.",
+          "CONTINUE": "Continue",
+          "RETRY": "Retry",
+          "INTEGRATION_ENABLED": "Integration enabled! Setting up your inbox...",
+          "INTEGRATION_ERROR": "Failed to enable Chatwoot integration. Please try again.",
+          "ENABLE_ERROR": "Failed to enable integration. Please try again.",
+          "NOT_CONNECTED_ERROR": "Please connect your WhatsApp number before continuing.",
+          "QR_REFRESHED": "QR Code refreshed successfully!"
         }
       },
       "VOICE": {
@@ -623,7 +688,9 @@
       "WIDGET_BUILDER": "Widget Builder",
       "BOT_CONFIGURATION": "Bot Configuration",
       "ACCOUNT_HEALTH": "Account Health",
-      "CSAT": "CSAT"
+      "CSAT": "CSAT",
+      "EVOLUTION_SETTINGS": "Evolution API",
+      "EVOLUTION_TEMPLATES": "Templates"
     },
     "ACCOUNT_HEALTH": {
       "TITLE": "Manage your WhatsApp account",
@@ -677,6 +744,113 @@
         "MODES": {
           "SANDBOX": "Sandbox",
           "LIVE": "Live"
+        }
+      }
+    },
+    "EVOLUTION": {
+      "SETTINGS": {
+        "CONNECTION": {
+          "TITLE": "Connection Status",
+          "DESCRIPTION": "Monitor and manage your WhatsApp connection through Evolution API."
+        },
+        "STATUS": {
+          "OPEN": "Connected",
+          "CONNECTING": "Connecting",
+          "DISCONNECTED": "Disconnected",
+          "CLOSE": "Disconnected",
+          "UNKNOWN": "Unknown"
+        },
+        "INSTANCE_NAME": "Instance Name",
+        "CHANNEL_TYPE": "Channel Type",
+        "CONNECT_BUTTON": "Connect WhatsApp",
+        "QR_INSTRUCTION": "Scan this QR code with your WhatsApp app to connect",
+        "REFRESH_STATUS": "Refresh Status",
+        "GET_NEW_QR": "Get New QR Code",
+        "QR_LOADING": "Generating QR code... Please wait.",
+        "CONNECTED": "WhatsApp connected successfully!",
+        "QR_ERROR": "Failed to generate QR code",
+        "RESTART_BUTTON": "Restart",
+        "DISCONNECT_BUTTON": "Disconnect",
+        "REFRESH_BUTTON": "Refresh",
+        "RESTART_SUCCESS": "Instance restarted successfully",
+        "RESTART_ERROR": "Failed to restart instance",
+        "DISCONNECT_SUCCESS": "Instance disconnected successfully",
+        "DISCONNECT_ERROR": "Failed to disconnect instance",
+        "DISCONNECT_CONFIRM_TITLE": "Disconnect WhatsApp?",
+        "DISCONNECT_CONFIRM_MESSAGE": "Disconnecting will immediately stop all WhatsApp message reception for this inbox. Your customers will not be able to reach you until you reconnect. You will need to scan the QR code again to restore the connection. Are you sure you want to proceed?",
+        "CANCEL_BUTTON": "Cancel",
+        "REFRESH_SUCCESS": "Connection refreshed successfully",
+        "REFRESH_ERROR": "Failed to refresh connection",
+        "INTEGRATION": {
+          "TITLE": "Integration Settings",
+          "DESCRIPTION": "Configure how Evolution API integrates with Chatwoot."
+        },
+        "SIGN_MSG": "Add agent signature to messages",
+        "REOPEN_CONVERSATION": "Reopen conversation on new message",
+        "CONVERSATION_PENDING": "Set new conversations as pending",
+        "MERGE_BRAZIL_CONTACTS": "Merge Brazilian contacts (9th digit)",
+        "IMPORT_CONTACTS": "Import contacts from WhatsApp",
+        "IMPORT_MESSAGES": "Import message history",
+        "DAYS_LIMIT_IMPORT": "Days to import messages",
+        "SAVE_BUTTON": "Save Settings",
+        "SAVE_SUCCESS": "Settings saved successfully",
+        "SAVE_ERROR": "Failed to save settings",
+        "FETCH_ERROR": "Failed to fetch settings",
+        "INSTANCE_SAVE_SUCCESS": "Instance settings saved successfully",
+        "INSTANCE_SAVE_ERROR": "Failed to save instance settings",
+        "INSTANCE": {
+          "TITLE": "Instance Settings",
+          "DESCRIPTION": "Configure WhatsApp instance behavior settings.",
+          "REJECT_CALL": "Reject Calls",
+          "REJECT_CALL_DESC": "Reject all incoming calls",
+          "GROUPS_IGNORE": "Ignore Groups",
+          "GROUPS_IGNORE_DESC": "Ignore all messages from groups",
+          "ALWAYS_ONLINE": "Always Online",
+          "ALWAYS_ONLINE_DESC": "Keep the WhatsApp always online",
+          "READ_MESSAGES": "Read Messages",
+          "READ_MESSAGES_DESC": "Mark all messages as read",
+          "SYNC_FULL_HISTORY": "Sync Full History",
+          "SYNC_FULL_HISTORY_DESC": "Sync all complete chat history on scan QR code",
+          "READ_STATUS": "Read Status",
+          "READ_STATUS_DESC": "Mark all statuses as read"
+        },
+        "INTEGRATION_STATUS": "Integration",
+        "INTEGRATION_ACTIVE": "Active",
+        "INTEGRATION_INACTIVE": "Not Active",
+        "INTEGRATION_ENABLED": "Integration enabled successfully! Messages will now sync with Chatwoot.",
+        "INTEGRATION_ENABLE_ERROR": "Failed to enable integration. Please try again.",
+        "INTEGRATION_NOT_ENABLED_TITLE": "Integration Not Active",
+        "INTEGRATION_NOT_ENABLED_DESC": "WhatsApp is connected but the Chatwoot integration is not enabled. Messages won't sync until you enable the integration.",
+        "ENABLE_INTEGRATION_BUTTON": "Enable Integration"
+      },
+      "TEMPLATES": {
+        "TITLE": "Message Templates",
+        "DESCRIPTION": "Create and manage WhatsApp message templates for your business.",
+        "CREATE_BUTTON": "Create Template",
+        "CREATE_TITLE": "Create New Template",
+        "EMPTY": "No templates found. Create your first template to get started.",
+        "LANGUAGE": "Language",
+        "DELETE_BUTTON": "Delete",
+        "DELETE_CONFIRM_TITLE": "Delete Template",
+        "DELETE_CONFIRM_MESSAGE": "Are you sure you want to delete the template \"{name}\"? This action cannot be undone.",
+        "FETCH_ERROR": "Failed to fetch templates",
+        "CREATE_SUCCESS": "Template created successfully! It may take some time to be approved by Meta.",
+        "CREATE_ERROR": "Failed to create template",
+        "DELETE_SUCCESS": "Template deleted successfully",
+        "DELETE_ERROR": "Failed to delete template",
+        "VALIDATION_ERROR": "Please fill in all required fields",
+        "FORM": {
+          "NAME": "Template Name",
+          "NAME_PLACEHOLDER": "e.g., order_confirmation",
+          "NAME_HELP": "Use lowercase letters, numbers, and underscores only",
+          "CATEGORY": "Category",
+          "LANGUAGE": "Language",
+          "BODY": "Message Body",
+          "BODY_PLACEHOLDER": "Enter your message template text here. Use '{'{1}'}', '{'{2}'}', etc. for variables.",
+          "BODY_HELP": "Use '{'{1}'}', '{'{2}'}', etc. for dynamic variables that will be replaced when sending",
+          "ALLOW_CATEGORY_CHANGE": "Allow Meta to change category if needed",
+          "CANCEL": "Cancel",
+          "SUBMIT": "Create Template"
         }
       }
     },

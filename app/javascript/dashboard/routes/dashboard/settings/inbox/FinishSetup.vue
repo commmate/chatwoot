@@ -36,6 +36,7 @@ const {
   isAFacebookInbox,
   isATelegramChannel,
   isATwilioWhatsAppChannel,
+  isEvolutionCloudWhatsApp,
 } = useInbox(route.params.inbox_id);
 
 const hasDuplicateInstagramInbox = computed(() => {
@@ -49,10 +50,26 @@ const hasDuplicateInstagramInbox = computed(() => {
 });
 
 const shouldShowWhatsAppWebhookDetails = computed(() => {
+  // Show webhook details for native WhatsApp Cloud or Evolution Cloud API inboxes
+  // (but not for embedded signup which handles webhooks automatically)
+  if (isEvolutionCloudWhatsApp.value) {
+    return true; // Evolution Cloud API always needs webhook configuration
+  }
+  
   return (
     isAWhatsAppCloudChannel.value &&
     currentInbox.value.provider_config?.source !== 'embedded_signup'
   );
+});
+
+const webhookVerifyToken = computed(() => {
+  // For Evolution inboxes, token is in additional_attributes
+  if (isEvolutionCloudWhatsApp.value) {
+    return currentInbox.value.additional_attributes?.webhook_verify_token;
+  }
+  
+  // For native WhatsApp Cloud, token is in provider_config
+  return currentInbox.value.provider_config?.webhook_verify_token;
 });
 
 const isWhatsAppEmbeddedSignup = computed(() => {
@@ -207,7 +224,7 @@ onMounted(() => {
           </p>
           <woot-code
             lang="html"
-            :script="currentInbox.provider_config.webhook_verify_token"
+            :script="webhookVerifyToken"
           />
         </div>
         <div class="w-[50%] max-w-[50%] ml-[25%]">

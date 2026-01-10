@@ -64,6 +64,12 @@ class Campaign < ApplicationRecord
   private
 
   def execute_campaign
+    # Evolution Cloud WhatsApp campaigns (treated as WhatsApp Cloud)
+    if inbox.evolution_cloud_whatsapp?
+      Evolution::WhatsappCampaignService.new(campaign: self).perform if account.feature_enabled?(:whatsapp_campaign)
+      return
+    end
+
     case inbox.inbox_type
     when 'Twilio SMS'
       Twilio::OneoffSmsCampaignService.new(campaign: self).perform
@@ -81,6 +87,9 @@ class Campaign < ApplicationRecord
   def validate_campaign_inbox
     return unless inbox
 
+    # Allow Evolution Cloud WhatsApp inboxes (Channel::Api with evolution_channel == whatsapp_cloud_api)
+    return if inbox.evolution_cloud_whatsapp?
+
     errors.add :inbox, 'Unsupported Inbox type' unless ['Website', 'Twilio SMS', 'Sms', 'Whatsapp'].include? inbox.inbox_type
   end
 
@@ -88,7 +97,8 @@ class Campaign < ApplicationRecord
   def ensure_correct_campaign_attributes
     return if inbox.blank?
 
-    if ['Twilio SMS', 'Sms', 'Whatsapp'].include?(inbox.inbox_type)
+    # Evolution Cloud WhatsApp campaigns behave like native WhatsApp campaigns
+    if inbox.evolution_cloud_whatsapp? || ['Twilio SMS', 'Sms', 'Whatsapp'].include?(inbox.inbox_type)
       self.campaign_type = 'one_off'
       self.scheduled_at ||= Time.now.utc
     else

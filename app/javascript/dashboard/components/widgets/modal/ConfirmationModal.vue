@@ -24,6 +24,10 @@ export default {
       type: String,
       default: 'No',
     },
+    confirmColor: {
+      type: String,
+      default: 'blue',
+    },
   },
   data: () => ({
     show: false,
@@ -58,7 +62,12 @@ export default {
       <woot-modal-header :header-title="title" :header-content="description" />
       <div class="flex flex-row justify-end gap-2 py-4 px-6 w-full">
         <NextButton faded type="reset" :label="cancelLabel" @click="cancel" />
-        <NextButton type="submit" :label="confirmLabel" @click="confirm" />
+        <NextButton 
+          type="submit" 
+          :label="confirmLabel" 
+          :[confirmColor]="true"
+          @click="confirm" 
+        />
       </div>
     </div>
   </Modal>
