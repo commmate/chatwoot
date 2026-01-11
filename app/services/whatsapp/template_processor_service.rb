@@ -50,8 +50,32 @@ class Whatsapp::TemplateProcessorService
   def process_header_components(processed_params)
     return [] if processed_params['header'].blank?
 
-    header_params = build_header_params(processed_params['header'])
+    header_data = processed_params['header']
+
+    # If header has media_type but empty/blank media_url, try to use the template's default image
+    if header_data['media_type'].present? && header_data['media_url'].blank?
+      template = find_template
+      default_url = extract_template_header_url(template)
+      if default_url.present?
+        header_data = header_data.merge('media_url' => default_url)
+      else
+        # No default URL available, skip header entirely
+        return []
+      end
+    end
+
+    header_params = build_header_params(header_data)
     header_params.present? ? [{ type: 'header', parameters: header_params }] : []
+  end
+
+  def extract_template_header_url(template)
+    return nil if template.blank?
+
+    header_component = template['components']&.find { |c| c['type'] == 'HEADER' }
+    return nil if header_component.blank?
+
+    # Extract URL from header_handle array (WhatsApp CDN URL)
+    header_component.dig('example', 'header_handle')&.first
   end
 
   def build_header_params(header_data)

@@ -692,7 +692,108 @@
       "ACCOUNT_HEALTH": "Saúde da conta",
       "CSAT": "CSAT",
       "EVOLUTION_SETTINGS": "Evolution API",
-      "EVOLUTION_TEMPLATES": "Templates"
+      "WHATSAPP_TEMPLATES": "Templates"
+    },
+    "WHATSAPP_TEMPLATES": {
+      "TITLE": "Templates de Mensagem",
+      "DESCRIPTION": "Crie e gerencie templates de mensagem do WhatsApp para suas campanhas e mensagens automatizadas.",
+      "CREATE_BUTTON": "Criar Template",
+      "SYNC_BUTTON": "Sincronizar Templates",
+      "CREATE_TITLE": "Criar Template de Mensagem",
+      "CREATE_SUCCESS": "Template criado com sucesso. Será revisado pela Meta antes de ficar ativo.",
+      "CREATE_ERROR": "Falha ao criar template. Verifique o erro e tente novamente.",
+      "DELETE_BUTTON": "Excluir",
+      "DELETE_CONFIRM_TITLE": "Excluir Template",
+      "DELETE_CONFIRM_MESSAGE": "Tem certeza que deseja excluir o template \"{name}\"? Esta ação não pode ser desfeita.",
+      "DELETE_SUCCESS": "Template excluído com sucesso",
+      "DELETE_ERROR": "Falha ao excluir template. Tente novamente.",
+      "FETCH_ERROR": "Falha ao buscar templates",
+      "SYNC_SUCCESS": "Templates sincronizados com sucesso",
+      "SYNC_ERROR": "Falha ao sincronizar templates",
+      "EMPTY": "Nenhum template encontrado. Clique em 'Sincronizar Templates' para buscar do Meta ou crie um novo.",
+      "LANGUAGE": "Idioma",
+      "STATS": {
+        "APPROVED": "Aprovados",
+        "PENDING": "Pendentes",
+        "REJECTED": "Rejeitados"
+      },
+      "FORM": {
+        "CANCEL": "Cancelar"
+      },
+      "BUILDER": {
+        "BASICS": {
+          "TITLE": "Informações Básicas",
+          "NAME": "Nome do Template",
+          "NAME_PLACEHOLDER": "ex: confirmacao_pedido",
+          "NAME_HELP": "Use apenas letras minúsculas, números e underscores",
+          "CATEGORY": "Categoria",
+          "CATEGORIES": {
+            "AUTHENTICATION": "Autenticação",
+            "MARKETING": "Marketing",
+            "UTILITY": "Utilitário"
+          },
+          "LANGUAGE": "Idioma",
+          "ALLOW_CATEGORY_CHANGE": "Permitir que a Meta recategorize este template se necessário"
+        },
+        "HEADER": {
+          "TITLE": "Cabeçalho (Opcional)",
+          "NONE": "Nenhum",
+          "TEXT": "Texto",
+          "IMAGE": "Imagem",
+          "VIDEO": "Vídeo",
+          "DOCUMENT": "Documento",
+          "LOCATION": "Localização",
+          "TEXT_CONTENT": "Texto do Cabeçalho",
+          "TEXT_PLACEHOLDER": "Digite o texto do cabeçalho",
+          "TEXT_HELP": "Você pode usar {'{{1}}'} para uma variável",
+          "TEXT_EXAMPLE": "Valor de Exemplo",
+          "TEXT_EXAMPLE_PLACEHOLDER": "Digite um exemplo para {'{{1}}'}",
+          "MEDIA_URL": "Arquivo da Mídia",
+          "MEDIA_URL_PLACEHOLDER": "Selecione um arquivo (JPEG/PNG)",
+          "MEDIA_URL_HELP": "",
+          "MEDIA_INFO_IMAGE": "Requisitos: JPEG/PNG, máximo 5MB.",
+          "MEDIA_INFO_VIDEO": "Requisitos: MP4, máximo 16MB.",
+          "MEDIA_INFO_DOCUMENT": "Requisitos: PDF, máximo 100MB.",
+          "MEDIA_DROP_HINT": "Arraste e solte um arquivo aqui, ou clique para selecionar",
+          "PREVIEW_ONLY": "apenas pré-visualização",
+          "FILE_PICKER_AUTOMATION_NOTICE": "O seletor de arquivos pode não abrir em um navegador controlado por automação. Use arrastar e soltar."
+        },
+        "BODY": {
+          "TITLE": "Corpo",
+          "TEXT": "Corpo da Mensagem",
+          "TEXT_PLACEHOLDER": "Olá {'{{1}}'}, seu pedido {'{{2}}'} está pronto!",
+          "TEXT_HELP": "Use {'{{1}}'}, {'{{2}}'}, etc. para variáveis",
+          "EXAMPLES": "Exemplos de Variáveis",
+          "EXAMPLE_PLACEHOLDER": "Exemplo para variável {{index}}"
+        },
+        "FOOTER": {
+          "TITLE": "Rodapé (Opcional)",
+          "TEXT_PLACEHOLDER": "ex: Responda PARAR para cancelar",
+          "TEXT_HELP": "Variáveis não são permitidas no rodapé"
+        },
+        "BUTTONS": {
+          "TITLE": "Botões (Opcional)",
+          "ADD": "Adicionar Botão",
+          "EMPTY": "Nenhum botão adicionado",
+          "BUTTON_TYPE": "Botão",
+          "QUICK_REPLY": "Resposta Rápida",
+          "URL": "URL",
+          "PHONE": "Telefone",
+          "COPY_CODE": "Copiar Código",
+          "TEXT_PLACEHOLDER": "Texto do botão",
+          "URL_PLACEHOLDER": "https://exemplo.com/pagina/{'{{1}}'}",
+          "URL_EXAMPLE_PLACEHOLDER": "Valor de exemplo para variável da URL",
+          "PHONE_PLACEHOLDER": "+5511999999999",
+          "PHONE_HELP": "Inclua o código do país (ex: +55 para Brasil)",
+          "COPY_CODE_HELP": "Este botão exibirá um código para o usuário copiar. O código é fornecido por você no momento do envio."
+        },
+        "PREVIEW": {
+          "TITLE": "Pré-visualização"
+        },
+        "VALIDATION_ERRORS": "Por favor, corrija os seguintes erros:",
+        "CANCEL": "Cancelar",
+        "CREATE": "Criar Template"
+      }
     },
     "EVOLUTION": {
       "SETTINGS": {
@@ -835,9 +936,9 @@
             "TEXT_HELP": "Suporta 1 placeholder: '{'{1}'}'",
             "TEXT_EXAMPLE": "Exemplo para '{'{1}'}'",
             "TEXT_EXAMPLE_PLACEHOLDER": "ex.: João",
-            "MEDIA_URL": "URL da Mídia",
-            "MEDIA_URL_PLACEHOLDER": "https://exemplo.com/imagem.jpg",
-            "MEDIA_URL_HELP": "Forneça uma URL pública para o arquivo de mídia (imagem, vídeo ou documento)"
+            "MEDIA_URL": "Arquivo da Mídia",
+            "MEDIA_URL_PLACEHOLDER": "Selecione um arquivo",
+            "MEDIA_URL_HELP": "Selecione um arquivo. O Chatwoot fará o upload para a Meta e gerará o handle automaticamente."
           },
           "BODY": {
             "TITLE": "Corpo",

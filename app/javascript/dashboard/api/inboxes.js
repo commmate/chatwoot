@@ -32,6 +32,11 @@ class Inboxes extends CacheEnabledApiClient {
   syncTemplates(inboxId) {
     return axios.post(`${this.url}/${inboxId}/sync_templates`);
   }
+
+  // Alias for backward compatibility
+  syncMessageTemplates(inboxId) {
+    return this.syncTemplates(inboxId);
+  }
 }
 
 export default new Inboxes();

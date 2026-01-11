@@ -109,6 +109,10 @@ onMounted(() => {
       @apply max-w-[80%] w-[56.25rem];
     }
 
+    &.large {
+      @apply max-w-[90%] w-[75rem];
+    }
+
     // .content-box {
     //   @apply h-auto p-0;
     // }

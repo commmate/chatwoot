@@ -2,6 +2,7 @@
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import NextButton from 'dashboard/components-next/button/Button.vue';
+import WhatsappTemplatesAPI from 'dashboard/api/whatsappTemplates';
 import TemplatePreview from './TemplatePreview.vue';
 import { validateTemplate } from './validators/metaTemplateRules';
 import { buildTemplatePayload } from './builders/components';
@@ -10,6 +11,7 @@ import type { HeaderFormat, ButtonType, TemplateCategory } from './validators/me
 
 interface Props {
   isCreating: boolean;
+  inboxId: number | string;
 }
 
 interface Emits {
@@ -31,7 +33,11 @@ const allowCategoryChange = ref(true);
 const headerFormat = ref<HeaderFormat | null>(null);
 const headerText = ref('');
 const headerTextExample = ref('');
-const headerMediaUrl = ref('');
+const headerMediaUrl = ref(''); // preview only
+const headerMediaHandle = ref('');
+const isUploadingMedia = ref(false);
+const mediaUploadError = ref('');
+const mediaFileInput = ref<HTMLInputElement | null>(null);
 
 // Body
 const bodyText = ref('');
@@ -52,18 +58,18 @@ const buttons = ref<Array<{
 // Constants
 const CATEGORIES: TemplateCategory[] = ['AUTHENTICATION', 'MARKETING', 'UTILITY'];
 const HEADER_FORMATS: Array<{ value: HeaderFormat | null; label: string; icon: string }> = [
-  { value: null, label: t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.HEADER.NONE'), icon: 'i-lucide-x' },
-  { value: 'TEXT', label: t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.HEADER.TEXT'), icon: 'i-lucide-type' },
-  { value: 'IMAGE', label: t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.HEADER.IMAGE'), icon: 'i-lucide-image' },
-  { value: 'VIDEO', label: t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.HEADER.VIDEO'), icon: 'i-lucide-video' },
-  { value: 'DOCUMENT', label: t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.HEADER.DOCUMENT'), icon: 'i-lucide-file-text' },
-  { value: 'LOCATION', label: t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.HEADER.LOCATION'), icon: 'i-lucide-map-pin' },
+  { value: null, label: t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.HEADER.NONE'), icon: 'i-lucide-x' },
+  { value: 'TEXT', label: t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.HEADER.TEXT'), icon: 'i-lucide-type' },
+  { value: 'IMAGE', label: t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.HEADER.IMAGE'), icon: 'i-lucide-image' },
+  { value: 'VIDEO', label: t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.HEADER.VIDEO'), icon: 'i-lucide-video' },
+  { value: 'DOCUMENT', label: t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.HEADER.DOCUMENT'), icon: 'i-lucide-file-text' },
+  { value: 'LOCATION', label: t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.HEADER.LOCATION'), icon: 'i-lucide-map-pin' },
 ];
 const BUTTON_TYPES: Array<{ value: ButtonType; label: string; icon: string }> = [
-  { value: 'QUICK_REPLY', label: t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BUTTONS.QUICK_REPLY'), icon: 'i-lucide-reply' },
-  { value: 'URL', label: t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BUTTONS.URL'), icon: 'i-lucide-external-link' },
-  { value: 'PHONE_NUMBER', label: t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BUTTONS.PHONE'), icon: 'i-lucide-phone' },
-  { value: 'COPY_CODE', label: t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BUTTONS.COPY_CODE'), icon: 'i-lucide-copy' },
+  { value: 'QUICK_REPLY', label: t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BUTTONS.QUICK_REPLY'), icon: 'i-lucide-reply' },
+  { value: 'URL', label: t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BUTTONS.URL'), icon: 'i-lucide-external-link' },
+  { value: 'PHONE_NUMBER', label: t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BUTTONS.PHONE'), icon: 'i-lucide-phone' },
+  { value: 'COPY_CODE', label: t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BUTTONS.COPY_CODE'), icon: 'i-lucide-copy' },
 ];
 const LANGUAGES = [
   { value: 'pt_BR', label: 'Português (Brasil)' },
@@ -98,6 +104,14 @@ watch(bodyText, (newText) => {
   }
 });
 
+watch(headerFormat, newFormat => {
+  // Clear media state when switching header formats
+  if (newFormat !== 'IMAGE' && newFormat !== 'VIDEO' && newFormat !== 'DOCUMENT') {
+    headerMediaUrl.value = '';
+    headerMediaHandle.value = '';
+  }
+});
+
 // Validation
 const validation = computed(() => {
   return validateTemplate({
@@ -106,7 +120,7 @@ const validation = computed(() => {
     headerFormat: headerFormat.value,
     headerText: headerText.value,
     headerTextExample: headerTextExample.value,
-    headerMediaUrl: headerMediaUrl.value,
+    headerMediaHandle: headerMediaHandle.value,
     bodyText: bodyText.value,
     bodyExamples: bodyExamples.value,
     footerText: footerText.value,
@@ -115,6 +129,62 @@ const validation = computed(() => {
 });
 
 const isValid = computed(() => validation.value.isValid);
+const isBrowserAutomation = computed(() => !!window?.navigator?.webdriver);
+const mediaInfoKey = computed(() => {
+  if (headerFormat.value === 'VIDEO') {
+    return 'INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.HEADER.MEDIA_INFO_VIDEO';
+  }
+  if (headerFormat.value === 'DOCUMENT') {
+    return 'INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.HEADER.MEDIA_INFO_DOCUMENT';
+  }
+  return 'INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.HEADER.MEDIA_INFO_IMAGE';
+});
+
+const mediaAccept = computed(() => {
+  if (headerFormat.value === 'VIDEO') return 'video/*';
+  if (headerFormat.value === 'DOCUMENT') return 'application/pdf';
+  return 'image/*';
+});
+
+const handleMediaFile = async (file: File) => {
+  if (!file) return;
+
+  // Preview
+  headerMediaUrl.value = URL.createObjectURL(file);
+  headerMediaHandle.value = '';
+  mediaUploadError.value = '';
+
+  isUploadingMedia.value = true;
+  try {
+    const { data } = await WhatsappTemplatesAPI.uploadMedia(props.inboxId, file);
+    headerMediaHandle.value = data?.handle || '';
+    if (!headerMediaHandle.value) {
+      throw new Error('Upload succeeded but handle was missing');
+    }
+  } catch (error: any) {
+    headerMediaHandle.value = '';
+    // Keep preview; validation will block creation.
+    mediaUploadError.value =
+      error?.response?.data?.error ||
+      error?.message ||
+      'Failed to upload media';
+  } finally {
+    isUploadingMedia.value = false;
+  }
+};
+
+const handleMediaFileSelected = async (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+  await handleMediaFile(file);
+};
+
+const handleMediaDrop = async (event: DragEvent) => {
+  const file = event.dataTransfer?.files?.[0];
+  if (!file) return;
+  await handleMediaFile(file);
+};
 
 // Button management
 const addButton = () => {
@@ -141,6 +211,7 @@ const handleCreate = () => {
     headerText: headerText.value,
     headerTextExample: headerTextExample.value,
     headerMediaUrl: headerMediaUrl.value,
+    headerMediaHandle: headerMediaHandle.value,
     bodyText: bodyText.value,
     bodyExamples: bodyExamples.value,
     footerText: footerText.value,
@@ -156,7 +227,12 @@ const handleCancel = () => {
 </script>
 
 <template>
-  <div class="flex gap-8 max-h-[70vh]">
+  <div class="p-6 w-[1100px]">
+    <h2 class="text-lg font-medium text-n-slate-12 mb-6">
+      {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.CREATE_TITLE') }}
+    </h2>
+    
+    <div class="flex gap-6 max-h-[70vh]">
     <!-- Builder Form -->
     <div class="flex-1 overflow-y-auto pr-4 space-y-6">
       <!-- Basic Info Section -->
@@ -164,7 +240,7 @@ const handleCancel = () => {
         <div class="flex items-center gap-2 mb-4">
           <i class="i-lucide-settings-2 text-lg text-n-slate-11" />
           <h3 class="text-sm font-semibold text-n-slate-12 uppercase tracking-wide">
-            {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BASICS.TITLE') }}
+            {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BASICS.TITLE') }}
           </h3>
         </div>
 
@@ -172,17 +248,17 @@ const handleCancel = () => {
           <!-- Template Name -->
           <div>
             <label class="block text-sm font-medium text-n-slate-12 mb-1.5">
-              {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BASICS.NAME') }}
+              {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BASICS.NAME') }}
               <span class="text-red-500 ml-0.5">*</span>
             </label>
             <input
               v-model="templateName"
               type="text"
               class="w-full px-3 py-2 rounded-lg border border-n-weak bg-n-alpha-2 text-n-slate-12 text-sm placeholder:text-n-slate-10 focus:ring-2 focus:ring-woot-500 focus:border-woot-500 transition-colors"
-              :placeholder="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BASICS.NAME_PLACEHOLDER')"
+              :placeholder="$t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BASICS.NAME_PLACEHOLDER')"
             />
             <p class="text-xs text-n-slate-11 mt-1.5">
-              {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BASICS.NAME_HELP') }}
+              {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BASICS.NAME_HELP') }}
             </p>
           </div>
 
@@ -190,7 +266,7 @@ const handleCancel = () => {
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-n-slate-12 mb-1.5">
-                {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BASICS.CATEGORY') }}
+                {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BASICS.CATEGORY') }}
                 <span class="text-red-500 ml-0.5">*</span>
               </label>
               <div class="relative">
@@ -199,7 +275,7 @@ const handleCancel = () => {
                   class="w-full px-3 py-2 pl-9 rounded-lg border border-n-weak bg-n-alpha-2 text-n-slate-12 text-sm focus:ring-2 focus:ring-woot-500 focus:border-woot-500 cursor-pointer"
                 >
                   <option v-for="cat in CATEGORIES" :key="cat" :value="cat" class="bg-n-solid-3 text-n-slate-12">
-                    {{ $t(`INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BASICS.CATEGORIES.${cat}`) }}
+                    {{ $t(`INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BASICS.CATEGORIES.${cat}`) }}
                   </option>
                 </select>
                 <i :class="CATEGORY_ICONS[category]" class="absolute left-3 top-1/2 -translate-y-1/2 text-n-slate-11 pointer-events-none" />
@@ -208,7 +284,7 @@ const handleCancel = () => {
 
             <div>
               <label class="block text-sm font-medium text-n-slate-12 mb-1.5">
-                {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BASICS.LANGUAGE') }}
+                {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BASICS.LANGUAGE') }}
                 <span class="text-red-500 ml-0.5">*</span>
               </label>
               <select
@@ -230,7 +306,7 @@ const handleCancel = () => {
               class="w-4 h-4 rounded border-n-weak text-woot-500 focus:ring-woot-500 cursor-pointer bg-n-alpha-2"
             />
             <span class="text-sm text-n-slate-12 group-hover:text-n-slate-11">
-              {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BASICS.ALLOW_CATEGORY_CHANGE') }}
+              {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BASICS.ALLOW_CATEGORY_CHANGE') }}
             </span>
           </label>
         </div>
@@ -241,7 +317,7 @@ const handleCancel = () => {
         <div class="flex items-center gap-2 mb-4">
           <i class="i-lucide-layout-template text-lg text-n-slate-11" />
           <h3 class="text-sm font-semibold text-n-slate-12 uppercase tracking-wide">
-            {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.HEADER.TITLE') }}
+            {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.HEADER.TITLE') }}
           </h3>
         </div>
 
@@ -267,7 +343,7 @@ const handleCancel = () => {
           <div v-if="headerFormat === 'TEXT'" class="space-y-3 pt-2">
             <div>
               <label class="block text-sm font-medium text-n-slate-12 mb-1.5">
-                {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.HEADER.TEXT_CONTENT') }}
+                {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.HEADER.TEXT_CONTENT') }}
                 <span class="text-red-500 ml-0.5">*</span>
               </label>
               <input
@@ -275,43 +351,74 @@ const handleCancel = () => {
                 type="text"
                 maxlength="60"
                 class="w-full px-3 py-2 rounded-lg border border-n-weak bg-n-alpha-2 text-n-slate-12 text-sm placeholder:text-n-slate-10 focus:ring-2 focus:ring-woot-500 focus:border-woot-500"
-                :placeholder="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.HEADER.TEXT_PLACEHOLDER')"
+                :placeholder="$t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.HEADER.TEXT_PLACEHOLDER')"
               />
               <div class="flex justify-between mt-1">
-                <p class="text-xs text-n-slate-11">{{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.HEADER.TEXT_HELP') }}</p>
+                <p class="text-xs text-n-slate-11">{{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.HEADER.TEXT_HELP') }}</p>
                 <span class="text-xs text-n-slate-11">{{ headerText.length }}/60</span>
               </div>
             </div>
 
             <div v-if="headerText.includes('{{1}}')">
               <label class="block text-sm font-medium text-n-slate-12 mb-1.5">
-                {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.HEADER.TEXT_EXAMPLE') }}
+                {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.HEADER.TEXT_EXAMPLE') }}
                 <span class="text-red-500 ml-0.5">*</span>
               </label>
               <input
                 v-model="headerTextExample"
                 type="text"
                 class="w-full px-3 py-2 rounded-lg border border-n-weak bg-n-alpha-2 text-n-slate-12 text-sm placeholder:text-n-slate-10 focus:ring-2 focus:ring-woot-500 focus:border-woot-500"
-                :placeholder="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.HEADER.TEXT_EXAMPLE_PLACEHOLDER')"
+                :placeholder="$t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.HEADER.TEXT_EXAMPLE_PLACEHOLDER')"
               />
             </div>
           </div>
 
           <!-- Media Header -->
           <div v-if="headerFormat === 'IMAGE' || headerFormat === 'VIDEO' || headerFormat === 'DOCUMENT'" class="space-y-3 pt-2">
+            <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 mb-3">
+              <p class="text-xs text-blue-600 dark:text-blue-400">
+                <i class="i-lucide-info inline-block mr-1" />
+                    {{ $t(mediaInfoKey) }}
+              </p>
+            </div>
             <div>
               <label class="block text-sm font-medium text-n-slate-12 mb-1.5">
-                {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.HEADER.MEDIA_URL') }}
+                    {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.HEADER.MEDIA_URL') }}
                 <span class="text-red-500 ml-0.5">*</span>
               </label>
-              <input
-                v-model="headerMediaUrl"
-                type="url"
-                class="w-full px-3 py-2 rounded-lg border border-n-weak bg-n-alpha-2 text-n-slate-12 text-sm placeholder:text-n-slate-10 focus:ring-2 focus:ring-woot-500 focus:border-woot-500"
-                :placeholder="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.HEADER.MEDIA_URL_PLACEHOLDER')"
-              />
-              <p class="text-xs text-n-slate-11 mt-1.5">
-                {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.HEADER.MEDIA_URL_HELP') }}
+                  <div
+                    class="relative w-full rounded-lg border border-n-weak bg-n-alpha-2 text-n-slate-12 text-sm focus:ring-2 focus:ring-woot-500 focus:border-woot-500 px-3 py-4 cursor-pointer transition-colors overflow-hidden"
+                    :class="isUploadingMedia ? 'opacity-60 cursor-not-allowed' : 'hover:bg-n-alpha-3'"
+                    @dragover.prevent
+                    @drop.prevent="handleMediaDrop"
+                  >
+                    <p class="text-sm text-n-slate-12">
+                      {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.HEADER.MEDIA_DROP_HINT') }}
+                    </p>
+                    <p v-if="isBrowserAutomation" class="text-xs text-amber-600 dark:text-amber-400 mt-1.5">
+                      {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.HEADER.FILE_PICKER_AUTOMATION_NOTICE') }}
+                    </p>
+                    <p v-if="headerMediaUrl" class="text-xs text-n-slate-11 mt-1.5">
+                      {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.HEADER.PREVIEW_ONLY') }}: {{ headerFormat?.toLowerCase() }}
+                    </p>
+                    <input
+                      ref="mediaFileInput"
+                      type="file"
+                      :accept="mediaAccept"
+                      class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      @dragover.prevent
+                      @drop.prevent="handleMediaDrop"
+                      @change="handleMediaFileSelected"
+                    />
+                  </div>
+              <p v-if="isUploadingMedia" class="text-xs text-n-slate-11 mt-1.5">
+                Uploading media to Meta...
+              </p>
+              <p v-else-if="headerMediaHandle" class="text-xs text-green-600 dark:text-green-400 mt-1.5">
+                Uploaded. Media handle ready.
+              </p>
+              <p v-else-if="mediaUploadError" class="text-xs text-red-600 dark:text-red-400 mt-1.5">
+                {{ mediaUploadError }}
               </p>
             </div>
           </div>
@@ -323,7 +430,7 @@ const handleCancel = () => {
         <div class="flex items-center gap-2 mb-4">
           <i class="i-lucide-text text-lg text-n-slate-11" />
           <h3 class="text-sm font-semibold text-n-slate-12 uppercase tracking-wide">
-            {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BODY.TITLE') }}
+            {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BODY.TITLE') }}
             <span class="text-red-500 ml-0.5">*</span>
           </h3>
         </div>
@@ -331,7 +438,7 @@ const handleCancel = () => {
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-n-slate-12 mb-1.5">
-              {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BODY.TEXT') }}
+              {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BODY.TEXT') }}
               <span class="text-red-500 ml-0.5">*</span>
             </label>
             <textarea
@@ -339,10 +446,10 @@ const handleCancel = () => {
               rows="5"
               maxlength="1024"
               class="w-full px-3 py-2 rounded-lg border border-n-weak bg-n-alpha-2 text-n-slate-12 text-sm placeholder:text-n-slate-10 focus:ring-2 focus:ring-woot-500 focus:border-woot-500 resize-none"
-              :placeholder="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BODY.TEXT_PLACEHOLDER')"
-            />
+              :placeholder="$t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BODY.TEXT_PLACEHOLDER')"
+            ></textarea>
             <div class="flex justify-between mt-1">
-              <p class="text-xs text-n-slate-11">{{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BODY.TEXT_HELP') }}</p>
+              <p class="text-xs text-n-slate-11">{{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BODY.TEXT_HELP') }}</p>
               <span class="text-xs text-n-slate-11">{{ bodyText.length }}/1024</span>
             </div>
           </div>
@@ -350,7 +457,7 @@ const handleCancel = () => {
           <!-- Variable Examples -->
           <div v-if="bodyExamples.length > 0" class="space-y-3 pt-2 border-t border-n-weak">
             <label class="block text-sm font-medium text-n-slate-12">
-              {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BODY.EXAMPLES') }}
+              {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BODY.EXAMPLES') }}
               <span class="text-red-500 ml-0.5">*</span>
             </label>
             <div
@@ -365,7 +472,7 @@ const handleCancel = () => {
                 v-model="bodyExamples[index]"
                 type="text"
                 class="flex-1 px-3 py-2 rounded-lg border border-n-weak bg-n-alpha-2 text-n-slate-12 text-sm placeholder:text-n-slate-10 focus:ring-2 focus:ring-woot-500 focus:border-woot-500"
-                :placeholder="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BODY.EXAMPLE_PLACEHOLDER', { index: index + 1 })"
+                :placeholder="$t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BODY.EXAMPLE_PLACEHOLDER', { index: index + 1 })"
               />
             </div>
           </div>
@@ -377,7 +484,7 @@ const handleCancel = () => {
         <div class="flex items-center gap-2 mb-4">
           <i class="i-lucide-footer text-lg text-n-slate-11" />
           <h3 class="text-sm font-semibold text-n-slate-12 uppercase tracking-wide">
-            {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.FOOTER.TITLE') }}
+            {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.FOOTER.TITLE') }}
           </h3>
         </div>
 
@@ -387,10 +494,10 @@ const handleCancel = () => {
             type="text"
             maxlength="60"
             class="w-full px-3 py-2 rounded-lg border border-n-weak bg-n-alpha-2 text-n-slate-12 text-sm placeholder:text-n-slate-10 focus:ring-2 focus:ring-woot-500 focus:border-woot-500"
-            :placeholder="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.FOOTER.TEXT_PLACEHOLDER')"
+            :placeholder="$t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.FOOTER.TEXT_PLACEHOLDER')"
           />
           <div class="flex justify-between mt-1">
-            <p class="text-xs text-n-slate-11">{{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.FOOTER.TEXT_HELP') }}</p>
+            <p class="text-xs text-n-slate-11">{{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.FOOTER.TEXT_HELP') }}</p>
             <span class="text-xs text-n-slate-11">{{ footerText.length }}/60</span>
           </div>
         </div>
@@ -402,7 +509,7 @@ const handleCancel = () => {
           <div class="flex items-center gap-2">
             <i class="i-lucide-mouse-pointer-click text-lg text-n-slate-11" />
             <h3 class="text-sm font-semibold text-n-slate-12 uppercase tracking-wide">
-              {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BUTTONS.TITLE') }}
+              {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BUTTONS.TITLE') }}
             </h3>
           </div>
           <NextButton
@@ -410,14 +517,14 @@ const handleCancel = () => {
             ghost
             size="sm"
             icon="i-lucide-plus"
-            :label="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BUTTONS.ADD')"
+            :label="$t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BUTTONS.ADD')"
             @click="addButton"
           />
         </div>
 
         <div v-if="buttons.length === 0" class="text-center py-6 text-n-slate-11">
           <i class="i-lucide-mouse-pointer-click text-3xl mb-2 opacity-50" />
-          <p class="text-sm">{{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BUTTONS.EMPTY') }}</p>
+          <p class="text-sm">{{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BUTTONS.EMPTY') }}</p>
         </div>
 
         <div class="space-y-3">
@@ -428,7 +535,7 @@ const handleCancel = () => {
           >
             <div class="flex items-center justify-between">
               <span class="text-sm font-medium text-n-slate-12">
-                {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BUTTONS.BUTTON_TYPE') }} {{ index + 1 }}
+                {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BUTTONS.BUTTON_TYPE') }} {{ index + 1 }}
               </span>
               <button
                 type="button"
@@ -463,7 +570,7 @@ const handleCancel = () => {
                 type="text"
                 maxlength="25"
                 class="w-full px-3 py-2 rounded-lg border border-n-weak bg-n-alpha-1 text-n-slate-12 text-sm placeholder:text-n-slate-10 focus:ring-2 focus:ring-woot-500 focus:border-woot-500"
-                :placeholder="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BUTTONS.TEXT_PLACEHOLDER')"
+                :placeholder="$t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BUTTONS.TEXT_PLACEHOLDER')"
               />
               <div class="flex justify-end mt-1">
                 <span class="text-xs text-n-slate-11">{{ (button.text || '').length }}/25</span>
@@ -476,14 +583,14 @@ const handleCancel = () => {
                 v-model="button.url"
                 type="url"
                 class="w-full px-3 py-2 rounded-lg border border-n-weak bg-n-alpha-1 text-n-slate-12 text-sm placeholder:text-n-slate-10 focus:ring-2 focus:ring-woot-500 focus:border-woot-500"
-                :placeholder="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BUTTONS.URL_PLACEHOLDER')"
+                :placeholder="$t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BUTTONS.URL_PLACEHOLDER')"
               />
               <div v-if="button.url && button.url.includes('{{1}}')" class="mt-2">
                 <input
                   v-model="button.urlExample"
                   type="text"
                   class="w-full px-3 py-2 rounded-lg border border-n-weak bg-n-alpha-1 text-n-slate-12 text-sm placeholder:text-n-slate-10 focus:ring-2 focus:ring-woot-500 focus:border-woot-500"
-                  :placeholder="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BUTTONS.URL_EXAMPLE_PLACEHOLDER')"
+                  :placeholder="$t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BUTTONS.URL_EXAMPLE_PLACEHOLDER')"
                 />
               </div>
             </div>
@@ -494,17 +601,17 @@ const handleCancel = () => {
                 v-model="button.phoneNumber"
                 type="tel"
                 class="w-full px-3 py-2 rounded-lg border border-n-weak bg-n-alpha-1 text-n-slate-12 text-sm placeholder:text-n-slate-10 focus:ring-2 focus:ring-woot-500 focus:border-woot-500"
-                :placeholder="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BUTTONS.PHONE_PLACEHOLDER')"
+                :placeholder="$t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BUTTONS.PHONE_PLACEHOLDER')"
               />
               <p class="text-xs text-n-slate-11 mt-1.5">
-                {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BUTTONS.PHONE_HELP') }}
+                {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BUTTONS.PHONE_HELP') }}
               </p>
             </div>
 
             <!-- Copy Code Info -->
             <div v-if="button.type === 'COPY_CODE'" class="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
               <p class="text-xs text-amber-500">
-                {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.BUTTONS.COPY_CODE_HELP') }}
+                {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.BUTTONS.COPY_CODE_HELP') }}
               </p>
             </div>
           </div>
@@ -518,7 +625,7 @@ const handleCancel = () => {
             <i class="i-lucide-alert-circle text-lg text-red-500 flex-shrink-0 mt-0.5" />
             <div>
               <p class="text-sm font-medium text-red-500 mb-2">
-                {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.VALIDATION_ERRORS') }}
+                {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.VALIDATION_ERRORS') }}
               </p>
               <ul class="space-y-1">
                 <li v-for="(error, index) in validation.errors" :key="index" class="text-sm text-red-400 flex items-start gap-2">
@@ -538,7 +645,7 @@ const handleCancel = () => {
         <div class="flex items-center gap-2 mb-4">
           <i class="i-lucide-smartphone text-lg text-n-slate-11" />
           <h3 class="text-sm font-semibold text-n-slate-12 uppercase tracking-wide">
-            {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.PREVIEW.TITLE') }}
+            {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.PREVIEW.TITLE') }}
           </h3>
         </div>
         <TemplatePreview
@@ -553,20 +660,22 @@ const handleCancel = () => {
         />
       </div>
     </div>
-  </div>
+    </div>
 
-  <!-- Actions Footer -->
-  <div class="flex justify-end gap-3 pt-6 mt-6 border-t border-n-weak">
-    <NextButton
-      ghost
-      :label="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.CANCEL')"
-      @click="handleCancel"
-    />
-    <NextButton
-      :is-loading="isCreating"
-      :disabled="!isValid"
-      :label="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.BUILDER.CREATE')"
-      @click="handleCreate"
-    />
+    <!-- Actions Footer -->
+    <div class="flex justify-end gap-3 pt-6 mt-6 border-t border-n-weak">
+      <NextButton
+        ghost
+        :label="$t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.CANCEL')"
+        @click="handleCancel"
+      />
+      <NextButton
+        :is-loading="isCreating"
+        :disabled="!isValid"
+        :label="$t('INBOX_MGMT.WHATSAPP_TEMPLATES.BUILDER.CREATE')"
+        @click="handleCreate"
+      />
+    </div>
   </div>
 </template>
+

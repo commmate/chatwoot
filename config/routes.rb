@@ -280,6 +280,14 @@ Rails.application.routes.draw do
 
           namespace :whatsapp do
             resource :authorization, only: [:create]
+            
+            resources :inboxes, only: [] do
+              resources :message_templates, only: [:index, :create, :destroy], param: :name do
+                collection do
+                  post :upload_media
+                end
+              end
+            end
           end
 
           # Evolution API integration routes

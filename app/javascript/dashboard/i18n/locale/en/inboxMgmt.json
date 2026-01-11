@@ -692,7 +692,108 @@
       "ACCOUNT_HEALTH": "Account Health",
       "CSAT": "CSAT",
       "EVOLUTION_SETTINGS": "Evolution API",
-      "EVOLUTION_TEMPLATES": "Templates"
+      "WHATSAPP_TEMPLATES": "Templates"
+    },
+    "WHATSAPP_TEMPLATES": {
+      "TITLE": "Message Templates",
+      "DESCRIPTION": "Create and manage WhatsApp message templates for your campaigns and automated messages.",
+      "CREATE_BUTTON": "Create Template",
+      "SYNC_BUTTON": "Sync Templates",
+      "CREATE_TITLE": "Create Message Template",
+      "CREATE_SUCCESS": "Template created successfully. It will be reviewed by Meta before becoming active.",
+      "CREATE_ERROR": "Failed to create template. Please check the error and try again.",
+      "DELETE_BUTTON": "Delete",
+      "DELETE_CONFIRM_TITLE": "Delete Template",
+      "DELETE_CONFIRM_MESSAGE": "Are you sure you want to delete the template \"{name}\"? This action cannot be undone.",
+      "DELETE_SUCCESS": "Template deleted successfully",
+      "DELETE_ERROR": "Failed to delete template. Please try again.",
+      "FETCH_ERROR": "Failed to fetch templates",
+      "SYNC_SUCCESS": "Templates synced successfully",
+      "SYNC_ERROR": "Failed to sync templates",
+      "EMPTY": "No templates found. Click 'Sync Templates' to fetch your templates from Meta or create a new one.",
+      "LANGUAGE": "Language",
+      "STATS": {
+        "APPROVED": "Approved",
+        "PENDING": "Pending",
+        "REJECTED": "Rejected"
+      },
+      "FORM": {
+        "CANCEL": "Cancel"
+      },
+      "BUILDER": {
+        "BASICS": {
+          "TITLE": "Basic Information",
+          "NAME": "Template Name",
+          "NAME_PLACEHOLDER": "e.g., order_confirmation",
+          "NAME_HELP": "Use lowercase letters, numbers, and underscores only",
+          "CATEGORY": "Category",
+          "CATEGORIES": {
+            "AUTHENTICATION": "Authentication",
+            "MARKETING": "Marketing",
+            "UTILITY": "Utility"
+          },
+          "LANGUAGE": "Language",
+          "ALLOW_CATEGORY_CHANGE": "Allow Meta to recategorize this template if needed"
+        },
+        "HEADER": {
+          "TITLE": "Header (Optional)",
+          "NONE": "None",
+          "TEXT": "Text",
+          "IMAGE": "Image",
+          "VIDEO": "Video",
+          "DOCUMENT": "Document",
+          "LOCATION": "Location",
+          "TEXT_CONTENT": "Header Text",
+          "TEXT_PLACEHOLDER": "Enter header text",
+          "TEXT_HELP": "You can use {'{{1}}'} for a variable",
+          "TEXT_EXAMPLE": "Example Value",
+          "TEXT_EXAMPLE_PLACEHOLDER": "Enter example for {'{{1}}'}",
+          "MEDIA_URL": "Media file",
+          "MEDIA_URL_PLACEHOLDER": "Choose a file",
+          "MEDIA_URL_HELP": "",
+          "MEDIA_INFO_IMAGE": "Requirements: JPEG/PNG, max 5MB.",
+          "MEDIA_INFO_VIDEO": "Requirements: MP4, max 16MB.",
+          "MEDIA_INFO_DOCUMENT": "Requirements: PDF, max 100MB.",
+          "MEDIA_DROP_HINT": "Drag and drop a file here, or click to browse",
+          "PREVIEW_ONLY": "preview only",
+          "FILE_PICKER_AUTOMATION_NOTICE": "File picker may not open in an automation-controlled browser. Use drag and drop."
+        },
+        "BODY": {
+          "TITLE": "Body",
+          "TEXT": "Message Body",
+          "TEXT_PLACEHOLDER": "Hello {'{{1}}'}, your order {'{{2}}'} is ready!",
+          "TEXT_HELP": "Use {'{{1}}'}, {'{{2}}'}, etc. for variables",
+          "EXAMPLES": "Variable Examples",
+          "EXAMPLE_PLACEHOLDER": "Example for variable {{index}}"
+        },
+        "FOOTER": {
+          "TITLE": "Footer (Optional)",
+          "TEXT_PLACEHOLDER": "e.g., Reply STOP to unsubscribe",
+          "TEXT_HELP": "Variables are not allowed in the footer"
+        },
+        "BUTTONS": {
+          "TITLE": "Buttons (Optional)",
+          "ADD": "Add Button",
+          "EMPTY": "No buttons added",
+          "BUTTON_TYPE": "Button",
+          "QUICK_REPLY": "Quick Reply",
+          "URL": "URL",
+          "PHONE": "Phone",
+          "COPY_CODE": "Copy Code",
+          "TEXT_PLACEHOLDER": "Button text",
+          "URL_PLACEHOLDER": "https://example.com/page/{'{{1}}'}",
+          "URL_EXAMPLE_PLACEHOLDER": "Example value for URL variable",
+          "PHONE_PLACEHOLDER": "+5511999999999",
+          "PHONE_HELP": "Include country code (e.g., +55 for Brazil)",
+          "COPY_CODE_HELP": "This button will display a code for the user to copy. The code is provided by you at send time."
+        },
+        "PREVIEW": {
+          "TITLE": "Preview"
+        },
+        "VALIDATION_ERRORS": "Please fix the following errors:",
+        "CANCEL": "Cancel",
+        "CREATE": "Create Template"
+      }
     },
     "ACCOUNT_HEALTH": {
       "TITLE": "Manage your WhatsApp account",
@@ -890,9 +991,15 @@
             "TEXT_HELP": "Supports 1 placeholder: '{'{1}'}'",
             "TEXT_EXAMPLE": "Example for '{'{1}'}'",
             "TEXT_EXAMPLE_PLACEHOLDER": "e.g., John",
-            "MEDIA_URL": "Media URL",
-            "MEDIA_URL_PLACEHOLDER": "https://example.com/image.jpg",
-            "MEDIA_URL_HELP": "Provide a public URL for the media file (image, video, or document)"
+            "MEDIA_URL": "Media file",
+            "MEDIA_URL_PLACEHOLDER": "Choose a file (JPEG/PNG)",
+            "MEDIA_URL_HELP": "",
+            "MEDIA_INFO_IMAGE": "Requirements: JPEG/PNG, max 5MB.",
+            "MEDIA_INFO_VIDEO": "Requirements: MP4, max 16MB.",
+            "MEDIA_INFO_DOCUMENT": "Requirements: PDF, max 100MB.",
+            "MEDIA_DROP_HINT": "Drag and drop a file here, or click to browse",
+            "PREVIEW_ONLY": "preview only",
+            "FILE_PICKER_AUTOMATION_NOTICE": "File picker may not open in an automation-controlled browser. Use drag and drop."
           },
           "BODY": {
             "TITLE": "Body",

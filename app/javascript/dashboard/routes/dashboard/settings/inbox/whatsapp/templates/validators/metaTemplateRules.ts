@@ -78,7 +78,7 @@ export function validateHeader(
   format: HeaderFormat | null,
   text: string,
   textExample: string,
-  mediaUrl: string
+  mediaHandle: string
 ): ValidationResult {
   const errors: string[] = [];
 
@@ -104,11 +104,10 @@ export function validateHeader(
     }
   }
 
+  // For IMAGE/VIDEO/DOCUMENT headers, Meta requires a media handle (h) from the upload API
   if (format === 'IMAGE' || format === 'VIDEO' || format === 'DOCUMENT') {
-    if (!mediaUrl || mediaUrl.trim().length === 0) {
-      errors.push(`Media URL is required for ${format} header`);
-    } else if (!isValidUrl(mediaUrl)) {
-      errors.push('Invalid media URL format');
+    if (!mediaHandle || mediaHandle.trim().length === 0) {
+      errors.push(`Media upload is required for ${format.toLowerCase()} headers`);
     }
   }
 
@@ -277,7 +276,7 @@ export function validateTemplate(template: {
   headerFormat: HeaderFormat | null;
   headerText: string;
   headerTextExample: string;
-  headerMediaUrl: string;
+  headerMediaHandle: string;
   bodyText: string;
   bodyExamples: string[];
   footerText: string;
@@ -302,7 +301,7 @@ export function validateTemplate(template: {
     template.headerFormat,
     template.headerText,
     template.headerTextExample,
-    template.headerMediaUrl
+    template.headerMediaHandle
   );
   allErrors.push(...headerValidation.errors);
 

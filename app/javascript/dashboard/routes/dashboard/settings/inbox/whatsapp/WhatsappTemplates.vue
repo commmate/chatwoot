@@ -1,14 +1,12 @@
 <script>
 import { useAlert } from 'dashboard/composables';
-import EvolutionAPI from 'dashboard/api/evolution';
+import InboxesAPI from 'dashboard/api/inboxes';
+import WhatsappTemplatesAPI from 'dashboard/api/whatsappTemplates';
 import SettingsSection from 'dashboard/components/SettingsSection.vue';
 import NextButton from 'dashboard/components-next/button/Button.vue';
 import Spinner from 'shared/components/Spinner.vue';
 import Modal from 'dashboard/components/Modal.vue';
 import TemplateBuilder from './templates/TemplateBuilder.vue';
-
-const TEMPLATE_CATEGORIES = ['AUTHENTICATION', 'MARKETING', 'UTILITY'];
-const COMPONENT_TYPES = ['HEADER', 'BODY', 'FOOTER', 'BUTTONS'];
 
 export default {
   components: {
@@ -27,6 +25,7 @@ export default {
   data() {
     return {
       isLoading: true,
+      isSyncing: false,
       templates: [],
       showCreateModal: false,
       isCreating: false,
@@ -35,14 +34,7 @@ export default {
     };
   },
   computed: {
-    categories() {
-      return TEMPLATE_CATEGORIES;
-    },
-    componentTypes() {
-      return COMPONENT_TYPES;
-    },
     safeTemplates() {
-      // Ensure templates is always an array and filter out null values
       const templateList = Array.isArray(this.templates) ? this.templates : [];
       return templateList.filter(t => t !== null && t !== undefined);
     },
@@ -57,24 +49,33 @@ export default {
     },
   },
   mounted() {
-    this.fetchTemplates();
+    this.loadTemplates();
   },
   methods: {
-    async fetchTemplates() {
+    loadTemplates() {
       this.isLoading = true;
       try {
-        const response = await EvolutionAPI.getTemplates(this.inbox.id);
-        const templateData = response.data.templates || response.data || [];
-        // Ensure templates is always an array
-        this.templates = Array.isArray(templateData) ? templateData : [];
-      } catch (error) {
-        this.templates = []; // Reset to empty array on error
-        useAlert(
-          error.response?.data?.error ||
-            this.$t('INBOX_MGMT.EVOLUTION.TEMPLATES.FETCH_ERROR')
-        );
+        const inboxData = this.$store.getters['inboxes/getInbox'](this.inbox.id);
+        this.templates = inboxData?.message_templates || [];
       } finally {
         this.isLoading = false;
+      }
+    },
+    async syncTemplates() {
+      this.isSyncing = true;
+      try {
+        await InboxesAPI.syncTemplates(this.inbox.id);
+        await this.$store.dispatch('inboxes/get', { inboxId: this.inbox.id });
+        const inboxData = this.$store.getters['inboxes/getInbox'](this.inbox.id);
+        this.templates = inboxData?.message_templates || [];
+        useAlert(this.$t('INBOX_MGMT.WHATSAPP_TEMPLATES.SYNC_SUCCESS'));
+      } catch (error) {
+        useAlert(
+          error.response?.data?.error ||
+            this.$t('INBOX_MGMT.WHATSAPP_TEMPLATES.SYNC_ERROR')
+        );
+      } finally {
+        this.isSyncing = false;
       }
     },
     openCreateModal() {
@@ -86,39 +87,24 @@ export default {
     async createTemplate(payload) {
       this.isCreating = true;
       try {
-        await EvolutionAPI.createTemplate(this.inbox.id, payload);
-
-        useAlert(this.$t('INBOX_MGMT.EVOLUTION.TEMPLATES.CREATE_SUCCESS'));
+        await WhatsappTemplatesAPI.createTemplate(this.inbox.id, payload);
+        useAlert(this.$t('INBOX_MGMT.WHATSAPP_TEMPLATES.CREATE_SUCCESS'));
         this.closeCreateModal();
-        this.fetchTemplates();
+        // Wait 4 seconds before syncing to allow Meta to process the template
+        await new Promise(resolve => setTimeout(resolve, 4000));
+        await this.syncTemplates();
       } catch (error) {
         console.error('Template creation error:', error);
-        console.error('Error response:', error.response);
-        
-        // Extract error message from various possible locations
         let errorMessage;
-        
-        // Check for Meta API error in details
-        if (error.response?.data?.details?.message) {
-          errorMessage = error.response.data.details.message;
-        }
-        // Check for Evolution API error message
-        else if (typeof error.response?.data?.error === 'string') {
+        if (error.response?.data?.details?.error?.message) {
+          errorMessage = error.response.data.details.error.message;
+        } else if (error.response?.data?.error) {
           errorMessage = error.response.data.error;
-        }
-        // Check for Meta API error in error object
-        else if (error.response?.data?.error?.message) {
-          errorMessage = error.response.data.error.message;
-        }
-        // Check for raw error message
-        else if (error.message) {
+        } else if (error.message) {
           errorMessage = error.message;
+        } else {
+          errorMessage = this.$t('INBOX_MGMT.WHATSAPP_TEMPLATES.CREATE_ERROR');
         }
-        // Fallback to generic error
-        else {
-          errorMessage = this.$t('INBOX_MGMT.EVOLUTION.TEMPLATES.CREATE_ERROR');
-        }
-        
         useAlert(errorMessage);
       } finally {
         this.isCreating = false;
@@ -135,17 +121,17 @@ export default {
 
       this.isDeleting = true;
       try {
-        await EvolutionAPI.deleteTemplate(
+        await WhatsappTemplatesAPI.deleteTemplate(
           this.inbox.id,
           this.templateToDelete.name
         );
-        useAlert(this.$t('INBOX_MGMT.EVOLUTION.TEMPLATES.DELETE_SUCCESS'));
+        useAlert(this.$t('INBOX_MGMT.WHATSAPP_TEMPLATES.DELETE_SUCCESS'));
         this.templateToDelete = null;
-        this.fetchTemplates();
+        await this.syncTemplates();
       } catch (error) {
         useAlert(
           error.response?.data?.error ||
-            this.$t('INBOX_MGMT.EVOLUTION.TEMPLATES.DELETE_ERROR')
+            this.$t('INBOX_MGMT.WHATSAPP_TEMPLATES.DELETE_ERROR')
         );
       } finally {
         this.isDeleting = false;
@@ -154,25 +140,25 @@ export default {
     getStatusClass(status) {
       switch (status) {
         case 'APPROVED':
-          return 'bg-green-100 text-green-800';
+          return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
         case 'PENDING':
-          return 'bg-yellow-100 text-yellow-800';
+          return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
         case 'REJECTED':
-          return 'bg-red-100 text-red-800';
+          return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
         default:
-          return 'bg-gray-100 text-gray-800';
+          return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
       }
     },
     getCategoryClass(category) {
       switch (category) {
         case 'MARKETING':
-          return 'bg-purple-100 text-purple-800';
+          return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400';
         case 'UTILITY':
-          return 'bg-blue-100 text-blue-800';
+          return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
         case 'AUTHENTICATION':
-          return 'bg-orange-100 text-orange-800';
+          return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400';
         default:
-          return 'bg-gray-100 text-gray-800';
+          return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
       }
     },
     getTemplateBody(template) {
@@ -189,26 +175,52 @@ export default {
 
     <template v-else>
       <SettingsSection
-        :title="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.TITLE')"
-        :sub-title="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.DESCRIPTION')"
+        :title="$t('INBOX_MGMT.WHATSAPP_TEMPLATES.TITLE')"
+        :sub-title="$t('INBOX_MGMT.WHATSAPP_TEMPLATES.DESCRIPTION')"
         :show-border="false"
       >
-        <div class="mb-4">
+        <div class="mb-4 flex gap-2">
           <NextButton
-            :label="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.CREATE_BUTTON')"
+            :label="$t('INBOX_MGMT.WHATSAPP_TEMPLATES.CREATE_BUTTON')"
             @click="openCreateModal"
           />
+          <NextButton
+            ghost
+            icon="i-lucide-refresh-cw"
+            :is-loading="isSyncing"
+            :label="$t('INBOX_MGMT.WHATSAPP_TEMPLATES.SYNC_BUTTON')"
+            @click="syncTemplates"
+          />
+        </div>
+
+        <!-- Stats -->
+        <div v-if="templates.length > 0" class="flex gap-4 mb-6">
+          <div class="px-4 py-2 rounded-lg bg-green-100 dark:bg-green-900/30">
+            <span class="text-sm font-medium text-green-800 dark:text-green-400">
+              {{ approvedTemplates.length }} {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.STATS.APPROVED') }}
+            </span>
+          </div>
+          <div class="px-4 py-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/30">
+            <span class="text-sm font-medium text-yellow-800 dark:text-yellow-400">
+              {{ pendingTemplates.length }} {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.STATS.PENDING') }}
+            </span>
+          </div>
+          <div class="px-4 py-2 rounded-lg bg-red-100 dark:bg-red-900/30">
+            <span class="text-sm font-medium text-red-800 dark:text-red-400">
+              {{ rejectedTemplates.length }} {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.STATS.REJECTED') }}
+            </span>
+          </div>
         </div>
 
         <!-- Templates List -->
         <div v-if="templates.length === 0" class="text-center py-8 text-n-slate-11">
-          {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.EMPTY') }}
+          {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.EMPTY') }}
         </div>
 
         <div v-else class="space-y-4">
           <div
             v-for="template in safeTemplates"
-            :key="template.id"
+            :key="template.id || template.name"
             class="p-4 border border-n-weak rounded-lg"
           >
             <div class="flex items-start justify-between">
@@ -231,7 +243,7 @@ export default {
                   </span>
                 </div>
                 <p class="text-sm text-n-slate-11 mb-2">
-                  {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.LANGUAGE') }}: {{ template.language }}
+                  {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.LANGUAGE') }}: {{ template.language }}
                 </p>
                 <p class="text-sm text-n-slate-12 whitespace-pre-wrap">
                   {{ getTemplateBody(template) }}
@@ -242,7 +254,7 @@ export default {
                 color-scheme="alert"
                 size="sm"
                 icon="i-lucide-trash-2"
-                :label="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.DELETE_BUTTON')"
+                :label="$t('INBOX_MGMT.WHATSAPP_TEMPLATES.DELETE_BUTTON')"
                 @click="confirmDelete(template)"
               />
             </div>
@@ -255,19 +267,14 @@ export default {
     <Modal
       v-model:show="showCreateModal"
       :on-close="closeCreateModal"
-      :full-width="true"
+      size="large"
     >
-      <div class="p-6">
-        <h2 class="text-lg font-medium text-n-slate-12 mb-6">
-          {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.CREATE_TITLE') }}
-        </h2>
-
-        <TemplateBuilder
-          :is-creating="isCreating"
-          @create="createTemplate"
-          @cancel="closeCreateModal"
-        />
-      </div>
+      <TemplateBuilder
+        :inbox-id="inbox.id"
+        :is-creating="isCreating"
+        @create="createTemplate"
+        @cancel="closeCreateModal"
+      />
     </Modal>
 
     <!-- Delete Confirmation Modal -->
@@ -279,21 +286,21 @@ export default {
     >
       <div class="p-6">
         <h2 class="text-lg font-medium text-n-slate-12 mb-2">
-          {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.DELETE_CONFIRM_TITLE') }}
+          {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.DELETE_CONFIRM_TITLE') }}
         </h2>
         <p class="text-sm text-n-slate-11 mb-4">
-          {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.DELETE_CONFIRM_MESSAGE', { name: templateToDelete.name }) }}
+          {{ $t('INBOX_MGMT.WHATSAPP_TEMPLATES.DELETE_CONFIRM_MESSAGE', { name: templateToDelete.name }) }}
         </p>
         <div class="flex justify-end gap-2">
           <NextButton
             ghost
-            :label="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.FORM.CANCEL')"
+            :label="$t('INBOX_MGMT.WHATSAPP_TEMPLATES.FORM.CANCEL')"
             @click="cancelDelete"
           />
           <NextButton
             color-scheme="alert"
             :is-loading="isDeleting"
-            :label="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.DELETE_BUTTON')"
+            :label="$t('INBOX_MGMT.WHATSAPP_TEMPLATES.DELETE_BUTTON')"
             @click="deleteTemplate"
           />
         </div>
@@ -301,4 +308,3 @@ export default {
     </Modal>
   </div>
 </template>
-

@@ -5,7 +5,6 @@ import { useVuelidate } from '@vuelidate/core';
 import { required, minLength } from '@vuelidate/validators';
 import { useMapGetter } from 'dashboard/composables/store';
 import { useStore } from 'dashboard/composables/store';
-import { INBOX_TYPES } from 'dashboard/helper/inbox';
 
 import Input from 'dashboard/components-next/input/Input.vue';
 import Button from 'dashboard/components-next/button/Button.vue';
@@ -164,26 +163,11 @@ const handleSubmit = async () => {
   handleCancel();
 };
 
-// Check if the selected inbox is an Evolution Cloud inbox
-const isEvolutionCloudInbox = computed(() => {
-  if (!state.inboxId) return false;
-  const inbox = formState.inboxes.value.find(i => i.id === state.inboxId);
-  return (
-    inbox?.channel_type === INBOX_TYPES.API &&
-    inbox?.additional_attributes?.evolution_channel === 'whatsapp_cloud_api'
-  );
-});
-
-// Reset template selection when inbox changes and fetch Evolution templates if needed
+// Reset template selection when inbox changes
 watch(
   () => state.inboxId,
-  async newInboxId => {
+  () => {
     state.templateId = null;
-
-    // Fetch templates from Evolution API for Evolution Cloud inboxes
-    if (newInboxId && isEvolutionCloudInbox.value) {
-      await store.dispatch('inboxes/fetchEvolutionTemplates', newInboxId);
-    }
   }
 );
 </script>

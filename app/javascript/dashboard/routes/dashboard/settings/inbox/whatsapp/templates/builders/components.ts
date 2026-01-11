@@ -15,6 +15,7 @@ export interface MetaTemplatePayload {
     text?: string;
     example?: {
       header_text?: string[];
+      header_url?: string[];
       header_handle?: string[];
       body_text?: string[][];
     };
@@ -36,7 +37,8 @@ export interface TemplateFormData {
   headerFormat: HeaderFormat | null;
   headerText: string;
   headerTextExample: string;
-  headerMediaUrl: string;
+  headerMediaUrl: string; // preview only
+  headerMediaHandle: string; // required for IMAGE/VIDEO/DOCUMENT template creation
   bodyText: string;
   bodyExamples: string[];
   footerText: string;
@@ -73,11 +75,13 @@ export function buildTemplatePayload(formData: TemplateFormData): MetaTemplatePa
       }
     }
 
-    if (formData.headerFormat === 'IMAGE' || 
-        formData.headerFormat === 'VIDEO' || 
-        formData.headerFormat === 'DOCUMENT') {
+    // For IMAGE/VIDEO/DOCUMENT headers, we need to provide an example with the media URL
+    // Meta requires header_handle with a handle obtained via Meta upload API (h)
+    if ((formData.headerFormat === 'IMAGE' || 
+         formData.headerFormat === 'VIDEO' || 
+         formData.headerFormat === 'DOCUMENT') && formData.headerMediaHandle) {
       headerComponent.example = {
-        header_handle: [formData.headerMediaUrl],
+        header_handle: [formData.headerMediaHandle],
       };
     }
 

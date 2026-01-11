@@ -25,7 +25,8 @@ class Whatsapp::Providers::WhatsappCloudService < Whatsapp::Providers::BaseServi
     response = HTTParty.post(
       "#{phone_id_path}/messages",
       headers: api_headers,
-      body: request_body.to_json
+      body: request_body.to_json,
+      timeout: 120
     )
 
     process_response(response, message)
@@ -110,7 +111,8 @@ class Whatsapp::Providers::WhatsappCloudService < Whatsapp::Providers::BaseServi
         to: phone_number,
         text: { body: message.outgoing_content },
         type: 'text'
-      }.to_json
+      }.to_json,
+      timeout: 120
     )
 
     process_response(response, message)
@@ -133,7 +135,8 @@ class Whatsapp::Providers::WhatsappCloudService < Whatsapp::Providers::BaseServi
         'to' => phone_number,
         'type' => type,
         type.to_s => type_content
-      }.to_json
+      }.to_json,
+      timeout: 120
     )
 
     process_response(response, message)
@@ -201,7 +204,8 @@ class Whatsapp::Providers::WhatsappCloudService < Whatsapp::Providers::BaseServi
         to: phone_number,
         interactive: payload,
         type: 'interactive'
-      }.to_json
+      }.to_json,
+      timeout: 120
     )
 
     process_response(response, message)

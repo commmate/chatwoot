@@ -41,6 +41,7 @@ export default {
       qrCode: null,
       integrationEnabled: false,
       hasShownConnectedAlert: false,
+      skipAutoQrFetch: false, // Flag to skip automatic QR fetch after restart
       // Instance settings
       isSavingInstanceSettings: false,
       rejectCall: false,
@@ -224,6 +225,7 @@ export default {
         if (this.isConnected) {
           this.qrCode = null;
           this.stopPolling();
+          this.skipAutoQrFetch = false; // Reset flag when connected
 
           // Only show alert and enable integration on first connection (not on every poll)
           if (!wasConnected && !this.hasShownConnectedAlert) {
@@ -236,8 +238,8 @@ export default {
               useAlert(this.$t('INBOX_MGMT.EVOLUTION.SETTINGS.CONNECTED'));
             }
           }
-        } else if (this.isBaileys && !this.qrCode?.base64 && !this.isConnecting) {
-          // If not connected and no QR code, try to fetch it
+        } else if (this.isBaileys && !this.qrCode?.base64 && !this.isConnecting && !this.skipAutoQrFetch) {
+          // If not connected and no QR code, try to fetch it (unless skip flag is set)
           await this.connectInstance();
         }
       } catch (error) {
@@ -279,9 +281,24 @@ export default {
       try {
         await EvolutionAPI.restartInstance(this.inbox.id);
         useAlert(this.$t('INBOX_MGMT.EVOLUTION.SETTINGS.RESTART_SUCCESS'));
-        // Refresh connection state after restart
-        await this.refreshConnection();
+        
+        // Set flag to skip automatic QR fetch after restart
+        // The instance should reconnect on its own using existing session
+        this.skipAutoQrFetch = true;
+        
+        // Wait a moment for restart to complete, then check connection state
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Just update connection state without triggering QR fetch
+        const response = await EvolutionAPI.getConnectionState(this.inbox.id);
+        this.connectionState = response.data;
+        
+        // Reset flag after 30 seconds to allow manual connect if needed
+        setTimeout(() => {
+          this.skipAutoQrFetch = false;
+        }, 30000);
       } catch (error) {
+        this.skipAutoQrFetch = false;
         useAlert(
           error.response?.data?.error ||
             this.$t('INBOX_MGMT.EVOLUTION.SETTINGS.RESTART_ERROR')
@@ -323,9 +340,23 @@ export default {
       try {
         await EvolutionAPI.refreshInstance(this.inbox.id);
         useAlert(this.$t('INBOX_MGMT.EVOLUTION.SETTINGS.REFRESH_SUCCESS'));
-        // Refresh connection state after reconnect
-        await this.refreshConnection();
+        
+        // Set flag to skip automatic QR fetch after refresh
+        this.skipAutoQrFetch = true;
+        
+        // Wait a moment for refresh to complete, then check connection state
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Just update connection state without triggering QR fetch
+        const response = await EvolutionAPI.getConnectionState(this.inbox.id);
+        this.connectionState = response.data;
+        
+        // Reset flag after 30 seconds
+        setTimeout(() => {
+          this.skipAutoQrFetch = false;
+        }, 30000);
       } catch (error) {
+        this.skipAutoQrFetch = false;
         useAlert(
           error.response?.data?.error ||
             this.$t('INBOX_MGMT.EVOLUTION.SETTINGS.REFRESH_ERROR')
