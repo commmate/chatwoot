@@ -823,7 +823,14 @@
         "INTEGRATION_ENABLE_ERROR": "Failed to enable integration. Please try again.",
         "INTEGRATION_NOT_ENABLED_TITLE": "Integration Not Active",
         "INTEGRATION_NOT_ENABLED_DESC": "WhatsApp is connected but the Chatwoot integration is not enabled. Messages won't sync until you enable the integration.",
-        "ENABLE_INTEGRATION_BUTTON": "Enable Integration"
+        "ENABLE_INTEGRATION_BUTTON": "Enable Integration",
+        "UPDATE_TOKEN_BUTTON": "Update Meta Token",
+        "UPDATE_TOKEN_TITLE": "Update Meta Access Token",
+        "UPDATE_TOKEN_DESCRIPTION": "If your Meta access token has expired or been invalidated, you can update it here. This will recreate the Evolution instance with the new token while maintaining all your settings and Chatwoot integration.",
+        "UPDATE_TOKEN_PLACEHOLDER": "Enter new Meta access token",
+        "UPDATE_TOKEN_SUCCESS": "Meta token updated successfully! Instance reconnected.",
+        "UPDATE_TOKEN_ERROR": "Failed to update token. Please verify the token is valid and try again.",
+        "UPDATE_TOKEN_CONFIRM": "Update Token"
       },
       "TEMPLATES": {
         "TITLE": "Message Templates",
@@ -853,6 +860,76 @@
           "ALLOW_CATEGORY_CHANGE": "Allow Meta to change category if needed",
           "CANCEL": "Cancel",
           "SUBMIT": "Create Template"
+        },
+        "BUILDER": {
+          "BASICS": {
+            "TITLE": "Basic Information",
+            "NAME": "Template Name",
+            "NAME_PLACEHOLDER": "e.g., order_confirmation",
+            "NAME_HELP": "Use only lowercase letters, numbers, and underscores (no spaces)",
+            "CATEGORY": "Category",
+            "CATEGORIES": {
+              "AUTHENTICATION": "Authentication (OTP, verification codes)",
+              "MARKETING": "Marketing (promotions, offers - requires opt-in)",
+              "UTILITY": "Utility (order updates, account notifications)"
+            },
+            "LANGUAGE": "Language",
+            "ALLOW_CATEGORY_CHANGE": "Allow Meta to reclassify if needed"
+          },
+          "HEADER": {
+            "TITLE": "Header (Optional)",
+            "FORMAT": "Header Type",
+            "NONE": "None",
+            "TEXT": "Text",
+            "IMAGE": "Image",
+            "VIDEO": "Video",
+            "DOCUMENT": "Document",
+            "LOCATION": "Location",
+            "TEXT_CONTENT": "Header Text",
+            "TEXT_PLACEHOLDER": "Enter header text (max 60 characters)",
+            "TEXT_HELP": "Supports 1 placeholder: '{'{1}'}'",
+            "TEXT_EXAMPLE": "Example for '{'{1}'}'",
+            "TEXT_EXAMPLE_PLACEHOLDER": "e.g., John",
+            "MEDIA_URL": "Media URL",
+            "MEDIA_URL_PLACEHOLDER": "https://example.com/image.jpg",
+            "MEDIA_URL_HELP": "Provide a public URL for the media file (image, video, or document)"
+          },
+          "BODY": {
+            "TITLE": "Body",
+            "TEXT": "Body Text",
+            "TEXT_PLACEHOLDER": "Enter your message body (max 1024 characters)",
+            "TEXT_HELP": "Use '{'{1}'}', '{'{2}'}', etc. for dynamic content. Supports formatting: *bold*, _italic_, ~strikethrough~",
+            "EXAMPLES": "Placeholder Examples",
+            "EXAMPLE_PLACEHOLDER": "Example value for '{'{index}'}'"
+          },
+          "FOOTER": {
+            "TITLE": "Footer (Optional)",
+            "TEXT": "Footer Text",
+            "TEXT_PLACEHOLDER": "e.g., Reply STOP to unsubscribe",
+            "TEXT_HELP": "Max 60 characters. No placeholders allowed."
+          },
+          "BUTTONS": {
+            "TITLE": "Buttons (Optional)",
+            "ADD": "Add Button",
+            "EMPTY": "No buttons added. Click 'Add Button' to create interactive buttons.",
+            "BUTTON_TYPE": "Button Type",
+            "QUICK_REPLY": "Quick Reply",
+            "URL": "URL (Call-to-Action)",
+            "PHONE": "Phone Number",
+            "COPY_CODE": "Copy Code (Authentication only)",
+            "TEXT_PLACEHOLDER": "Button text (max 25 characters)",
+            "URL_PLACEHOLDER": "https://example.com or https://example.com/order?id='{'{1}'}'",
+            "URL_EXAMPLE_PLACEHOLDER": "Example value for '{'{1}'}' in URL",
+            "PHONE_PLACEHOLDER": "+1234567890",
+            "PHONE_HELP": "Must include country code (e.g., +1 for US)",
+            "COPY_CODE_HELP": "Auto-displays 'Copy code' button for OTP templates"
+          },
+          "PREVIEW": {
+            "TITLE": "Preview"
+          },
+          "VALIDATION_ERRORS": "Please fix the following errors:",
+          "CREATE": "Create Template",
+          "CANCEL": "Cancel"
         }
       }
     },

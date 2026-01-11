@@ -5,6 +5,7 @@ import SettingsSection from 'dashboard/components/SettingsSection.vue';
 import NextButton from 'dashboard/components-next/button/Button.vue';
 import Spinner from 'shared/components/Spinner.vue';
 import Modal from 'dashboard/components/Modal.vue';
+import TemplateBuilder from './templates/TemplateBuilder.vue';
 
 const TEMPLATE_CATEGORIES = ['AUTHENTICATION', 'MARKETING', 'UTILITY'];
 const COMPONENT_TYPES = ['HEADER', 'BODY', 'FOOTER', 'BUTTONS'];
@@ -15,6 +16,7 @@ export default {
     NextButton,
     Spinner,
     Modal,
+    TemplateBuilder,
   },
   props: {
     inbox: {
@@ -30,14 +32,6 @@ export default {
       isCreating: false,
       isDeleting: false,
       templateToDelete: null,
-      // New template form
-      newTemplate: {
-        name: '',
-        category: 'MARKETING',
-        language: 'en',
-        allowCategoryChange: true,
-        bodyText: '',
-      },
     };
   },
   computed: {
@@ -84,50 +78,47 @@ export default {
       }
     },
     openCreateModal() {
-      this.newTemplate = {
-        name: '',
-        category: 'MARKETING',
-        language: 'en',
-        allowCategoryChange: true,
-        bodyText: '',
-      };
       this.showCreateModal = true;
     },
     closeCreateModal() {
       this.showCreateModal = false;
     },
-    async createTemplate() {
-      if (!this.newTemplate.name || !this.newTemplate.bodyText) {
-        useAlert(this.$t('INBOX_MGMT.EVOLUTION.TEMPLATES.VALIDATION_ERROR'));
-        return;
-      }
-
+    async createTemplate(payload) {
       this.isCreating = true;
       try {
-        // Build components array
-        const components = [
-          {
-            type: 'BODY',
-            text: this.newTemplate.bodyText,
-          },
-        ];
-
-        await EvolutionAPI.createTemplate(this.inbox.id, {
-          name: this.newTemplate.name.toLowerCase().replace(/\s+/g, '_'),
-          category: this.newTemplate.category,
-          language: this.newTemplate.language,
-          allow_category_change: this.newTemplate.allowCategoryChange,
-          components,
-        });
+        await EvolutionAPI.createTemplate(this.inbox.id, payload);
 
         useAlert(this.$t('INBOX_MGMT.EVOLUTION.TEMPLATES.CREATE_SUCCESS'));
         this.closeCreateModal();
         this.fetchTemplates();
       } catch (error) {
-        const errorMessage =
-          error.response?.data?.details?.message ||
-          error.response?.data?.error ||
-          this.$t('INBOX_MGMT.EVOLUTION.TEMPLATES.CREATE_ERROR');
+        console.error('Template creation error:', error);
+        console.error('Error response:', error.response);
+        
+        // Extract error message from various possible locations
+        let errorMessage;
+        
+        // Check for Meta API error in details
+        if (error.response?.data?.details?.message) {
+          errorMessage = error.response.data.details.message;
+        }
+        // Check for Evolution API error message
+        else if (typeof error.response?.data?.error === 'string') {
+          errorMessage = error.response.data.error;
+        }
+        // Check for Meta API error in error object
+        else if (error.response?.data?.error?.message) {
+          errorMessage = error.response.data.error.message;
+        }
+        // Check for raw error message
+        else if (error.message) {
+          errorMessage = error.message;
+        }
+        // Fallback to generic error
+        else {
+          errorMessage = this.$t('INBOX_MGMT.EVOLUTION.TEMPLATES.CREATE_ERROR');
+        }
+        
         useAlert(errorMessage);
       } finally {
         this.isCreating = false;
@@ -264,85 +255,18 @@ export default {
     <Modal
       v-model:show="showCreateModal"
       :on-close="closeCreateModal"
-      size="medium"
+      :full-width="true"
     >
       <div class="p-6">
-        <h2 class="text-lg font-medium text-n-slate-12 mb-4">
+        <h2 class="text-lg font-medium text-n-slate-12 mb-6">
           {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.CREATE_TITLE') }}
         </h2>
 
-        <form @submit.prevent="createTemplate" class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-n-slate-12 mb-1">
-              {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.FORM.NAME') }}
-            </label>
-            <input
-              v-model="newTemplate.name"
-              type="text"
-              class="w-full"
-              :placeholder="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.FORM.NAME_PLACEHOLDER')"
-            />
-            <p class="text-xs text-n-slate-11 mt-1">
-              {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.FORM.NAME_HELP') }}
-            </p>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-n-slate-12 mb-1">
-              {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.FORM.CATEGORY') }}
-            </label>
-            <select v-model="newTemplate.category" class="w-full">
-              <option v-for="cat in categories" :key="cat" :value="cat">
-                {{ cat }}
-              </option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-n-slate-12 mb-1">
-              {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.FORM.LANGUAGE') }}
-            </label>
-            <select v-model="newTemplate.language" class="w-full">
-              <option value="en">English</option>
-              <option value="en_US">English (US)</option>
-              <option value="pt_BR">Portuguese (Brazil)</option>
-              <option value="es">Spanish</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-n-slate-12 mb-1">
-              {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.FORM.BODY') }}
-            </label>
-            <textarea
-              v-model="newTemplate.bodyText"
-              rows="4"
-              class="w-full"
-              :placeholder="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.FORM.BODY_PLACEHOLDER')"
-            />
-            <p class="text-xs text-n-slate-11 mt-1">
-              {{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.FORM.BODY_HELP') }}
-            </p>
-          </div>
-
-          <label class="flex items-center gap-2">
-            <input v-model="newTemplate.allowCategoryChange" type="checkbox" />
-            <span class="text-sm">{{ $t('INBOX_MGMT.EVOLUTION.TEMPLATES.FORM.ALLOW_CATEGORY_CHANGE') }}</span>
-          </label>
-
-          <div class="flex justify-end gap-2 pt-4">
-            <NextButton
-              ghost
-              :label="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.FORM.CANCEL')"
-              @click="closeCreateModal"
-            />
-            <NextButton
-              type="submit"
-              :is-loading="isCreating"
-              :label="$t('INBOX_MGMT.EVOLUTION.TEMPLATES.FORM.SUBMIT')"
-            />
-          </div>
-        </form>
+        <TemplateBuilder
+          :is-creating="isCreating"
+          @create="createTemplate"
+          @cancel="closeCreateModal"
+        />
       </div>
     </Modal>
 

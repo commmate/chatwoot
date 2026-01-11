@@ -58,6 +58,11 @@ class EvolutionAPI extends ApiClient {
     return axios.post(`${this.url}/inboxes/${inboxId}/refresh`);
   }
 
+  // Update Meta access token (Cloud API only)
+  updateMetaToken(inboxId, tokenData) {
+    return axios.post(`${this.url}/inboxes/${inboxId}/update_meta_token`, tokenData);
+  }
+
   // Get instance settings (reject calls, groups ignore, always online, etc.)
   getInstanceSettings(inboxId) {
     return axios.get(`${this.url}/inboxes/${inboxId}/instance_settings`);

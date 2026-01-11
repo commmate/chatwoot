@@ -5,6 +5,7 @@ import SettingsSection from 'dashboard/components/SettingsSection.vue';
 import NextButton from 'dashboard/components-next/button/Button.vue';
 import Spinner from 'shared/components/Spinner.vue';
 import ConfirmationModal from 'dashboard/components/widgets/modal/ConfirmationModal.vue';
+import Modal from 'dashboard/components/Modal.vue';
 
 export default {
   components: {
@@ -12,6 +13,7 @@ export default {
     NextButton,
     Spinner,
     ConfirmationModal,
+    Modal,
   },
   props: {
     inbox: {
@@ -28,6 +30,11 @@ export default {
       isDisconnecting: false,
       isRefreshing: false,
       isEnablingIntegration: false,
+      isUpdatingToken: false,
+      showUpdateTokenModal: false,
+      newMetaToken: '',
+      newPhoneNumberId: '',
+      newBusinessAccountId: '',
       pollTimer: null,
       settings: null,
       connectionState: null,
@@ -327,6 +334,54 @@ export default {
         this.isRefreshing = false;
       }
     },
+    openUpdateTokenModal() {
+      this.showUpdateTokenModal = true;
+      this.newMetaToken = '';
+      // Use stored values from inbox (hidden from user)
+      this.newPhoneNumberId = this.inbox.additional_attributes?.evolution_number || '';
+      this.newBusinessAccountId = this.inbox.additional_attributes?.evolution_business_id || '';
+    },
+    closeUpdateTokenModal() {
+      this.showUpdateTokenModal = false;
+      this.newMetaToken = '';
+      this.newPhoneNumberId = '';
+      this.newBusinessAccountId = '';
+    },
+    async updateMetaToken() {
+      if (!this.newMetaToken) {
+        useAlert(this.$t('INBOX_MGMT.EVOLUTION.SETTINGS.UPDATE_TOKEN_ERROR'));
+        return;
+      }
+
+      if (!this.newPhoneNumberId || !this.newBusinessAccountId) {
+        useAlert('Phone Number ID and Business Account ID are required. Please contact support.');
+        return;
+      }
+
+      this.isUpdatingToken = true;
+      try {
+        await EvolutionAPI.updateMetaToken(this.inbox.id, {
+          token: this.newMetaToken,
+          phone_number_id: this.newPhoneNumberId,
+          business_account_id: this.newBusinessAccountId,
+        });
+
+        useAlert(this.$t('INBOX_MGMT.EVOLUTION.SETTINGS.UPDATE_TOKEN_SUCCESS'));
+        this.closeUpdateTokenModal();
+        
+        // Refresh connection state and settings after token update
+        await this.fetchSettings();
+      } catch (error) {
+        console.error('Failed to update Meta token:', error);
+        const errorMessage =
+          error.response?.data?.error ||
+          error.response?.data?.message ||
+          this.$t('INBOX_MGMT.EVOLUTION.SETTINGS.UPDATE_TOKEN_ERROR');
+        useAlert(errorMessage);
+      } finally {
+        this.isUpdatingToken = false;
+      }
+    },
   },
 };
 </script>
@@ -443,6 +498,13 @@ export default {
               :label="$t('INBOX_MGMT.EVOLUTION.SETTINGS.DISCONNECT_BUTTON')"
               :is-loading="isDisconnecting"
               @click="openDisconnectDialog"
+            />
+            <NextButton
+              v-if="isCloudApi"
+              ghost
+              icon="i-lucide-key-round"
+              :label="$t('INBOX_MGMT.EVOLUTION.SETTINGS.UPDATE_TOKEN_BUTTON')"
+              @click="openUpdateTokenModal"
             />
           </div>
 
@@ -619,6 +681,56 @@ export default {
       :cancel-label="$t('INBOX_MGMT.EVOLUTION.SETTINGS.CANCEL_BUTTON')"
       confirm-color="ruby"
     />
+
+    <!-- Update Meta Token Modal -->
+    <Modal
+      v-if="showUpdateTokenModal"
+      :show="showUpdateTokenModal"
+      :on-close="closeUpdateTokenModal"
+      size="medium"
+    >
+      <div class="p-6">
+        <h2 class="text-lg font-medium text-n-slate-12 mb-2">
+          {{ $t('INBOX_MGMT.EVOLUTION.SETTINGS.UPDATE_TOKEN_TITLE') }}
+        </h2>
+        <p class="text-sm text-n-slate-11 mb-6">
+          {{ $t('INBOX_MGMT.EVOLUTION.SETTINGS.UPDATE_TOKEN_DESCRIPTION') }}
+        </p>
+
+        <div class="space-y-4">
+          <!-- New Meta Token -->
+          <div>
+            <label class="block text-sm font-medium text-n-slate-12 mb-1.5">
+              {{ $t('INBOX_MGMT.ADD.EVOLUTION.META_TOKEN.LABEL') }}
+              <span class="text-red-500 ml-0.5">*</span>
+            </label>
+            <textarea
+              v-model="newMetaToken"
+              rows="4"
+              class="w-full px-3 py-2 rounded-lg border border-n-weak bg-n-alpha-2 text-n-slate-12 text-sm placeholder:text-n-slate-10 focus:ring-2 focus:ring-woot-500 focus:border-woot-500 font-mono text-xs resize-none"
+              :placeholder="$t('INBOX_MGMT.EVOLUTION.SETTINGS.UPDATE_TOKEN_PLACEHOLDER')"
+            />
+            <p class="text-xs text-n-slate-11 mt-1">
+              {{ $t('INBOX_MGMT.ADD.EVOLUTION.META_TOKEN.HELP_TEXT') }}
+            </p>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 mt-6">
+          <NextButton
+            ghost
+            :label="$t('INBOX_MGMT.EVOLUTION.SETTINGS.CANCEL_BUTTON')"
+            @click="closeUpdateTokenModal"
+          />
+          <NextButton
+            :is-loading="isUpdatingToken"
+            :disabled="!newMetaToken"
+            :label="$t('INBOX_MGMT.EVOLUTION.SETTINGS.UPDATE_TOKEN_CONFIRM')"
+            @click="updateMetaToken"
+          />
+        </div>
+      </div>
+    </Modal>
   </div>
 </template>
 

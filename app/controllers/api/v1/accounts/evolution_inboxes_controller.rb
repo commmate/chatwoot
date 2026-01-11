@@ -209,6 +209,112 @@ class Api::V1::Accounts::EvolutionInboxesController < Api::V1::Accounts::BaseCon
     render json: { error: e.message }, status: :unprocessable_entity
   end
 
+  # POST /api/v1/accounts/:account_id/evolution/inboxes/:inbox_id/update_token
+  # Updates Meta access token by recreating Evolution instance with new token
+  def update_meta_token
+    validate_cloud_api_inbox!
+
+    new_token = params[:token]
+    phone_number_id = params[:phone_number_id]
+    business_account_id = params[:business_account_id]
+
+    raise EvolutionApi::Client::ApiError.new('Token is required', status: 422) if new_token.blank?
+    raise EvolutionApi::Client::ApiError.new('Phone Number ID is required', status: 422) if phone_number_id.blank?
+    raise EvolutionApi::Client::ApiError.new('Business Account ID is required', status: 422) if business_account_id.blank?
+
+    # Validate new token with Meta API before proceeding
+    validate_meta_token_api!(new_token, phone_number_id)
+
+    # Try to get current configuration (may not exist if instance was deleted)
+    current_settings = nil
+    current_chatwoot = nil
+    instance_exists = false
+
+    begin
+      current_settings = evolution_client.find_settings(instance_name: evolution_instance_name)
+      current_chatwoot = evolution_client.find_chatwoot_integration(instance_name: evolution_instance_name)
+      instance_exists = true
+    rescue EvolutionApi::Client::ApiError => e
+      Rails.logger.info("Instance #{evolution_instance_name} does not exist, will create new one")
+      instance_exists = false
+    end
+
+    # Delete old instance if it exists
+    if instance_exists
+      begin
+        evolution_client.delete_instance(instance_name: evolution_instance_name)
+        # Wait for Evolution to complete the deletion process
+        sleep(2)
+      rescue EvolutionApi::Client::ApiError => e
+        Rails.logger.warn("Failed to delete instance (may not exist): #{e.message}")
+      end
+    end
+
+    # Create/recreate with same name but new token
+    evolution_client.create_instance(
+      instance_name: evolution_instance_name,
+      channel: 'whatsapp_cloud_api',
+      options: {
+        token: new_token,
+        number: phone_number_id,
+        business_id: business_account_id
+      }
+    )
+
+    # Set Chatwoot integration (use current or defaults)
+    # Convert string booleans to actual booleans for Evolution API
+    evolution_client.set_chatwoot_integration(
+      instance_name: evolution_instance_name,
+      chatwoot_config: {
+        url: current_chatwoot&.fetch('url', nil) || chatwoot_reachable_url,
+        account_id: current_chatwoot&.fetch('accountId', nil) || Current.account.id,
+        token: current_chatwoot&.fetch('token', nil) || integration_user_token,
+        name_inbox: @inbox.name,
+        sign_msg: to_boolean(current_chatwoot&.fetch('signMsg', true)),
+        sign_delimiter: current_chatwoot&.fetch('signDelimiter', "\n"),
+        reopen_conversation: to_boolean(current_chatwoot&.fetch('reopenConversation', true)),
+        conversation_pending: to_boolean(current_chatwoot&.fetch('conversationPending', false)),
+        merge_brazil_contacts: to_boolean(current_chatwoot&.fetch('mergeBrazilContacts', true)),
+        import_contacts: to_boolean(current_chatwoot&.fetch('importContacts', true)),
+        import_messages: to_boolean(current_chatwoot&.fetch('importMessages', true)),
+        days_limit_import_messages: to_integer(current_chatwoot&.fetch('daysLimitImportMessages', 3)),
+        auto_create: false
+      }
+    )
+
+    # Restore instance settings if they existed
+    if current_settings.present?
+      evolution_client.set_settings(
+        instance_name: evolution_instance_name,
+        settings: {
+          reject_call: current_settings['rejectCall'],
+          msg_call: current_settings['msgCall'],
+          groups_ignore: current_settings['groupsIgnore'],
+          always_online: current_settings['alwaysOnline'],
+          read_messages: current_settings['readMessages'],
+          read_status: current_settings['readStatus'],
+          sync_full_history: current_settings['syncFullHistory']
+        }
+      )
+    end
+
+    # Update phone_number_id and business_account_id in Chatwoot
+    @inbox.channel.update!(
+      additional_attributes: @inbox.channel.additional_attributes.merge(
+        'evolution_number' => phone_number_id,
+        'evolution_business_id' => business_account_id
+      )
+    )
+
+    render json: { message: 'Token updated successfully', status: 'connected' }
+  rescue EvolutionApi::Client::ApiError => e
+    render json: { error: e.message, details: e.response_body }, status: e.status || :unprocessable_entity
+  rescue StandardError => e
+    Rails.logger.error("Token update failed: #{e.message}")
+    Rails.logger.error(e.backtrace.join("\n"))
+    render json: { error: "Failed to update token: #{e.message}" }, status: :unprocessable_entity
+  end
+
   # GET /api/v1/accounts/:account_id/evolution/status
   # Returns whether Evolution API is enabled and configured
   def status
@@ -222,6 +328,42 @@ class Api::V1::Accounts::EvolutionInboxesController < Api::V1::Accounts::BaseCon
   end
 
   private
+
+  def validate_meta_token_api!(token, phone_number_id)
+    api_version = GlobalConfigService.load('WHATSAPP_API_VERSION', 'v22.0')
+    url = "https://graph.facebook.com/#{api_version}/#{phone_number_id}"
+
+    response = HTTParty.get(url, {
+      query: {
+        fields: 'id',
+        access_token: token
+      }
+    })
+
+    unless response.success?
+      error_data = response.parsed_response['error']
+      if error_data['code'] == 190
+        raise EvolutionApi::Client::ApiError.new("Token is invalid or expired: #{error_data['message']}", status: 422)
+      elsif error_data['code'] == 100
+        raise EvolutionApi::Client::ApiError.new("Invalid Phone Number ID or insufficient permissions: #{error_data['message']}", status: 422)
+      else
+        raise EvolutionApi::Client::ApiError.new("Meta API error: #{error_data['message']}", status: 422)
+      end
+    end
+  end
+
+  # Convert string/boolean values to actual boolean
+  def to_boolean(value)
+    return true if value == true || value == 'true'
+    return false if value == false || value == 'false'
+    !!value
+  end
+
+  # Convert string/number values to actual integer
+  def to_integer(value)
+    return value.to_i if value.is_a?(String)
+    value.to_i
+  end
 
   def check_admin_authorization!
     raise Pundit::NotAuthorizedError unless Current.user&.administrator?
@@ -331,22 +473,99 @@ class Api::V1::Accounts::EvolutionInboxesController < Api::V1::Accounts::BaseCon
   end
 
   def template_params
-    params.require(:template).permit(
-      :name,
-      :category,
-      :language,
-      :allow_category_change,
-      :webhook_url,
-      components: [:type, :text, :format, { buttons: [:type, :text, :url, :phone_number], example: {} }]
-    ).to_h.symbolize_keys
+    # Extract permitted scalar fields
+    template = params.require(:template)
+    
+    permitted = {
+      name: template[:name],
+      category: template[:category],
+      language: template[:language],
+      allow_category_change: template[:allow_category_change],
+      webhook_url: template[:webhook_url]
+    }.compact
+    
+    # Handle components array with deep nested structure
+    # Components can have complex nested structures (example.body_text, buttons with examples, etc.)
+    if template[:components].present?
+      permitted[:components] = sanitize_components(template[:components])
+    end
+    
+    permitted
+  end
+  
+  def sanitize_components(components)
+    return [] unless components.is_a?(Array)
+    
+    components.map do |component|
+      sanitized = {}
+      
+      # Basic fields
+      sanitized[:type] = component[:type] if component[:type].present?
+      sanitized[:format] = component[:format] if component[:format].present?
+      sanitized[:text] = component[:text] if component[:text].present?
+      
+      # Example field (can have header_text, header_handle, body_text)
+      if component[:example].present?
+        sanitized[:example] = sanitize_example(component[:example])
+      end
+      
+      # Buttons array (for BUTTONS component type)
+      if component[:buttons].present?
+        sanitized[:buttons] = sanitize_buttons(component[:buttons])
+      end
+      
+      sanitized
+    end
+  end
+  
+  def sanitize_example(example)
+    return {} unless example.is_a?(Hash) || example.is_a?(ActionController::Parameters)
+    
+    sanitized = {}
+    sanitized[:header_text] = Array(example[:header_text]) if example[:header_text].present?
+    sanitized[:header_handle] = Array(example[:header_handle]) if example[:header_handle].present?
+    
+    # body_text is an array of arrays: [[example1, example2, ...]]
+    if example[:body_text].present?
+      sanitized[:body_text] = example[:body_text].is_a?(Array) ? example[:body_text] : [example[:body_text]]
+    end
+    
+    sanitized
+  end
+  
+  def sanitize_buttons(buttons)
+    return [] unless buttons.is_a?(Array)
+    
+    buttons.map do |button|
+      sanitized = {}
+      sanitized[:type] = button[:type] if button[:type].present?
+      sanitized[:text] = button[:text] if button[:text].present?
+      sanitized[:url] = button[:url] if button[:url].present?
+      sanitized[:phone_number] = button[:phone_number] if button[:phone_number].present?
+      
+      # Button can have example array (for dynamic URLs)
+      if button[:example].present?
+        sanitized[:example] = Array(button[:example])
+      end
+      
+      sanitized
+    end
   end
 
   def template_update_params
-    params.require(:template).permit(
-      :category,
-      :allow_category_change,
-      components: [:type, :text, :format, { buttons: [:type, :text, :url, :phone_number], example: {} }]
-    ).to_h.symbolize_keys
+    template = params.require(:template)
+    
+    permitted = {
+      category: template[:category],
+      allow_category_change: template[:allow_category_change]
+    }.compact
+    
+    # Handle components array with deep nested structure
+    if template[:components].present?
+      permitted[:components] = sanitize_components(template[:components])
+    end
+    
+    permitted
   end
 
   def build_chatwoot_update_config

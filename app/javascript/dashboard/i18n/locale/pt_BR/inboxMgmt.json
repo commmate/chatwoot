@@ -768,7 +768,14 @@
         "INTEGRATION_ENABLE_ERROR": "Falha ao habilitar integração. Por favor, tente novamente.",
         "INTEGRATION_NOT_ENABLED_TITLE": "Integração Inativa",
         "INTEGRATION_NOT_ENABLED_DESC": "O WhatsApp está conectado, mas a integração com o Chatwoot não está habilitada. As mensagens não serão sincronizadas até você habilitar a integração.",
-        "ENABLE_INTEGRATION_BUTTON": "Habilitar Integração"
+        "ENABLE_INTEGRATION_BUTTON": "Habilitar Integração",
+        "UPDATE_TOKEN_BUTTON": "Atualizar Token Meta",
+        "UPDATE_TOKEN_TITLE": "Atualizar Token de Acesso Meta",
+        "UPDATE_TOKEN_DESCRIPTION": "Se seu token de acesso Meta expirou ou foi invalidado, você pode atualizá-lo aqui. Isso recriará a instância Evolution com o novo token mantendo todas as suas configurações e integração Chatwoot.",
+        "UPDATE_TOKEN_PLACEHOLDER": "Digite o novo token de acesso Meta",
+        "UPDATE_TOKEN_SUCCESS": "Token Meta atualizado com sucesso! Instância reconectada.",
+        "UPDATE_TOKEN_ERROR": "Falha ao atualizar token. Verifique se o token é válido e tente novamente.",
+        "UPDATE_TOKEN_CONFIRM": "Atualizar Token"
       },
       "TEMPLATES": {
         "TITLE": "Templates de Mensagem",
@@ -798,6 +805,76 @@
           "ALLOW_CATEGORY_CHANGE": "Permitir que a Meta altere a categoria se necessário",
           "CANCEL": "Cancelar",
           "SUBMIT": "Criar Template"
+        },
+        "BUILDER": {
+          "BASICS": {
+            "TITLE": "Informações Básicas",
+            "NAME": "Nome do Template",
+            "NAME_PLACEHOLDER": "ex.: confirmacao_pedido",
+            "NAME_HELP": "Use apenas letras minúsculas, números e sublinhados (sem espaços)",
+            "CATEGORY": "Categoria",
+            "CATEGORIES": {
+              "AUTHENTICATION": "Autenticação (OTP, códigos de verificação)",
+              "MARKETING": "Marketing (promoções, ofertas - requer opt-in)",
+              "UTILITY": "Utilidade (atualizações de pedidos, notificações de conta)"
+            },
+            "LANGUAGE": "Idioma",
+            "ALLOW_CATEGORY_CHANGE": "Permitir que a Meta reclassifique se necessário"
+          },
+          "HEADER": {
+            "TITLE": "Cabeçalho (Opcional)",
+            "FORMAT": "Tipo de Cabeçalho",
+            "NONE": "Nenhum",
+            "TEXT": "Texto",
+            "IMAGE": "Imagem",
+            "VIDEO": "Vídeo",
+            "DOCUMENT": "Documento",
+            "LOCATION": "Localização",
+            "TEXT_CONTENT": "Texto do Cabeçalho",
+            "TEXT_PLACEHOLDER": "Digite o texto do cabeçalho (máx. 60 caracteres)",
+            "TEXT_HELP": "Suporta 1 placeholder: '{'{1}'}'",
+            "TEXT_EXAMPLE": "Exemplo para '{'{1}'}'",
+            "TEXT_EXAMPLE_PLACEHOLDER": "ex.: João",
+            "MEDIA_URL": "URL da Mídia",
+            "MEDIA_URL_PLACEHOLDER": "https://exemplo.com/imagem.jpg",
+            "MEDIA_URL_HELP": "Forneça uma URL pública para o arquivo de mídia (imagem, vídeo ou documento)"
+          },
+          "BODY": {
+            "TITLE": "Corpo",
+            "TEXT": "Texto do Corpo",
+            "TEXT_PLACEHOLDER": "Digite o corpo da mensagem (máx. 1024 caracteres)",
+            "TEXT_HELP": "Use '{'{1}'}', '{'{2}'}', etc. para conteúdo dinâmico. Suporta formatação: *negrito*, _itálico_, ~tachado~",
+            "EXAMPLES": "Exemplos de Placeholders",
+            "EXAMPLE_PLACEHOLDER": "Valor de exemplo para '{'{index}'}'"
+          },
+          "FOOTER": {
+            "TITLE": "Rodapé (Opcional)",
+            "TEXT": "Texto do Rodapé",
+            "TEXT_PLACEHOLDER": "ex.: Responda PARAR para cancelar inscrição",
+            "TEXT_HELP": "Máx. 60 caracteres. Não são permitidos placeholders."
+          },
+          "BUTTONS": {
+            "TITLE": "Botões (Opcional)",
+            "ADD": "Adicionar Botão",
+            "EMPTY": "Nenhum botão adicionado. Clique em 'Adicionar Botão' para criar botões interativos.",
+            "BUTTON_TYPE": "Tipo de Botão",
+            "QUICK_REPLY": "Resposta Rápida",
+            "URL": "URL (Chamada para Ação)",
+            "PHONE": "Número de Telefone",
+            "COPY_CODE": "Copiar Código (somente Autenticação)",
+            "TEXT_PLACEHOLDER": "Texto do botão (máx. 25 caracteres)",
+            "URL_PLACEHOLDER": "https://exemplo.com ou https://exemplo.com/pedido?id='{'{1}'}'",
+            "URL_EXAMPLE_PLACEHOLDER": "Valor de exemplo para '{'{1}'}' na URL",
+            "PHONE_PLACEHOLDER": "+5511999999999",
+            "PHONE_HELP": "Deve incluir código do país (ex.: +55 para Brasil)",
+            "COPY_CODE_HELP": "Exibe automaticamente o botão 'Copiar código' para templates OTP"
+          },
+          "PREVIEW": {
+            "TITLE": "Visualização"
+          },
+          "VALIDATION_ERRORS": "Por favor, corrija os seguintes erros:",
+          "CREATE": "Criar Template",
+          "CANCEL": "Cancelar"
         }
       }
     },

@@ -294,6 +294,7 @@ Rails.application.routes.draw do
               post :restart
               post :logout
               post :refresh
+              post :update_meta_token
               get :instance_settings
               put :instance_settings, action: :update_instance_settings
               get :templates
