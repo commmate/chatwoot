@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onBeforeUnmount } from 'vue';
+import { ref, computed, onBeforeUnmount, onMounted, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { useVuelidate } from '@vuelidate/core';
@@ -16,8 +16,13 @@ const route = useRoute();
 
 const POLL_INTERVAL = 5000;
 
+// CommMate: Read inbox_name from query params if provided (post-signup redirect)
+const initialInboxName = route.query.inbox_name
+  ? decodeURIComponent(route.query.inbox_name)
+  : '';
+
 // Form state
-const inboxName = ref('');
+const inboxName = ref(initialInboxName);
 
 // UI state
 const isCreating = ref(false);
@@ -216,6 +221,18 @@ const proceedToAgents = async () => {
     isCreating.value = false;
   }
 };
+
+// CommMate: Auto-load QR code on mount if coming from post-signup redirect
+onMounted(async () => {
+  const shouldAutoLoad =
+    route.query.auto_load_qr === '1' && inboxName.value.trim().length > 0;
+
+  if (shouldAutoLoad) {
+    // Wait for next tick to ensure the component is fully rendered
+    await nextTick();
+    loadQRCode();
+  }
+});
 
 // Cleanup on unmount
 onBeforeUnmount(() => {

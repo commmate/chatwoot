@@ -59,6 +59,12 @@ export default {
           required,
           email,
           businessEmailValidator(value) {
+            // CommMate: Skip business email validation when personal emails are allowed
+            if (
+              window.chatwootConfig?.commmateAllowPersonalEmailSignup === 'true'
+            ) {
+              return true;
+            }
             return CompanyEmailValidator.isCompanyEmail(value);
           },
         },
@@ -156,6 +162,14 @@ export default {
     passwordRequirementsMet() {
       return Object.values(this.passwordRequirements).every(Boolean);
     },
+    // CommMate: Check if post-signup Evolution onboarding is enabled
+    shouldRedirectToEvolutionOnboarding() {
+      const config = window.chatwootConfig || {};
+      return (
+        config.commmatePostSignupEvolutionOnboarding === 'true' &&
+        config.evolutionApiEnabled === 'true'
+      );
+    },
   },
   methods: {
     async submit() {
@@ -166,8 +180,17 @@ export default {
       }
       this.isSignupInProgress = true;
       try {
-        await register(this.credentials);
-        window.location = DEFAULT_REDIRECT_URL;
+        const response = await register(this.credentials);
+
+        // CommMate: Redirect to Evolution onboarding if enabled
+        if (this.shouldRedirectToEvolutionOnboarding && response?.account_id) {
+          const inboxName = encodeURIComponent(
+            this.credentials.accountName.trim()
+          );
+          window.location = `/app/accounts/${response.account_id}/settings/inboxes/new/evolution?inbox_name=${inboxName}&auto_load_qr=1`;
+        } else {
+          window.location = DEFAULT_REDIRECT_URL;
+        }
       } catch (error) {
         let errorMessage =
           error?.message || this.$t('REGISTER.API.ERROR_MESSAGE');
