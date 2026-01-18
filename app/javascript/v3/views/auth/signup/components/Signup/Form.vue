@@ -183,11 +183,13 @@ export default {
         const response = await register(this.credentials);
 
         // CommMate: Redirect to Evolution onboarding if enabled
-        if (this.shouldRedirectToEvolutionOnboarding && response?.account_id) {
+        // Note: API response is wrapped in { data: {...} } by jbuilder
+        const accountId = response?.data?.account_id || response?.account_id;
+        if (this.shouldRedirectToEvolutionOnboarding && accountId) {
           const inboxName = encodeURIComponent(
             this.credentials.accountName.trim()
           );
-          window.location = `/app/accounts/${response.account_id}/settings/inboxes/new/evolution?inbox_name=${inboxName}&auto_load_qr=1`;
+          window.location = `/app/accounts/${accountId}/settings/inboxes/new/evolution?inbox_name=${inboxName}&auto_load_qr=1`;
         } else {
           window.location = DEFAULT_REDIRECT_URL;
         }

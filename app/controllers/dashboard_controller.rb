@@ -24,6 +24,8 @@ class DashboardController < ActionController::Base
     DISABLE_USER_PROFILE_UPDATE
     DEPLOYMENT_ENV
     INSTALLATION_PRICING_PLAN
+    COMMMATE_ALLOW_PERSONAL_EMAIL_SIGNUP
+    COMMMATE_POST_SIGNUP_EVOLUTION_ONBOARDING
   ].freeze
 
   before_action :set_application_pack

@@ -59,9 +59,10 @@ watch(
     // find the correct label option from the list
     // the single select component expects the full label object
     // in our case, the label id and name are both the same
-    labelToApply.value = labelOptions.value.find(
-      option => option.name === auto_resolve_label
-    );
+    // Default to null when no match found to satisfy SingleSelect's Object prop type
+    labelToApply.value =
+      labelOptions.value.find(option => option.name === auto_resolve_label) ||
+      null;
 
     // Set unit based on duration and its divisibility
     if (duration.value) {

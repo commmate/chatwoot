@@ -581,7 +581,8 @@
     },
     "AGENTS": {
       "BUTTON_TEXT": "Add agents",
-      "ADD_AGENTS": "Adding Agents to your Inbox..."
+      "ADD_AGENTS": "Adding Agents to your Inbox...",
+      "ONBOARD_NEW_AGENT": "Onboard new agent"
     },
     "FINISH": {
       "TITLE": "Your Inbox is ready!",
