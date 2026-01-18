@@ -581,7 +581,8 @@
     },
     "AGENTS": {
       "BUTTON_TEXT": "Adicionar agentes",
-      "ADD_AGENTS": "Adicionando agentes à sua caixa de entrada..."
+      "ADD_AGENTS": "Adicionando agentes à sua caixa de entrada...",
+      "ONBOARD_NEW_AGENT": "Convidar novo agente"
     },
     "FINISH": {
       "TITLE": "Sua caixa de entrada está pronta!",
