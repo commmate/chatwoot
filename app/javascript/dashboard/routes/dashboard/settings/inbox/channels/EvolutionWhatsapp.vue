@@ -307,6 +307,7 @@ onBeforeUnmount(() => {
             type="text"
             :disabled="isNameLocked"
             :placeholder="$t('INBOX_MGMT.ADD.EVOLUTION.INBOX_NAME.PLACEHOLDER')"
+            data-tour="evolution-inbox-name"
             @blur="v$.inboxName.$touch"
           />
           <span v-if="v$.inboxName.$error" class="message">
@@ -323,6 +324,7 @@ onBeforeUnmount(() => {
           solid
           blue
           :label="$t('INBOX_MGMT.ADD.EVOLUTION.BAILEYS.LOAD_QR_BUTTON')"
+          data-tour="evolution-load-qr"
           @click="loadQRCode"
         />
         <p class="mt-2 text-sm text-n-slate-11">
@@ -360,7 +362,12 @@ onBeforeUnmount(() => {
           class="rounded-lg bg-white p-4 dark:bg-n-slate-2"
         >
           <div v-if="qrCode?.base64" class="flex flex-col items-center">
-            <img :src="qrCode.base64" alt="QR Code" class="h-64 w-64" />
+            <img
+              :src="qrCode.base64"
+              alt="QR Code"
+              class="h-64 w-64"
+              data-tour="evolution-qr-code"
+            />
             <p class="mt-3 text-center text-sm text-n-slate-11">
               {{ $t('INBOX_MGMT.ADD.EVOLUTION.CONNECT.QR_INSTRUCTION') }}
             </p>
@@ -420,6 +427,7 @@ onBeforeUnmount(() => {
             solid
             blue
             :label="$t('INBOX_MGMT.ADD.EVOLUTION.CONNECT.CONTINUE')"
+            data-tour="evolution-continue"
             @click="proceedToAgents"
           />
         </div>

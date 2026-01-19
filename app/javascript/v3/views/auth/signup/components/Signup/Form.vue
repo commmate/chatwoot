@@ -26,6 +26,12 @@ export default {
     Icon,
     VueHcaptcha,
   },
+  props: {
+    locale: {
+      type: String,
+      default: 'en',
+    },
+  },
   setup() {
     return { v$: useVuelidate() };
   },
@@ -180,7 +186,11 @@ export default {
       }
       this.isSignupInProgress = true;
       try {
-        const response = await register(this.credentials);
+        // Include locale in the registration payload
+        const response = await register({
+          ...this.credentials,
+          locale: this.locale,
+        });
 
         // CommMate: Redirect to Evolution onboarding if enabled
         // Note: API response is wrapped in { data: {...} } by jbuilder

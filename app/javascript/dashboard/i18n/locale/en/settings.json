@@ -793,5 +793,202 @@
       "CONFIRM_BUTTON_LABEL": "Delete",
       "CANCEL_BUTTON_LABEL": "Cancel"
     }
+  },
+  "TOUR": {
+    "BUTTONS": {
+      "NEXT": "Next",
+      "BACK": "Back",
+      "DONE": "Done",
+      "SKIP": "Skip",
+      "BRING_ME_THERE": "Bring me there"
+    },
+    "ADMIN_FEATURES": {
+      "WELCOME": {
+        "TITLE": "Welcome to CommMate! 👋",
+        "DESCRIPTION": "Let's take a quick tour of the main features to help you get the most out of your customer support platform."
+      },
+      "CONVERSATIONS": {
+        "TITLE": "Conversations",
+        "DESCRIPTION": "This is your main workspace. All incoming messages from your connected channels appear here."
+      },
+      "CONTACTS": {
+        "TITLE": "Contacts",
+        "DESCRIPTION": "View and manage all your contacts. You can add notes, custom attributes, and see conversation history."
+      },
+      "REPORTS": {
+        "TITLE": "Reports & Analytics",
+        "DESCRIPTION": "Track team performance, response times, and conversation metrics to improve your support."
+      },
+      "CAMPAIGNS": {
+        "TITLE": "Campaigns",
+        "DESCRIPTION": "Send bulk messages to your contacts. This feature requires a Meta WhatsApp Cloud API inbox."
+      },
+      "WHATSAPP_CAMPAIGNS_NOTE": {
+        "TITLE": "WhatsApp Campaigns ⚠️",
+        "DESCRIPTION": "WhatsApp Campaigns require a Meta WhatsApp Cloud API inbox. Evolution (Baileys) does not support campaigns."
+      },
+      "SETTINGS": {
+        "TITLE": "Settings",
+        "DESCRIPTION": "This is where you manage your inboxes, agents, teams, automation rules, and more."
+      },
+      "TEAMS": {
+        "TITLE": "Teams",
+        "DESCRIPTION": "Organize your agents into teams (e.g., Sales, Support). Teams help route conversations to the right people."
+      },
+      "CANNED_RESPONSES": {
+        "TITLE": "Saved Replies (Canned Responses)",
+        "DESCRIPTION": "Create pre-written responses for common questions. Type \"/\" in the reply box to use them quickly."
+      },
+      "MACROS": {
+        "TITLE": "Macros",
+        "DESCRIPTION": "Automate repetitive actions like adding labels, assigning agents, or sending messages with a single click."
+      },
+      "AUTOMATION": {
+        "TITLE": "Automation Rules",
+        "DESCRIPTION": "Set up rules to automatically assign, label, or respond to conversations based on conditions."
+      },
+      "LABELS": {
+        "TITLE": "Labels",
+        "DESCRIPTION": "Create labels to categorize and organize your conversations (e.g., \"Urgent\", \"Sales Lead\")."
+      },
+      "TEMPLATES": {
+        "TITLE": "WhatsApp Templates",
+        "DESCRIPTION": "Manage your WhatsApp message templates for outbound messages. Templates must be approved by Meta before use."
+      },
+      "AI_ASSIST": {
+        "TITLE": "AI-Powered Replies ✨",
+        "DESCRIPTION": "Click the AI button in the reply box to improve, correct, or rephrase your messages using OpenAI. Great for maintaining professional tone!"
+      },
+      "COMPLETE": {
+        "TITLE": "You're All Set! 🚀",
+        "DESCRIPTION": "You now know the essentials. Explore the platform and reach out to CommMate support if you need help."
+      }
+    },
+    "AGENT_FEATURES": {
+      "WELCOME": {
+        "TITLE": "Welcome to CommMate! 👋",
+        "DESCRIPTION": "Let's take a quick tour of the features you'll use every day to help customers."
+      },
+      "CONVERSATIONS": {
+        "TITLE": "Your Conversations",
+        "DESCRIPTION": "All your assigned conversations appear here. Click on a conversation to view and reply."
+      },
+      "CONVERSATION_LIST": {
+        "TITLE": "Conversation List",
+        "DESCRIPTION": "Conversations are sorted by recent activity. Unread messages are highlighted."
+      },
+      "REPLY_BOX": {
+        "TITLE": "Reply to Customers",
+        "DESCRIPTION": "Type your message here. Use \"/\" to insert saved replies (canned responses) for faster responses."
+      },
+      "CONTACTS": {
+        "TITLE": "Contacts",
+        "DESCRIPTION": "View contact details and conversation history. Add notes to keep track of important information."
+      },
+      "REPORTS": {
+        "TITLE": "Your Performance",
+        "DESCRIPTION": "Track your response times and conversation metrics to improve your support skills."
+      },
+      "AI_ASSIST": {
+        "TITLE": "AI-Powered Replies ✨",
+        "DESCRIPTION": "Click the AI button to improve or rephrase your messages. Perfect for maintaining a professional tone!"
+      },
+      "CANNED_RESPONSES": {
+        "TITLE": "Saved Replies",
+        "DESCRIPTION": "Access pre-written responses for common questions. Type \"/\" in the reply box to search and insert them."
+      },
+      "COMPLETE": {
+        "TITLE": "You're Ready! 🎉",
+        "DESCRIPTION": "You're all set to start helping customers. Good luck!"
+      }
+    },
+    "ONBOARDING": {
+      "EVOLUTION_QR": {
+        "WELCOME": {
+          "TITLE": "Welcome to CommMate! 🎉",
+          "DESCRIPTION": "Let's set up your WhatsApp inbox. Your inbox name has been pre-filled with your company name. Click Next to continue."
+        },
+        "LOAD_QR": {
+          "TITLE": "Load QR Code",
+          "DESCRIPTION": "Click this button to generate your WhatsApp QR code."
+        },
+        "SCAN_QR": {
+          "TITLE": "Scan the QR Code 📱",
+          "DESCRIPTION": "Open WhatsApp on your phone, go to Settings > Linked Devices > Link a Device, and scan this QR code."
+        },
+        "CONTINUE": {
+          "TITLE": "Continue Setup",
+          "DESCRIPTION": "Once connected, click Continue to add agents to your inbox."
+        }
+      },
+      "ADD_AGENTS": {
+        "INTRO": {
+          "TITLE": "Add Agents to Your Inbox",
+          "DESCRIPTION": "Select agents who will handle conversations in this inbox. You can also onboard new agents."
+        },
+        "ONBOARD_NEW_AGENT": {
+          "TITLE": "Onboard New Agents",
+          "DESCRIPTION": "Don't see the agent you need? Click here to invite new team members directly."
+        },
+        "SUBMIT": {
+          "TITLE": "Finish Adding Agents",
+          "DESCRIPTION": "Click 'Add agents' to complete the setup and start receiving messages."
+        }
+      },
+      "FINISH": {
+        "COMPLETE": {
+          "TITLE": "Setup Complete! 🎉",
+          "DESCRIPTION": "Your inbox is ready. Click 'Bring me there' to go to your conversations."
+        },
+        "START_CHATTING": {
+          "TITLE": "Start Chatting",
+          "DESCRIPTION": "Click here to go to your inbox and start managing conversations!"
+        }
+      }
+    },
+    "CONVERSATION_REPLY": {
+      "REPLY_BOX": {
+        "TITLE": "Reply Box 💬",
+        "DESCRIPTION": "This is where you compose and send messages to your customers. Type your reply and press Enter or click Send."
+      },
+      "ATTACH_FILE": {
+        "TITLE": "Attach Files 📎",
+        "DESCRIPTION": "Click here to attach images, documents, or other files to your message."
+      },
+      "AUDIO_RECORDER": {
+        "TITLE": "Send Audio 🎙️",
+        "DESCRIPTION": "Record and send voice messages directly to your customers."
+      },
+      "AI_ASSIST": {
+        "TITLE": "AI Assistant ✨",
+        "DESCRIPTION": "Use AI to improve, correct, or rephrase your messages before sending. Great for maintaining a professional tone!"
+      },
+      "RESOLVE_ACTION": {
+        "TITLE": "Resolve / Reopen",
+        "DESCRIPTION": "Mark conversations as resolved when completed, or reopen them if follow-up is needed."
+      },
+      "SIDEPANEL_TOGGLE": {
+        "TITLE": "Customer Details Panel",
+        "DESCRIPTION": "Click here to open the side panel and view customer details, assign agents, teams, and manage labels."
+      }
+    },
+    "CONVERSATION_SIDEPANEL": {
+      "ASSIGN_AGENT": {
+        "TITLE": "Assign Agent",
+        "DESCRIPTION": "Route this conversation to a specific agent. Click to select an agent from your team."
+      },
+      "ASSIGN_TEAM": {
+        "TITLE": "Assign Team",
+        "DESCRIPTION": "Route this conversation to a specific team (e.g., Sales, Support). The team members will be notified."
+      },
+      "ASSIGN_PRIORITY": {
+        "TITLE": "Set Priority",
+        "DESCRIPTION": "Set the urgency level of this conversation (Urgent, High, Medium, Low) to help prioritize your workload."
+      },
+      "ADD_LABELS": {
+        "TITLE": "Add Labels 🏷️",
+        "DESCRIPTION": "Add labels to categorize and organize conversations. Labels help you filter and find conversations quickly."
+      }
+    }
   }
 }

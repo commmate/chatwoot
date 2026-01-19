@@ -5,6 +5,8 @@ import dashboard from './dashboard/dashboard.routes';
 import store from 'dashboard/store';
 import { validateLoggedInRoutes } from '../helper/routeHelpers';
 import AnalyticsHelper from '../helper/AnalyticsHelper';
+// CommMate: Tour module for guided walkthrough
+import { initializeTourAutoStart } from 'dashboard/tour/autoStart';
 
 const routes = [...dashboard.routes];
 
@@ -48,6 +50,9 @@ export const initalizeRouter = () => {
       return validateAuthenticateRoutePermission(to, next, store);
     });
   });
+
+  // CommMate: Initialize tour auto-start on route changes
+  initializeTourAutoStart(router, store);
 };
 
 export default router;

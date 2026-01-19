@@ -236,6 +236,7 @@ export default {
         :input-placeholder="
           $t('AGENT_MGMT.MULTI_SELECTOR.SEARCH.PLACEHOLDER.AGENT')
         "
+        data-tour="sidepanel-assign-agent"
         @select="onClickAssignAgent"
       />
     </div>
@@ -255,6 +256,7 @@ export default {
         :input-placeholder="
           $t('AGENT_MGMT.MULTI_SELECTOR.SEARCH.PLACEHOLDER.TEAM')
         "
+        data-tour="sidepanel-assign-team"
         @select="onClickAssignTeam"
       />
     </div>
@@ -273,6 +275,7 @@ export default {
         :input-placeholder="
           $t('CONVERSATION.PRIORITY.CHANGE_PRIORITY.INPUT_PLACEHOLDER')
         "
+        data-tour="sidepanel-assign-priority"
         @select="onClickAssignPriority"
       />
     </div>
@@ -280,6 +283,9 @@ export default {
       compact
       :title="$t('CONVERSATION_SIDEBAR.ACCORDION.CONVERSATION_LABELS')"
     />
-    <ConversationLabels :conversation-id="conversationId" />
+    <ConversationLabels
+      :conversation-id="conversationId"
+      data-tour="sidepanel-labels"
+    />
   </div>
 </template>

@@ -793,5 +793,202 @@
       "CONFIRM_BUTTON_LABEL": "Excluir",
       "CANCEL_BUTTON_LABEL": "Cancelar"
     }
+  },
+  "TOUR": {
+    "BUTTONS": {
+      "NEXT": "Próximo",
+      "BACK": "Voltar",
+      "DONE": "Concluir",
+      "SKIP": "Pular",
+      "BRING_ME_THERE": "Ir para lá"
+    },
+    "ADMIN_FEATURES": {
+      "WELCOME": {
+        "TITLE": "Bem-vindo ao CommMate! 👋",
+        "DESCRIPTION": "Vamos fazer um tour rápido pelos principais recursos para ajudá-lo a aproveitar ao máximo sua plataforma de suporte ao cliente."
+      },
+      "CONVERSATIONS": {
+        "TITLE": "Conversas",
+        "DESCRIPTION": "Este é seu espaço de trabalho principal. Todas as mensagens dos seus canais conectados aparecem aqui."
+      },
+      "CONTACTS": {
+        "TITLE": "Contatos",
+        "DESCRIPTION": "Visualize e gerencie todos os seus contatos. Você pode adicionar notas, atributos personalizados e ver o histórico de conversas."
+      },
+      "REPORTS": {
+        "TITLE": "Relatórios e Análises",
+        "DESCRIPTION": "Acompanhe o desempenho da equipe, tempos de resposta e métricas de conversas para melhorar seu suporte."
+      },
+      "CAMPAIGNS": {
+        "TITLE": "Campanhas",
+        "DESCRIPTION": "Envie mensagens em massa para seus contatos. Este recurso requer uma caixa de entrada WhatsApp Cloud API da Meta."
+      },
+      "WHATSAPP_CAMPAIGNS_NOTE": {
+        "TITLE": "Campanhas WhatsApp ⚠️",
+        "DESCRIPTION": "Campanhas WhatsApp requerem uma caixa de entrada WhatsApp Cloud API da Meta. Evolution (Baileys) não suporta campanhas."
+      },
+      "SETTINGS": {
+        "TITLE": "Configurações",
+        "DESCRIPTION": "Aqui você gerencia suas caixas de entrada, agentes, equipes, regras de automação e mais."
+      },
+      "TEAMS": {
+        "TITLE": "Times",
+        "DESCRIPTION": "Organize seus agentes em equipes (ex: Vendas, Suporte). As equipes ajudam a direcionar conversas para as pessoas certas."
+      },
+      "CANNED_RESPONSES": {
+        "TITLE": "Respostas Prontas",
+        "DESCRIPTION": "Crie respostas pré-escritas para perguntas comuns. Digite \"/\" na caixa de resposta para usá-las rapidamente."
+      },
+      "MACROS": {
+        "TITLE": "Macros",
+        "DESCRIPTION": "Automatize ações repetitivas como adicionar etiquetas, atribuir agentes ou enviar mensagens com um único clique."
+      },
+      "AUTOMATION": {
+        "TITLE": "Regras de Automação",
+        "DESCRIPTION": "Configure regras para atribuir, etiquetar ou responder automaticamente às conversas com base em condições."
+      },
+      "LABELS": {
+        "TITLE": "Etiquetas",
+        "DESCRIPTION": "Crie etiquetas para categorizar e organizar suas conversas (ex: \"Urgente\", \"Lead de Vendas\")."
+      },
+      "TEMPLATES": {
+        "TITLE": "Templates WhatsApp",
+        "DESCRIPTION": "Gerencie seus templates de mensagens WhatsApp para mensagens de saída. Os templates devem ser aprovados pela Meta antes do uso."
+      },
+      "AI_ASSIST": {
+        "TITLE": "Respostas com IA ✨",
+        "DESCRIPTION": "Clique no botão de IA na caixa de resposta para melhorar, corrigir ou reformular suas mensagens usando OpenAI. Ótimo para manter um tom profissional!"
+      },
+      "COMPLETE": {
+        "TITLE": "Tudo Pronto! 🚀",
+        "DESCRIPTION": "Você já conhece o essencial. Explore a plataforma e entre em contato com o suporte do CommMate se precisar de ajuda."
+      }
+    },
+    "AGENT_FEATURES": {
+      "WELCOME": {
+        "TITLE": "Bem-vindo ao CommMate! 👋",
+        "DESCRIPTION": "Vamos fazer um tour rápido pelos recursos que você usará diariamente para ajudar os clientes."
+      },
+      "CONVERSATIONS": {
+        "TITLE": "Suas Conversas",
+        "DESCRIPTION": "Todas as conversas atribuídas a você aparecem aqui. Clique em uma conversa para visualizar e responder."
+      },
+      "CONVERSATION_LIST": {
+        "TITLE": "Lista de Conversas",
+        "DESCRIPTION": "As conversas são ordenadas por atividade recente. Mensagens não lidas são destacadas."
+      },
+      "REPLY_BOX": {
+        "TITLE": "Responder aos Clientes",
+        "DESCRIPTION": "Digite sua mensagem aqui. Use \"/\" para inserir respostas salvas para respostas mais rápidas."
+      },
+      "CONTACTS": {
+        "TITLE": "Contatos",
+        "DESCRIPTION": "Visualize detalhes do contato e histórico de conversas. Adicione notas para registrar informações importantes."
+      },
+      "REPORTS": {
+        "TITLE": "Seu Desempenho",
+        "DESCRIPTION": "Acompanhe seus tempos de resposta e métricas de conversas para melhorar suas habilidades de suporte."
+      },
+      "AI_ASSIST": {
+        "TITLE": "Respostas com IA ✨",
+        "DESCRIPTION": "Clique no botão de IA para melhorar ou reformular suas mensagens. Perfeito para manter um tom profissional!"
+      },
+      "CANNED_RESPONSES": {
+        "TITLE": "Respostas Prontas",
+        "DESCRIPTION": "Acesse respostas pré-escritas para perguntas comuns. Digite \"/\" na caixa de resposta para pesquisar e inserir."
+      },
+      "COMPLETE": {
+        "TITLE": "Você Está Pronto! 🎉",
+        "DESCRIPTION": "Você está pronto para começar a ajudar os clientes. Boa sorte!"
+      }
+    },
+    "ONBOARDING": {
+      "EVOLUTION_QR": {
+        "WELCOME": {
+          "TITLE": "Bem-vindo ao CommMate! 🎉",
+          "DESCRIPTION": "Vamos configurar sua caixa de entrada do WhatsApp. O nome da caixa foi preenchido com o nome da sua empresa. Clique em Próximo para continuar."
+        },
+        "LOAD_QR": {
+          "TITLE": "Carregar QR Code",
+          "DESCRIPTION": "Clique neste botão para gerar seu QR Code do WhatsApp."
+        },
+        "SCAN_QR": {
+          "TITLE": "Escaneie o QR Code 📱",
+          "DESCRIPTION": "Abra o WhatsApp no seu celular, vá em Configurações > Aparelhos conectados > Conectar um aparelho, e escaneie este QR Code."
+        },
+        "CONTINUE": {
+          "TITLE": "Continuar Configuração",
+          "DESCRIPTION": "Após conectar, clique em Continuar para adicionar agentes à sua caixa de entrada."
+        }
+      },
+      "ADD_AGENTS": {
+        "INTRO": {
+          "TITLE": "Adicionar Agentes à Caixa de Entrada",
+          "DESCRIPTION": "Selecione os agentes que atenderão as conversas nesta caixa de entrada. Você também pode convidar novos agentes."
+        },
+        "ONBOARD_NEW_AGENT": {
+          "TITLE": "Convidar Novos Agentes",
+          "DESCRIPTION": "Não encontrou o agente que precisa? Clique aqui para convidar novos membros da equipe."
+        },
+        "SUBMIT": {
+          "TITLE": "Finalizar Adição de Agentes",
+          "DESCRIPTION": "Clique em 'Adicionar agentes' para completar a configuração e começar a receber mensagens."
+        }
+      },
+      "FINISH": {
+        "COMPLETE": {
+          "TITLE": "Configuração Concluída! 🎉",
+          "DESCRIPTION": "Sua caixa de entrada está pronta. Clique em 'Ir para lá' para ir às suas conversas."
+        },
+        "START_CHATTING": {
+          "TITLE": "Começar a Conversar",
+          "DESCRIPTION": "Clique aqui para ir à sua caixa de entrada e começar a gerenciar conversas!"
+        }
+      }
+    },
+    "CONVERSATION_REPLY": {
+      "REPLY_BOX": {
+        "TITLE": "Caixa de Resposta 💬",
+        "DESCRIPTION": "Aqui você escreve e envia mensagens para seus clientes. Digite sua resposta e pressione Enter ou clique em Enviar."
+      },
+      "ATTACH_FILE": {
+        "TITLE": "Anexar Arquivos 📎",
+        "DESCRIPTION": "Clique aqui para anexar imagens, documentos ou outros arquivos à sua mensagem."
+      },
+      "AUDIO_RECORDER": {
+        "TITLE": "Enviar Áudio 🎙️",
+        "DESCRIPTION": "Grave e envie mensagens de voz diretamente para seus clientes."
+      },
+      "AI_ASSIST": {
+        "TITLE": "Assistente IA ✨",
+        "DESCRIPTION": "Use IA para melhorar, corrigir ou reformular suas mensagens antes de enviar. Ótimo para manter um tom profissional!"
+      },
+      "RESOLVE_ACTION": {
+        "TITLE": "Resolver / Reabrir",
+        "DESCRIPTION": "Marque conversas como resolvidas quando concluídas, ou reabra se precisar de acompanhamento."
+      },
+      "SIDEPANEL_TOGGLE": {
+        "TITLE": "Painel de Detalhes do Cliente",
+        "DESCRIPTION": "Clique aqui para abrir o painel lateral e ver detalhes do cliente, atribuir agentes, times e gerenciar etiquetas."
+      }
+    },
+    "CONVERSATION_SIDEPANEL": {
+      "ASSIGN_AGENT": {
+        "TITLE": "Atribuir Agente",
+        "DESCRIPTION": "Encaminhe esta conversa para um agente específico. Clique para selecionar um agente da sua equipe."
+      },
+      "ASSIGN_TEAM": {
+        "TITLE": "Atribuir Time",
+        "DESCRIPTION": "Encaminhe esta conversa para um time específico (ex: Vendas, Suporte). Os membros do time serão notificados."
+      },
+      "ASSIGN_PRIORITY": {
+        "TITLE": "Definir Prioridade",
+        "DESCRIPTION": "Defina o nível de urgência desta conversa (Urgente, Alta, Média, Baixa) para ajudar a priorizar seu trabalho."
+      },
+      "ADD_LABELS": {
+        "TITLE": "Adicionar Etiquetas 🏷️",
+        "DESCRIPTION": "Adicione etiquetas para categorizar e organizar conversas. Etiquetas ajudam a filtrar e encontrar conversas rapidamente."
+      }
+    }
   }
 }

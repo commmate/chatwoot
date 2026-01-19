@@ -5,6 +5,7 @@ import Policy from 'dashboard/components/policy.vue';
 import { useSidebarContext } from './provider';
 
 const props = defineProps({
+  name: { type: String, default: '' },
   label: { type: String, required: true },
   to: { type: [String, Object], required: true },
   icon: { type: [String, Object], default: null },
@@ -13,6 +14,23 @@ const props = defineProps({
 });
 
 const { resolvePermissions, resolveFeatureFlag } = useSidebarContext();
+
+// CommMate: Map settings leaf names to tour data attributes (stable selectors)
+const TOUR_DATA_ATTRS = {
+  'Settings Account Settings': 'settings-account',
+  'Settings Agents': 'settings-agents',
+  'Settings Teams': 'settings-teams',
+  'Settings Inboxes': 'settings-inboxes',
+  'Settings Labels': 'settings-labels',
+  'Settings Custom Attributes': 'settings-custom-attributes',
+  'Settings Automation': 'settings-automation',
+  'Settings Agent Bots': 'settings-agent-bots',
+  'Settings Macros': 'settings-macros',
+  'Settings Canned Responses': 'settings-canned-responses',
+  'Settings Integrations': 'settings-integrations',
+};
+
+const tourDataAttr = computed(() => TOUR_DATA_ATTRS[props.name] || null);
 
 const shouldRenderComponent = computed(() => {
   return typeof props.component === 'function' || isVNode(props.component);
@@ -31,6 +49,7 @@ const shouldRenderComponent = computed(() => {
       :is="to ? 'router-link' : 'div'"
       :to="to"
       :title="label"
+      :data-tour="tourDataAttr"
       class="flex h-8 items-center gap-2 px-2 py-1 rounded-lg max-w-[9.438rem] hover:bg-gradient-to-r from-transparent via-n-slate-3/70 to-n-slate-3/70 group"
       :class="{
         'text-n-blue-text bg-n-alpha-2 active': active,

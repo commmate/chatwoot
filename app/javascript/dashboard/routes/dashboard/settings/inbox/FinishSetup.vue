@@ -298,6 +298,7 @@ onMounted(() => {
               solid
               teal
               :label="$t('INBOX_MGMT.FINISH.BUTTON_TEXT')"
+              data-tour="finish-bring-me-there"
             />
           </router-link>
         </div>

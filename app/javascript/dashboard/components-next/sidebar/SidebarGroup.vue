@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, nextTick } from 'vue';
+import { computed, onMounted, nextTick, watch } from 'vue';
 import { useSidebarContext } from './provider';
 import { useRoute, useRouter } from 'vue-router';
 import Policy from 'dashboard/components/policy.vue';
@@ -123,9 +123,24 @@ const toggleTrigger = () => {
 onMounted(async () => {
   await nextTick();
   if (hasActiveChild.value) {
-    setExpandedItem(props.name);
+    // Ensure the group containing the active route is expanded.
+    // Avoid using setExpandedItem here because it toggles and can collapse the group
+    // if it was already expanded (e.g., when tour pre-expands Settings).
+    expandedItem.value = props.name;
   }
 });
+
+// Keep sidebar groups in sync with route changes:
+// if a child becomes active later (without remounting the sidebar), ensure the group expands.
+watch(
+  hasActiveChild,
+  isActiveNow => {
+    if (isActiveNow) {
+      expandedItem.value = props.name;
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <!-- eslint-disable-next-line vue/no-root-v-if -->
@@ -165,7 +180,7 @@ onMounted(async () => {
         />
         <SidebarGroupLeaf
           v-else-if="isAllowed(child.to)"
-          v-show="isExpanded || activeChild?.name === child.name"
+          v-show="isExpanded || hasActiveChild"
           v-bind="child"
           :active="activeChild?.name === child.name"
         />

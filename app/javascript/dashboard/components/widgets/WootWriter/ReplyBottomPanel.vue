@@ -309,6 +309,7 @@ export default {
           slate
           faded
           sm
+          data-tour="attach-file-button"
         />
       </FileUpload>
       <NextButton
@@ -318,6 +319,7 @@ export default {
         slate
         faded
         sm
+        data-tour="audio-recorder-button"
         @click="toggleAudioRecorder"
       />
       <NextButton

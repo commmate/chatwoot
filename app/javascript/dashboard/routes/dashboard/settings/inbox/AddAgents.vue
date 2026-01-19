@@ -105,6 +105,7 @@ export default {
               :select-label="$t('FORMS.MULTISELECT.ENTER_TO_SELECT')"
               :deselect-label="$t('FORMS.MULTISELECT.ENTER_TO_REMOVE')"
               :placeholder="$t('INBOX_MGMT.ADD.AGENTS.PICK_AGENTS')"
+              data-tour="add-agents-multiselect"
               @select="v$.selectedAgents.$touch"
             />
             <span v-if="v$.selectedAgents.$error" class="message">
@@ -119,12 +120,14 @@ export default {
             solid
             blue
             :label="$t('INBOX_MGMT.AGENTS.BUTTON_TEXT')"
+            data-tour="add-agents-submit"
           />
           <NextButton
             type="button"
             faded
             slate
             :label="$t('INBOX_MGMT.AGENTS.ONBOARD_NEW_AGENT')"
+            data-tour="onboard-new-agent"
             @click="openAddAgentModal"
           />
         </div>

@@ -137,6 +137,7 @@ useEmitter(CMD_RESOLVE_CONVERSATION, onCmdResolveConversation);
     <ButtonGroup
       class="rounded-lg shadow outline-1 outline flex-shrink-0"
       :class="!showOpenButton ? 'outline-n-container' : 'outline-transparent'"
+      data-tour="resolve-action"
     >
       <Button
         v-if="isOpen"

@@ -43,7 +43,7 @@ useEventListener(scrollableContainer, 'scroll', () => {
 <template>
   <SidebarGroupSeparator
     v-if="hasAccessibleItems"
-    v-show="isExpanded"
+    v-show="isExpanded || activeChild"
     :label
     :icon
     class="my-1"
@@ -59,7 +59,7 @@ useEventListener(scrollableContainer, 'scroll', () => {
     >
       <SidebarGroupLeaf
         v-for="child in children"
-        v-show="isExpanded || activeChild?.name === child.name"
+        v-show="isExpanded || activeChild"
         v-bind="child"
         :key="child.name"
         :active="activeChild?.name === child.name"

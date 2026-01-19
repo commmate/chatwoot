@@ -5,6 +5,7 @@ import Icon from 'next/icon/Icon.vue';
 
 const props = defineProps({
   to: { type: [Object, String], default: '' },
+  name: { type: String, default: '' },
   label: { type: String, default: '' },
   icon: { type: [String, Object], default: '' },
   expandable: { type: Boolean, default: false },
@@ -15,6 +16,17 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['toggle']);
+
+// CommMate: Map menu names to tour data attributes
+const TOUR_DATA_ATTRS = {
+  Conversation: 'sidebar-conversations',
+  Contacts: 'sidebar-contacts',
+  Reports: 'sidebar-reports',
+  Campaigns: 'sidebar-campaigns',
+  Settings: 'sidebar-settings',
+};
+
+const tourDataAttr = computed(() => TOUR_DATA_ATTRS[props.name] || null);
 
 const showBadge = useMapGetter(props.getterKeys.badge);
 const dynamicCount = useMapGetter(props.getterKeys.count);
@@ -31,6 +43,7 @@ const count = computed(() =>
     draggable="false"
     :to="to"
     :title="label"
+    :data-tour="tourDataAttr"
     :class="{
       'text-n-blue-text bg-n-alpha-2 font-medium': isActive && !hasActiveChild,
       'text-n-slate-12 font-medium': hasActiveChild,

@@ -137,6 +137,7 @@ export default {
         slate
         faded
         sm
+        data-tour="ai-assist-button"
         @click="openAIAssist"
       />
       <woot-modal
