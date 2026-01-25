@@ -142,12 +142,6 @@ const smsInboxes = computed(() =>
 const whatsAppInboxes = computed(() =>
   inboxes.value.filter(inbox => inbox.channel_type === INBOX_TYPES.WHATSAPP)
 );
-const hasCampaignInboxes = computed(
-  () =>
-    websiteInboxes.value.length > 0 ||
-    smsInboxes.value.length > 0 ||
-    whatsAppInboxes.value.length > 0
-);
 
 // CommMate: Build campaign menu children based on available inboxes
 const campaignMenuChildren = computed(() => {

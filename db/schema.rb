@@ -1088,6 +1088,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_16_100001) do
     t.bigint "account_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "available_for_campaigns", default: false
   end
 
   create_table "leaves", force: :cascade do |t|
