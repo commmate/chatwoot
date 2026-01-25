@@ -13,6 +13,9 @@ RSpec.describe '/api/v1/accounts/{account.id}/contacts/:id/conversations', type:
 
   before do
     create(:inbox_member, user: agent, inbox: inbox_1)
+    # CommMate: Grant conversation_manage permission so agent can see all conversations
+    # in their accessible inboxes (not just assigned ones)
+    agent.account_users.find_by(account: account).update!(access_permissions: ['conversation_manage'])
     2.times.each do
       create(:conversation, account: account, inbox: inbox_1, contact: contact, contact_inbox: contact_inbox_1)
       create(:conversation, account: account, inbox: inbox_2, contact: contact, contact_inbox: contact_inbox_2)
