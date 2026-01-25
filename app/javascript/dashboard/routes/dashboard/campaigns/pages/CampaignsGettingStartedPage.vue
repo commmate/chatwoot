@@ -90,4 +90,3 @@ const navigateToCreateInbox = () => {
     </Button>
   </div>
 </template>
-

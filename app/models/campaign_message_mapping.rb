@@ -27,8 +27,21 @@ class CampaignMessageMapping < ApplicationRecord
   belongs_to :campaign_delivery_report
   belongs_to :contact
 
-  validates :whatsapp_message_id, presence: true, uniqueness: true
+  # Either whatsapp_message_id or resend_email_id must be present
+  validates :whatsapp_message_id, uniqueness: true, allow_nil: true
+  validates :resend_email_id, uniqueness: true, allow_nil: true
   validates :status, presence: true
+  validate :external_id_present
+
+  private
+
+  def external_id_present
+    return if whatsapp_message_id.present? || resend_email_id.present?
+
+    errors.add(:base, 'Either whatsapp_message_id or resend_email_id must be present')
+  end
+
+  public
 
   # Update status from webhook and sync with delivery report
   def update_from_webhook(status:, errors: nil)

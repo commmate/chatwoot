@@ -8,6 +8,9 @@ module Api::V1::InboxesHelper
   def validate_email_channel(attributes)
     channel_data = permitted_params(attributes)[:channel]
 
+    # Skip IMAP/SMTP validation for Resend provider - it uses API-based sending
+    return if channel_data[:provider] == 'resend'
+
     validate_imap(channel_data)
     validate_smtp(channel_data)
   end

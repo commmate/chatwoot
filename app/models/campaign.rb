@@ -72,6 +72,8 @@ class Campaign < ApplicationRecord
       Sms::OneoffSmsCampaignService.new(campaign: self).perform
     when 'Whatsapp'
       Whatsapp::OneoffCampaignService.new(campaign: self).perform if account.feature_enabled?(:whatsapp_campaign)
+    when 'Email'
+      Resend::OneoffCampaignService.new(campaign: self).perform if inbox.channel.resend?
     end
   end
 
@@ -82,6 +84,12 @@ class Campaign < ApplicationRecord
   def validate_campaign_inbox
     return unless inbox
 
+    # Email campaigns are only supported for Resend provider
+    if inbox.inbox_type == 'Email'
+      errors.add :inbox, 'Email campaigns only supported for Resend provider' unless inbox.channel.resend?
+      return
+    end
+
     errors.add :inbox, 'Unsupported Inbox type' unless ['Website', 'Twilio SMS', 'Sms', 'Whatsapp'].include? inbox.inbox_type
   end
 
@@ -89,7 +97,7 @@ class Campaign < ApplicationRecord
   def ensure_correct_campaign_attributes
     return if inbox.blank?
 
-    if ['Twilio SMS', 'Sms', 'Whatsapp'].include?(inbox.inbox_type)
+    if ['Twilio SMS', 'Sms', 'Whatsapp', 'Email'].include?(inbox.inbox_type)
       self.campaign_type = 'one_off'
       self.scheduled_at ||= Time.now.utc
     else

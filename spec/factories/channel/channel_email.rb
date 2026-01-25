@@ -34,5 +34,17 @@ FactoryBot.define do
       imap_password { 'random-password' }
       imap_enable_ssl { true }
     end
+
+    trait :resend_email do
+      sequence(:email) { |n| "mail-#{n}@mail.example.com" }
+      provider { 'resend' }
+      provider_config do
+        {
+          'api_key' => 're_test_api_key_12345',
+          'from_email' => 'test@mail.example.com',
+          'from_name' => 'Test Sender'
+        }
+      end
+    end
   end
 end

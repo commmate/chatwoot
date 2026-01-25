@@ -248,6 +248,100 @@
         }
       }
     },
+    "EMAIL": {
+      "HEADER_TITLE": "Email campaigns",
+      "NEW_CAMPAIGN": "Create campaign",
+      "EMPTY_STATE": {
+        "TITLE": "No email campaigns are available",
+        "SUBTITLE": "Launch an email campaign to reach your customers directly. Send newsletters, offers or announcements with ease. Click 'Create campaign' to get started."
+      },
+      "CARD": {
+        "STATUS": {
+          "COMPLETED": "Completed",
+          "COMPLETED_WITH_ERRORS": "Completed with errors",
+          "SCHEDULED": "Scheduled"
+        },
+        "FAILED_COUNT": "{count} failed",
+        "CAMPAIGN_DETAILS": {
+          "SENT_FROM": "Sent from",
+          "ON": "on"
+        }
+      },
+      "DETAILS": {
+        "SUBJECT": "Subject",
+        "SUBJECT_LABEL": "Subject:",
+        "REPLY_TO": "Reply-To",
+        "REPLY_TO_LABEL": "Reply-To:",
+        "EMAIL_PREVIEW": "Email Preview"
+      },
+      "CREATE_DIALOG": {
+        "TITLE": "Create Email Campaign",
+        "SUBTITLE": "Design and schedule an HTML email to send to your contacts",
+        "SECTIONS": {
+          "BASIC_INFO": "Campaign Details",
+          "EMAIL_CONTENT": "Email Content (HTML)",
+          "AUDIENCE_SCHEDULE": "Audience & Schedule"
+        },
+        "PREVIEW_TITLE": "Email Preview"
+      },
+      "CREATE": {
+        "TITLE": "Create email campaign",
+        "SUCCESS": "Email campaign created successfully",
+        "ERROR": "There was an error creating the campaign. Please try again.",
+        "FORM": {
+          "TITLE": {
+            "LABEL": "Campaign Title",
+            "PLACEHOLDER": "Enter the campaign title (internal use)",
+            "ERROR": "Title is required"
+          },
+          "SUBJECT": {
+            "LABEL": "Email Subject",
+            "PLACEHOLDER": "Enter the email subject line",
+            "ERROR": "Subject is required"
+          },
+          "REPLY_TO": {
+            "TITLE": "Reply-To Email",
+            "DESCRIPTION": "Choose where replies to this campaign will be sent.",
+            "LABEL": "Custom Reply-To Email",
+            "PLACEHOLDER": "support@yourcompany.com",
+            "ERROR": "Please enter a valid email address",
+            "IMAP_OPTION": "Use IMAP inbox email",
+            "RESEND_OPTION": "Use Resend sender email",
+            "CUSTOM_OPTION": "Use a custom email",
+            "CUSTOM_DESCRIPTION": "Specify any email address to receive replies",
+            "RECOMMENDED": "Recommended",
+            "DEFAULT": "Default"
+          },
+          "MESSAGE": {
+            "LABEL": "Email Content (HTML)",
+            "PLACEHOLDER": "<h1>Hello {{contact.name}}!</h1>\n<p>Your message here...</p>",
+            "ERROR": "Message is required",
+            "HELP": "You can use Liquid variables like {{contact.name}}, {{contact.email}}, {{inbox.name}}"
+          },
+          "PREVIEW": "Preview",
+          "EDIT_HTML": "Edit HTML",
+          "INBOX": {
+            "LABEL": "Select Inbox",
+            "PLACEHOLDER": "Select a Resend inbox",
+            "ERROR": "Inbox is required"
+          },
+          "AUDIENCE": {
+            "LABEL": "Audience",
+            "PLACEHOLDER": "Select the customer labels",
+            "ERROR": "Audience is required"
+          },
+          "SCHEDULED_AT": {
+            "LABEL": "Scheduled time",
+            "PLACEHOLDER": "Select when to send",
+            "ERROR": "Scheduled time is required"
+          },
+          "BUTTONS": {
+            "CREATE": "Create Campaign",
+            "CANCEL": "Cancel"
+          }
+        }
+      }
+    },
     "DETAILS": {
       "TITLE": "Campaign Details",
       "MESSAGE": "Message",
@@ -305,6 +399,10 @@
       "WHATSAPP": {
         "TITLE": "No WhatsApp Cloud Inbox Configured",
         "DESCRIPTION": "WhatsApp campaigns require a WhatsApp Cloud API or Twilio WhatsApp inbox. Evolution WhatsApp inboxes are not supported for campaigns. Create a compatible WhatsApp inbox to start sending template messages to your contacts."
+      },
+      "EMAIL": {
+        "TITLE": "No Resend Email Inbox Configured",
+        "DESCRIPTION": "Email campaigns require a Resend email inbox. Create a Resend inbox to start sending email campaigns to your contacts."
       }
     },
     "GETTING_STARTED": {
@@ -322,6 +420,10 @@
       "WHATSAPP": {
         "TITLE": "WhatsApp Campaigns",
         "DESCRIPTION": "Send WhatsApp template messages using a WhatsApp Cloud API or Twilio WhatsApp inbox. Evolution WhatsApp is not supported."
+      },
+      "EMAIL": {
+        "TITLE": "Email Campaigns",
+        "DESCRIPTION": "Send HTML email campaigns using a Resend inbox with full delivery tracking."
       }
     }
   }

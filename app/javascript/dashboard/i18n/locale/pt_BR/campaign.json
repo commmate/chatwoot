@@ -248,6 +248,100 @@
         }
       }
     },
+    "EMAIL": {
+      "HEADER_TITLE": "Campanhas de e-mail",
+      "NEW_CAMPAIGN": "Criar campanha",
+      "EMPTY_STATE": {
+        "TITLE": "Nenhuma campanha de e-mail disponível",
+        "SUBTITLE": "Lance uma campanha de e-mail para alcançar seus clientes diretamente. Envie newsletters, ofertas ou anúncios com facilidade. Clique em 'Criar campanha' para começar."
+      },
+      "CARD": {
+        "STATUS": {
+          "COMPLETED": "Concluído",
+          "COMPLETED_WITH_ERRORS": "Concluído com erros",
+          "SCHEDULED": "Agendada"
+        },
+        "FAILED_COUNT": "{count} falharam",
+        "CAMPAIGN_DETAILS": {
+          "SENT_FROM": "Enviado de",
+          "ON": "ativado"
+        }
+      },
+      "DETAILS": {
+        "SUBJECT": "Assunto",
+        "SUBJECT_LABEL": "Assunto:",
+        "REPLY_TO": "Responder para",
+        "REPLY_TO_LABEL": "Responder para:",
+        "EMAIL_PREVIEW": "Pré-visualização do E-mail"
+      },
+      "CREATE_DIALOG": {
+        "TITLE": "Criar Campanha de E-mail",
+        "SUBTITLE": "Crie e agende um e-mail HTML para enviar aos seus contatos",
+        "SECTIONS": {
+          "BASIC_INFO": "Detalhes da Campanha",
+          "EMAIL_CONTENT": "Conteúdo do E-mail (HTML)",
+          "AUDIENCE_SCHEDULE": "Público e Agendamento"
+        },
+        "PREVIEW_TITLE": "Pré-visualização do E-mail"
+      },
+      "CREATE": {
+        "TITLE": "Criar campanha de e-mail",
+        "SUCCESS": "Campanha de e-mail criada com sucesso",
+        "ERROR": "Houve um erro ao criar a campanha. Por favor, tente novamente.",
+        "FORM": {
+          "TITLE": {
+            "LABEL": "Título da Campanha",
+            "PLACEHOLDER": "Digite o título da campanha (uso interno)",
+            "ERROR": "Título é obrigatório"
+          },
+          "SUBJECT": {
+            "LABEL": "Assunto do E-mail",
+            "PLACEHOLDER": "Digite o assunto do e-mail",
+            "ERROR": "Assunto é obrigatório"
+          },
+          "REPLY_TO": {
+            "TITLE": "E-mail de Resposta",
+            "DESCRIPTION": "Escolha para onde as respostas desta campanha serão enviadas.",
+            "LABEL": "E-mail de resposta personalizado",
+            "PLACEHOLDER": "suporte@suaempresa.com",
+            "ERROR": "Por favor, insira um endereço de e-mail válido",
+            "IMAP_OPTION": "Usar e-mail da caixa de entrada IMAP",
+            "RESEND_OPTION": "Usar e-mail do remetente Resend",
+            "CUSTOM_OPTION": "Usar um e-mail personalizado",
+            "CUSTOM_DESCRIPTION": "Especifique qualquer endereço de e-mail para receber respostas",
+            "RECOMMENDED": "Recomendado",
+            "DEFAULT": "Padrão"
+          },
+          "MESSAGE": {
+            "LABEL": "Conteúdo do E-mail (HTML)",
+            "PLACEHOLDER": "<h1>Olá {{contact.name}}!</h1>\n<p>Sua mensagem aqui...</p>",
+            "ERROR": "Mensagem é obrigatória",
+            "HELP": "Você pode usar variáveis Liquid como {{contact.name}}, {{contact.email}}, {{inbox.name}}"
+          },
+          "PREVIEW": "Pré-visualizar",
+          "EDIT_HTML": "Editar HTML",
+          "INBOX": {
+            "LABEL": "Selecionar Caixa de Entrada",
+            "PLACEHOLDER": "Selecione uma caixa de entrada Resend",
+            "ERROR": "Caixa de entrada é obrigatória"
+          },
+          "AUDIENCE": {
+            "LABEL": "Público",
+            "PLACEHOLDER": "Selecione as etiquetas dos clientes",
+            "ERROR": "Público é obrigatório"
+          },
+          "SCHEDULED_AT": {
+            "LABEL": "Horário agendado",
+            "PLACEHOLDER": "Selecione quando enviar",
+            "ERROR": "Horário agendado é obrigatório"
+          },
+          "BUTTONS": {
+            "CREATE": "Criar Campanha",
+            "CANCEL": "Cancelar"
+          }
+        }
+      }
+    },
     "DETAILS": {
       "TITLE": "Detalhes da Campanha",
       "MESSAGE": "Mensagem",
@@ -305,6 +399,10 @@
       "WHATSAPP": {
         "TITLE": "Nenhuma Caixa de Entrada do WhatsApp Cloud Configurada",
         "DESCRIPTION": "Campanhas do WhatsApp requerem uma caixa de entrada do WhatsApp Cloud API ou Twilio WhatsApp. Caixas de entrada Evolution WhatsApp não são suportadas para campanhas. Crie uma caixa de entrada compatível do WhatsApp para começar a enviar mensagens de modelo para seus contatos."
+      },
+      "EMAIL": {
+        "TITLE": "Nenhuma Caixa de Entrada Resend Configurada",
+        "DESCRIPTION": "Campanhas de e-mail requerem uma caixa de entrada Resend. Crie uma caixa de entrada Resend para começar a enviar campanhas de e-mail para seus contatos."
       }
     },
     "GETTING_STARTED": {
@@ -322,6 +420,10 @@
       "WHATSAPP": {
         "TITLE": "Campanhas do WhatsApp",
         "DESCRIPTION": "Envie mensagens de modelo do WhatsApp usando uma caixa de entrada do WhatsApp Cloud API ou Twilio WhatsApp. Evolution WhatsApp não é suportado."
+      },
+      "EMAIL": {
+        "TITLE": "Campanhas de E-mail",
+        "DESCRIPTION": "Envie campanhas de e-mail HTML usando uma caixa de entrada Resend com rastreamento completo de entrega."
       }
     }
   }

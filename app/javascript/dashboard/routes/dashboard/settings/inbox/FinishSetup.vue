@@ -62,6 +62,10 @@ const isWhatsAppEmbeddedSignup = computed(() => {
   );
 });
 
+const isAResendChannel = computed(() => {
+  return isAnEmailChannel.value && currentInbox.value.provider === 'resend';
+});
+
 const message = computed(() => {
   if (isATwilioChannel.value) {
     return `${t('INBOX_MGMT.FINISH.MESSAGE')}. ${t(
@@ -94,6 +98,12 @@ const message = computed(() => {
   if (isWhatsAppEmbeddedSignup.value) {
     return `${t('INBOX_MGMT.FINISH.MESSAGE')}. ${t(
       'INBOX_MGMT.FINISH.WHATSAPP_QR_INSTRUCTION'
+    )}`;
+  }
+
+  if (isAResendChannel.value) {
+    return `${t('INBOX_MGMT.FINISH.MESSAGE')}. ${t(
+      'INBOX_MGMT.ADD.RESEND.API_CALLBACK.SUBTITLE'
     )}`;
   }
 
@@ -223,6 +233,15 @@ onMounted(() => {
             lang="html"
             :script="currentInbox.callback_webhook_url"
           />
+        </div>
+        <div v-if="isAResendChannel" class="w-[50%] max-w-[50%] ml-[25%]">
+          <p class="mt-8 font-medium text-n-slate-11">
+            {{ $t('INBOX_MGMT.ADD.RESEND.API_CALLBACK.WEBHOOK_URL') }}
+          </p>
+          <woot-code lang="html" :script="currentInbox.callback_webhook_url" />
+          <p class="mt-4 text-sm text-n-slate-11">
+            {{ $t('INBOX_MGMT.ADD.RESEND.API_CALLBACK.SUBTITLE') }}
+          </p>
         </div>
         <EmailInboxFinish
           v-if="isAnEmailChannel && !currentInbox.provider"

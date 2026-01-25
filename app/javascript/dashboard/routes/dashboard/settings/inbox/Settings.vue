@@ -16,6 +16,7 @@ import GoogleReauthorize from './channels/google/Reauthorize.vue';
 import WhatsappReauthorize from './channels/whatsapp/Reauthorize.vue';
 import EvolutionSettings from './evolution/EvolutionSettings.vue';
 import InboxMigrationSettings from './migration/MigrationSettings.vue';
+import ResendSettings from './resend/ResendSettings.vue';
 import InboxHealthAPI from 'dashboard/api/inboxHealth';
 import PreChatFormSettings from './PreChatForm/Settings.vue';
 import WeeklyAvailability from './components/WeeklyAvailability.vue';
@@ -59,6 +60,7 @@ export default {
     AccountHealth,
     EvolutionSettings,
     InboxMigrationSettings,
+    ResendSettings,
   },
   mixins: [inboxMixin],
   setup() {
@@ -161,7 +163,7 @@ export default {
         this.isALineChannel ||
         this.isAPIInbox ||
         this.isAVoiceChannel ||
-        (this.isAnEmailChannel && !this.inbox.provider) ||
+        this.isAnEmailChannel ||
         this.shouldShowWhatsAppConfiguration ||
         this.isAWebWidgetInbox
       ) {
@@ -201,6 +203,16 @@ export default {
           {
             key: 'evolution',
             name: this.$t('INBOX_MGMT.TABS.EVOLUTION'),
+          },
+        ];
+      }
+
+      if (this.isResendInbox) {
+        visibleToAllChannelTabs = [
+          ...visibleToAllChannelTabs,
+          {
+            key: 'resend',
+            name: this.$t('INBOX_MGMT.TABS.RESEND'),
           },
         ];
       }
@@ -321,6 +333,9 @@ export default {
         this.isEmbeddedSignupWhatsApp &&
         this.inbox.reauthorization_required
       );
+    },
+    isResendInbox() {
+      return this.isAnEmailChannel && this.inbox.provider === 'resend';
     },
     whatsappRegistrationIncomplete() {
       if (
@@ -982,6 +997,9 @@ export default {
       </div>
       <div v-if="selectedTabKey === 'evolution'" class="mx-8">
         <EvolutionSettings :inbox="inbox" />
+      </div>
+      <div v-if="selectedTabKey === 'resend'">
+        <ResendSettings :inbox="inbox" />
       </div>
       <div v-if="selectedTabKey === 'migration'" class="mx-8">
         <InboxMigrationSettings :inbox="inbox" />

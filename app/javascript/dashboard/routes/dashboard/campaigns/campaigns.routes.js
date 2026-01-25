@@ -4,6 +4,7 @@ import CampaignsPageRouteView from './pages/CampaignsPageRouteView.vue';
 import LiveChatCampaignsPage from './pages/LiveChatCampaignsPage.vue';
 import SMSCampaignsPage from './pages/SMSCampaignsPage.vue';
 import WhatsAppCampaignsPage from './pages/WhatsAppCampaignsPage.vue';
+import EmailCampaignsPage from './pages/EmailCampaignsPage.vue';
 import CampaignsGettingStartedPage from './pages/CampaignsGettingStartedPage.vue';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 
@@ -61,6 +62,12 @@ const campaignsRoutes = {
             featureFlag: FEATURE_FLAGS.WHATSAPP_CAMPAIGNS,
           },
           component: WhatsAppCampaignsPage,
+        },
+        {
+          path: 'email',
+          name: 'campaigns_email_index',
+          meta,
+          component: EmailCampaignsPage,
         },
         {
           path: 'getting-started',
