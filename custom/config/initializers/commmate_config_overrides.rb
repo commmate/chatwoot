@@ -70,5 +70,8 @@ module CommMateConfigOverrides
 end
 
 Rails.application.config.after_initialize do
+  # Skip in test environment to avoid interfering with test expectations
+  next if Rails.env.test?
+
   CommMateConfigOverrides.apply_overrides
 end

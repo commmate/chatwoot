@@ -24,6 +24,9 @@ end
 
 # Override default branding
 Rails.application.config.after_initialize do
+  # Skip in test environment to avoid interfering with test expectations
+  next if Rails.env.test?
+
   branding = CommMate::Branding.config
 
   next if branding.blank?
