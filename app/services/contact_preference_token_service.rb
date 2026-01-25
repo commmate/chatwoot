@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # CommMate: Token service for contact preference management
 # Generates secure JWT tokens for public preference pages
 class ContactPreferenceTokenService < BaseTokenService

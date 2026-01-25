@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ContactDrop < BaseDrop
   def name
     @obj.try(:name).try(:split).try(:map, &:capitalize).try(:join, ' ')
