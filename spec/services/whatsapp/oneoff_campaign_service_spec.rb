@@ -90,7 +90,8 @@ describe Whatsapp::OneoffCampaignService do
         contact_with_label2.update_labels([label2.title])
         contact_with_both_labels.update_labels([label1.title, label2.title])
 
-        expect(whatsapp_channel).to receive(:send_template).exactly(3).times
+        expect(whatsapp_channel).to receive(:send_template_with_result).exactly(3).times
+          .and_return({ ok: true, message_id: 'test_id', error: nil })
 
         described_class.new(campaign: campaign).perform
       end
@@ -99,7 +100,7 @@ describe Whatsapp::OneoffCampaignService do
         contact_without_phone = create(:contact, account: account, phone_number: nil)
         contact_without_phone.update_labels([label1.title])
 
-        expect(whatsapp_channel).not_to receive(:send_template)
+        expect(whatsapp_channel).not_to receive(:send_template_with_result)
 
         described_class.new(campaign: campaign).perform
       end
@@ -119,7 +120,7 @@ describe Whatsapp::OneoffCampaignService do
         contact = create(:contact, :with_phone_number, account: account)
         contact.update_labels([label1.title])
 
-        expect(whatsapp_channel).to receive(:send_template).with(
+        expect(whatsapp_channel).to receive(:send_template_with_result).with(
           contact.phone_number,
           hash_including(
             name: 'ticket_status_updated',
@@ -134,9 +135,8 @@ describe Whatsapp::OneoffCampaignService do
                 )
               )
             )
-          ),
-          nil
-        )
+          )
+        ).and_return({ ok: true, message_id: 'test_id', error: nil })
 
         described_class.new(campaign: campaign).perform
       end
@@ -151,30 +151,34 @@ describe Whatsapp::OneoffCampaignService do
 
         expect(Rails.logger).to receive(:error)
           .with("Skipping contact #{contact.name} - no template_params found for WhatsApp campaign")
-        expect(whatsapp_channel).not_to receive(:send_template)
+        expect(whatsapp_channel).not_to receive(:send_template_with_result)
 
         described_class.new(campaign: campaign).perform
       end
     end
 
-    context 'when send_template raises an error' do
-      it 'logs error and continues processing remaining contacts' do
+    context 'when send_template_with_result returns an error' do
+      it 'records error and continues processing remaining contacts' do
         contact_error, contact_success = create_list(:contact, 2, :with_phone_number, account: account)
         contact_error.update_labels([label1.title])
         contact_success.update_labels([label1.title])
-        error_message = 'WhatsApp API error'
 
-        allow(whatsapp_channel).to receive(:send_template).and_return(nil)
+        # First contact fails, second succeeds
+        allow(whatsapp_channel).to receive(:send_template_with_result)
+          .with(contact_error.phone_number, anything)
+          .and_return({ ok: false, message_id: nil, error: { code: 100, message: 'WhatsApp API error', details: nil } })
 
-        expect(whatsapp_channel).to receive(:send_template).with(contact_error.phone_number, anything, nil).and_raise(StandardError, error_message)
-        expect(whatsapp_channel).to receive(:send_template).with(contact_success.phone_number, anything, nil).once
-
-        expect(Rails.logger).to receive(:error)
-          .with("Failed to send WhatsApp template message to #{contact_error.phone_number}: #{error_message}")
-        expect(Rails.logger).to receive(:error).with(/Backtrace:/)
+        allow(whatsapp_channel).to receive(:send_template_with_result)
+          .with(contact_success.phone_number, anything)
+          .and_return({ ok: true, message_id: 'success_id', error: nil })
 
         described_class.new(campaign: campaign).perform
+
         expect(campaign.reload.completed?).to be true
+        # The delivery report should have 1 success and 1 failure
+        report = campaign.campaign_delivery_reports.last
+        expect(report.succeeded).to eq(1)
+        expect(report.failed).to eq(1)
       end
     end
 
@@ -230,7 +234,8 @@ describe Whatsapp::OneoffCampaignService do
 
         original_params = campaign.template_params.deep_dup
 
-        allow(whatsapp_channel).to receive(:send_template)
+        allow(whatsapp_channel).to receive(:send_template_with_result)
+          .and_return({ ok: true, message_id: 'test_id', error: nil })
         described_class.new(campaign: campaign).perform
 
         # Original params should remain unchanged
@@ -260,7 +265,8 @@ describe Whatsapp::OneoffCampaignService do
         contact = create(:contact, :with_phone_number, account: account, name: nil)
         contact.update_labels([label1.title])
 
-        allow(whatsapp_channel).to receive(:send_template)
+        allow(whatsapp_channel).to receive(:send_template_with_result)
+          .and_return({ ok: true, message_id: 'test_id', error: nil })
 
         # Should not raise error, ContactDrop handles nil names
         expect { described_class.new(campaign: campaign).perform }.not_to raise_error
@@ -271,7 +277,8 @@ describe Whatsapp::OneoffCampaignService do
         contact = create(:contact, :with_phone_number, account: account, name: 'John')
         contact.update_labels([label1.title])
 
-        allow(whatsapp_channel).to receive(:send_template)
+        allow(whatsapp_channel).to receive(:send_template_with_result)
+          .and_return({ ok: true, message_id: 'test_id', error: nil })
 
         # Should not raise error, just use original string
         expect { described_class.new(campaign: campaign).perform }.not_to raise_error
