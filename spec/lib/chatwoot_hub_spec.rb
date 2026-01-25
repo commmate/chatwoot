@@ -17,12 +17,12 @@ describe ChatwootHub do
     end
 
     it 'will not send instance metrics when telemetry is disabled' do
-      version = '1.1.1'
       with_modified_env DISABLE_TELEMETRY: 'true' do
-        allow(RestClient).to receive(:post).and_return({ version: version }.to_json)
-        expect(described_class.sync_with_hub['version']).to eq version
-        expect(RestClient).to have_received(:post).with(described_class::PING_URL,
-                                                        described_class.instance_config.to_json, { content_type: :json, accept: :json })
+        allow(RestClient).to receive(:post)
+        # CommMate: When telemetry is disabled, sync_with_hub returns empty hash
+        # and does not make any external calls
+        expect(described_class.sync_with_hub).to eq({})
+        expect(RestClient).not_to have_received(:post)
       end
     end
 
