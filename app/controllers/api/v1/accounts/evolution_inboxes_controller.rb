@@ -10,35 +10,30 @@
 # settings_inboxes_manage permission.
 #
 class Api::V1::Accounts::EvolutionInboxesController < Api::V1::Accounts::BaseController
+  include EvolutionInboxHelper
+  include EvolutionPhoneHelper
+
   before_action :check_admin_authorization!, only: [:create]
-  before_action :validate_evolution_enabled!, except: [:status]
   before_action :fetch_inbox, except: [:create, :status]
   before_action :authorize_inbox_update!, except: [:create, :status]
   before_action :validate_evolution_inbox!, except: [:create, :status]
 
   # POST /api/v1/accounts/:account_id/evolution/inboxes
-  # Creates a new Evolution-backed WhatsApp inbox (Baileys)
   def create
     provisioner = EvolutionApi::InboxProvisioner.new(
       account: Current.account,
       inbox_name: provision_params[:inbox_name],
       user: Current.user
     )
-
     @inbox = provisioner.provision!
     render json: inbox_response(@inbox), status: :created
   rescue EvolutionApi::InboxProvisioner::ProvisioningError => e
-    Rails.logger.error("Evolution inbox provisioning failed: #{e.message}")
-    Rails.logger.error(e.backtrace.join("\n")) if e.backtrace.present?
-    render json: { error: format_error_message(e) }, status: :unprocessable_entity
+    handle_provisioning_error(e)
   rescue StandardError => e
-    Rails.logger.error("Unexpected error during Evolution inbox provisioning: #{e.message}")
-    Rails.logger.error(e.backtrace.join("\n")) if e.backtrace.present?
-    render json: { error: "An unexpected error occurred: #{e.message}" }, status: :internal_server_error
+    handle_unexpected_error(e)
   end
 
   # GET /api/v1/accounts/:account_id/evolution/inboxes/:inbox_id/chatwoot
-  # Returns Evolution's Chatwoot integration settings
   def chatwoot_settings
     settings = evolution_client.find_chatwoot_integration(instance_name: evolution_instance_name)
     render json: sanitize_chatwoot_settings(settings)
@@ -47,15 +42,11 @@ class Api::V1::Accounts::EvolutionInboxesController < Api::V1::Accounts::BaseCon
   end
 
   # PUT /api/v1/accounts/:account_id/evolution/inboxes/:inbox_id/chatwoot
-  # Updates Evolution's Chatwoot integration settings (excluding fixed fields)
   def update_chatwoot_settings
-    chatwoot_config = build_chatwoot_update_config
-
     evolution_client.set_chatwoot_integration(
       instance_name: evolution_instance_name,
-      chatwoot_config: chatwoot_config
+      chatwoot_config: build_chatwoot_update_config
     )
-
     settings = evolution_client.find_chatwoot_integration(instance_name: evolution_instance_name)
     render json: sanitize_chatwoot_settings(settings)
   rescue EvolutionApi::Client::ApiError => e
@@ -63,97 +54,67 @@ class Api::V1::Accounts::EvolutionInboxesController < Api::V1::Accounts::BaseCon
   end
 
   # GET /api/v1/accounts/:account_id/evolution/inboxes/:inbox_id/connection
-  # Returns the Evolution instance connection state
   def connection
-    state = evolution_client.connection_state(instance_name: evolution_instance_name)
-    render json: state
+    render json: evolution_client.connection_state(instance_name: evolution_instance_name)
   rescue EvolutionApi::Client::ApiError => e
     render json: { error: e.message }, status: :unprocessable_entity
   end
 
   # GET /api/v1/accounts/:account_id/evolution/inboxes/:inbox_id/qrcode
-  # Returns QR code for Baileys instances to connect
   def qrcode
-    qr_data = evolution_client.connect_instance(instance_name: evolution_instance_name)
-    render json: qr_data
+    render json: evolution_client.connect_instance(instance_name: evolution_instance_name)
   rescue EvolutionApi::Client::ApiError => e
     render json: { error: e.message }, status: :unprocessable_entity
   end
 
   # POST /api/v1/accounts/:account_id/evolution/inboxes/:inbox_id/enable_integration
-  # Enables Evolution→Chatwoot integration after WhatsApp connection (Baileys)
-  # This should be called after the user scans the QR code and WhatsApp is connected
   def enable_integration
-    # Verify the instance is connected before enabling integration
-    state = evolution_client.connection_state(instance_name: evolution_instance_name)
-    unless state.dig('instance', 'state') == 'open'
-      render json: { error: 'WhatsApp is not connected. Please scan the QR code first.' }, status: :unprocessable_entity
-      return
-    end
+    return render_not_connected_error unless whatsapp_connected?
 
-    # Fetch instance info to get the connected phone number
     update_phone_number_from_instance
-
-    # Enable Chatwoot integration with autoCreate:false (we already created the inbox)
     evolution_client.set_chatwoot_integration(
       instance_name: evolution_instance_name,
       chatwoot_config: build_enable_integration_config
     )
-
-    # Store which user's token is being used
     persist_evolution_token_binding!
-
     render json: { message: 'Integration enabled successfully', connected: true }
   rescue EvolutionApi::Client::ApiError => e
     render json: { error: e.message }, status: :unprocessable_entity
   end
 
   # POST /api/v1/accounts/:account_id/evolution/inboxes/:inbox_id/restart
-  # Restarts the Evolution instance
   def restart
-    result = evolution_client.restart_instance(instance_name: evolution_instance_name)
-    render json: result
+    render json: evolution_client.restart_instance(instance_name: evolution_instance_name)
   rescue EvolutionApi::Client::ApiError => e
     render json: { error: e.message }, status: :unprocessable_entity
   end
 
   # POST /api/v1/accounts/:account_id/evolution/inboxes/:inbox_id/logout
-  # Disconnects the Evolution instance from WhatsApp (logout)
   def logout
     result = evolution_client.logout_instance(instance_name: evolution_instance_name)
-
-    # Clear the phone number since the user may reconnect with a different WhatsApp account
     clear_phone_number_from_inbox
-
     render json: result
   rescue EvolutionApi::Client::ApiError => e
     render json: { error: e.message }, status: :unprocessable_entity
   end
 
   # POST /api/v1/accounts/:account_id/evolution/inboxes/:inbox_id/refresh
-  # Refreshes the connection state (fetches current state from Evolution)
   def refresh
     state = evolution_client.connection_state(instance_name: evolution_instance_name)
-
-    # If connected, fetch and update the phone number
     update_phone_number_from_instance if state.dig('instance', 'state') == 'open'
-
     render json: state
   rescue EvolutionApi::Client::ApiError => e
     render json: { error: e.message }, status: :unprocessable_entity
   end
 
   # GET /api/v1/accounts/:account_id/evolution/inboxes/:inbox_id/instance_settings
-  # Returns instance settings (reject calls, groups ignore, always online, etc.)
   def instance_settings
-    settings = evolution_client.find_settings(instance_name: evolution_instance_name)
-    render json: settings
+    render json: evolution_client.find_settings(instance_name: evolution_instance_name)
   rescue EvolutionApi::Client::ApiError => e
     render json: { error: e.message }, status: :unprocessable_entity
   end
 
   # PUT /api/v1/accounts/:account_id/evolution/inboxes/:inbox_id/instance_settings
-  # Updates instance settings
   def update_instance_settings
     settings = evolution_client.set_settings(
       instance_name: evolution_instance_name,
@@ -165,32 +126,23 @@ class Api::V1::Accounts::EvolutionInboxesController < Api::V1::Accounts::BaseCon
   end
 
   # POST /api/v1/accounts/:account_id/evolution/inboxes/:inbox_id/reauthenticate
-  # Re-authenticates the Evolution integration with the current user's token.
-  # Useful when the original token owner's account is deleted or to transfer ownership.
   def reauthenticate
-    chatwoot_config = build_chatwoot_update_config
     evolution_client.set_chatwoot_integration(
       instance_name: evolution_instance_name,
-      chatwoot_config: chatwoot_config
+      chatwoot_config: build_chatwoot_update_config
     )
     persist_evolution_token_binding!
-
     render json: { message: I18n.t('evolution.reauthenticate_success') }
   rescue EvolutionApi::Client::ApiError => e
     render json: { error: e.message }, status: :unprocessable_entity
   end
 
   # GET /api/v1/accounts/:account_id/evolution/status
-  # Returns whether Evolution API is enabled, configured, and healthy
   def status
-    enabled = evolution_enabled?
-    configured = enabled && evolution_configured?
-    healthy = configured && check_evolution_health
-
     render json: {
-      enabled: enabled,
-      configured: configured,
-      healthy: healthy
+      enabled: evolution_enabled?,
+      configured: evolution_enabled? && evolution_configured?,
+      healthy: evolution_enabled? && evolution_configured? && check_evolution_health
     }
   end
 
@@ -204,53 +156,10 @@ class Api::V1::Accounts::EvolutionInboxesController < Api::V1::Accounts::BaseCon
     authorize @inbox, :update?
   end
 
-  def validate_evolution_enabled!
-    return if evolution_enabled?
-
-    render json: { error: 'Evolution API is not enabled for this installation' }, status: :forbidden
-  end
-
-  def evolution_enabled?
-    config = InstallationConfig.find_by(name: 'EVOLUTION_API_ENABLED')
-    config&.value == true || config&.value == 'true'
-  end
-
-  def evolution_configured?
-    url = InstallationConfig.find_by(name: 'EVOLUTION_API_URL')&.value
-    key = InstallationConfig.find_by(name: 'EVOLUTION_API_KEY')&.value
-    url.present? && key.present?
-  end
-
-  def check_evolution_health
-    EvolutionApi::Client.new.health_check
-  rescue StandardError
-    false
-  end
-
   def fetch_inbox
     inbox_id = params[:inbox_id] || params[:id]
     @inbox = Current.account.inboxes.find(inbox_id)
     authorize @inbox, :show?
-  end
-
-  def validate_evolution_inbox!
-    return if evolution_inbox?
-
-    render json: { error: 'This inbox is not an Evolution API inbox' }, status: :unprocessable_entity
-  end
-
-  def evolution_inbox?
-    return false unless @inbox.channel_type == 'Channel::Api'
-
-    evolution_instance_name.present?
-  end
-
-  def evolution_instance_name
-    @inbox.channel.additional_attributes&.dig('evolution_instance_name')
-  end
-
-  def evolution_client
-    @evolution_client ||= EvolutionApi::Client.new
   end
 
   def provision_params
@@ -259,164 +168,54 @@ class Api::V1::Accounts::EvolutionInboxesController < Api::V1::Accounts::BaseCon
 
   def chatwoot_update_params
     params.permit(
-      :sign_msg,
-      :sign_delimiter,
-      :reopen_conversation,
-      :conversation_pending,
-      :merge_brazil_contacts,
-      :import_contacts,
-      :import_messages,
-      :days_limit_import_messages
+      :sign_msg, :sign_delimiter, :reopen_conversation, :conversation_pending,
+      :merge_brazil_contacts, :import_contacts, :import_messages, :days_limit_import_messages
     )
   end
 
   def instance_settings_params
     permitted = %i[reject_call msg_call groups_ignore always_online read_messages read_status sync_full_history]
-
-    if params[:evolution_inbox].present?
-      params.require(:evolution_inbox).permit(*permitted).to_h.symbolize_keys
-    else
-      params.permit(*permitted).to_h.symbolize_keys
-    end
+    source = params[:evolution_inbox].present? ? params.require(:evolution_inbox) : params
+    source.permit(*permitted).to_h.symbolize_keys
   end
 
   def build_chatwoot_update_config
-    config = chatwoot_update_params.to_h.symbolize_keys
-
-    # Add fixed fields that should never change (resolved from current installation)
-    config[:url] = chatwoot_reachable_url
-    config[:account_id] = Current.account.id
-    config[:token] = current_user_token
-    config[:name_inbox] = @inbox.name
-    config[:auto_create] = false
-
-    config
-  end
-
-  def build_enable_integration_config
-    {
+    chatwoot_update_params.to_h.symbolize_keys.merge(
       url: chatwoot_reachable_url,
       account_id: Current.account.id,
       token: current_user_token,
       name_inbox: @inbox.name,
-      auto_create: false,
-      enabled: true,
-      sign_msg: true,
-      reopen_conversation: true,
-      conversation_pending: false,
-      merge_brazil_contacts: true,
-      import_contacts: true,
-      import_messages: true,
-      days_limit_import_messages: 3
-    }
-  end
-
-  # Returns a Chatwoot URL reachable by Evolution API
-  def chatwoot_reachable_url
-    if Rails.env.development?
-      frontend_url = ENV.fetch('FRONTEND_URL', nil)
-      if frontend_url&.include?('localhost') || frontend_url&.include?('127.0.0.1')
-        host_ip = `ipconfig getifaddr en0 2>/dev/null`.strip
-        host_ip = '192.168.0.22' if host_ip.blank?
-        "http://#{host_ip}:3000"
-      else
-        frontend_url
-      end
-    else
-      ENV.fetch('FRONTEND_URL', nil) || Rails.application.routes.url_helpers.root_url
-    end
-  end
-
-  def current_user_access_token
-    @current_user_access_token ||= Current.user.access_token || Current.user.create_access_token
-  end
-
-  def current_user_token
-    current_user_access_token.token
-  end
-
-  # Persists the current user's access token binding in the inbox channel's additional_attributes.
-  # This allows tracking which user's token is being used by Evolution.
-  def persist_evolution_token_binding!
-    access_token = current_user_access_token
-    current_attrs = @inbox.channel.additional_attributes || {}
-
-    @inbox.channel.update!(
-      additional_attributes: current_attrs.merge(
-        'evolution_chatwoot_access_token_id' => access_token.id,
-        'evolution_chatwoot_token_owner_id' => Current.user.id,
-        'evolution_chatwoot_token_rotated_at' => Time.current.iso8601
-      )
+      auto_create: false
     )
   end
 
-  def sanitize_chatwoot_settings(settings)
-    settings = settings.dup if settings.is_a?(Hash)
-    settings&.except('token', :token)
-  end
-
-  def inbox_response(inbox)
+  def build_enable_integration_config
     {
-      id: inbox.id,
-      name: inbox.name,
-      channel_type: inbox.channel_type,
-      evolution: {
-        instance_name: inbox.channel.additional_attributes['evolution_instance_name'],
-        channel: inbox.channel.additional_attributes['evolution_channel'],
-        url: inbox.channel.additional_attributes['evolution_url']
-      }
+      url: chatwoot_reachable_url, account_id: Current.account.id, token: current_user_token,
+      name_inbox: @inbox.name, auto_create: false, enabled: true, sign_msg: true,
+      reopen_conversation: true, conversation_pending: false, merge_brazil_contacts: true,
+      import_contacts: true, import_messages: true, days_limit_import_messages: 3
     }
   end
 
-  def format_error_message(error)
-    message = error.message
-
-    if message.include?('Validation failed:')
-      message.sub(/^.*Validation failed:\s*/, 'Validation error: ')
-    elsif message.include?('Failed to provision Evolution inbox:')
-      message
-    else
-      "Failed to create Evolution inbox: #{message}"
-    end
+  def whatsapp_connected?
+    state = evolution_client.connection_state(instance_name: evolution_instance_name)
+    state.dig('instance', 'state') == 'open'
   end
 
-  # Fetches instance info from Evolution and stores the phone number in additional_attributes
-  def update_phone_number_from_instance
-    instance_info = evolution_client.fetch_instance(instance_name: evolution_instance_name)
-
-    # Handle both array and hash responses
-    instance_data = instance_info.is_a?(Array) ? instance_info.first : instance_info
-
-    # Extract phone number from ownerJid (format: 5511999999999@s.whatsapp.net)
-    owner_jid = instance_data&.dig('instance', 'ownerJid') ||
-                instance_data&.dig('ownerJid') ||
-                instance_data&.dig('owner') ||
-                instance_data&.dig('number')
-
-    return if owner_jid.blank?
-
-    # Remove @s.whatsapp.net suffix and format with + prefix
-    phone_number = owner_jid.to_s.split('@').first
-    return if phone_number.blank?
-
-    formatted_phone = phone_number.start_with?('+') ? phone_number : "+#{phone_number}"
-
-    # Update the channel's additional_attributes with the phone number
-    current_attrs = @inbox.channel.additional_attributes || {}
-    @inbox.channel.update!(additional_attributes: current_attrs.merge('phone_number' => formatted_phone))
-  rescue StandardError => e
-    # Don't fail the whole operation if phone number extraction fails
-    Rails.logger.warn("[Evolution] Failed to extract phone number: #{e.message}")
+  def render_not_connected_error
+    render json: { error: 'WhatsApp is not connected. Please scan the QR code first.' }, status: :unprocessable_entity
   end
 
-  # Clears the phone number from additional_attributes (called on logout/disconnect)
-  def clear_phone_number_from_inbox
-    current_attrs = @inbox.channel.additional_attributes || {}
-    return if current_attrs['phone_number'].blank?
+  def handle_provisioning_error(error)
+    Rails.logger.error("Evolution inbox provisioning failed: #{error.message}")
+    Rails.logger.error(error.backtrace.join("\n")) if error.backtrace.present?
+    render json: { error: format_error_message(error) }, status: :unprocessable_entity
+  end
 
-    current_attrs.delete('phone_number')
-    @inbox.channel.update!(additional_attributes: current_attrs)
-  rescue StandardError => e
-    Rails.logger.warn("[Evolution] Failed to clear phone number: #{e.message}")
+  def handle_unexpected_error(error)
+    Rails.logger.error("Unexpected error during Evolution inbox provisioning: #{error.message}")
+    Rails.logger.error(error.backtrace.join("\n")) if error.backtrace.present?
+    render json: { error: "An unexpected error occurred: #{error.message}" }, status: :internal_server_error
   end
 end

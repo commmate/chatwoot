@@ -9,4 +9,3 @@ Rails.application.config.after_initialize do
   I18n.load_path += Dir[custom_locale_path.join('*.yml')]
   I18n.reload!
 end
-

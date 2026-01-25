@@ -1,55 +1,72 @@
 # frozen_string_literal: true
 
+# CommMate branding rake tasks
+module CommMateBrandingHelper
+  BRANDING_CONFIG = {
+    'INSTALLATION_NAME' => 'CommMate',
+    'BRAND_NAME' => 'CommMate',
+    'BRAND_URL' => 'https://commmate.com',
+    'WIDGET_BRAND_URL' => 'https://commmate.com',
+    'TERMS_URL' => 'https://commmate.com/terms',
+    'PRIVACY_URL' => 'https://commmate.com/privacy',
+    'LOGO' => '/brand-assets/logo-full.png',
+    'LOGO_DARK' => '/brand-assets/logo-full-dark.png',
+    'LOGO_THUMBNAIL' => '/brand-assets/logo_thumbnail.png'
+  }.freeze
+
+  VERIFY_KEYS = %w[
+    INSTALLATION_NAME BRAND_NAME BRAND_URL
+    LOGO LOGO_DARK LOGO_THUMBNAIL
+  ].freeze
+
+  class << self
+    def apply_branding
+      BRANDING_CONFIG.each do |name, value|
+        InstallationConfig.find_or_create_by!(name: name).update!(value: value)
+      end
+      InstallationConfig.where(name: 'IS_ENTERPRISE').delete_all
+    end
+
+    def verify_branding
+      VERIFY_KEYS.each { |key| verify_config(key) }
+      verify_enterprise_disabled
+    end
+
+    private
+
+    def verify_config(name)
+      value = InstallationConfig.find_by(name: name)&.value
+      status = commmate_branded?(value) ? '✅' : '❌'
+      puts "#{status} #{name.titleize}: #{value || 'NOT SET'}"
+    end
+
+    def commmate_branded?(value)
+      value&.include?('CommMate') || value&.include?('commmate') || value&.include?('brand-assets')
+    end
+
+    def verify_enterprise_disabled
+      is_enterprise = InstallationConfig.exists?(name: 'IS_ENTERPRISE')
+      status = is_enterprise ? '❌' : '✅'
+      message = is_enterprise ? 'ENABLED (should be disabled)' : 'Disabled'
+      puts "#{status} SSO/Enterprise: #{message}"
+    end
+  end
+end
+
 namespace :commmate do
   desc 'Apply CommMate branding to database'
   task branding: :environment do
     puts '🎨 Applying CommMate branding...'
-    
-    begin
-      # Update branding (idempotent - safe to run multiple times)
-      InstallationConfig.find_or_create_by!(name: 'INSTALLATION_NAME').update!(value: 'CommMate')
-      InstallationConfig.find_or_create_by!(name: 'BRAND_NAME').update!(value: 'CommMate')
-      
-      # Update URLs
-      InstallationConfig.find_or_create_by!(name: 'BRAND_URL').update!(value: 'https://commmate.com')
-      InstallationConfig.find_or_create_by!(name: 'WIDGET_BRAND_URL').update!(value: 'https://commmate.com')
-      InstallationConfig.find_or_create_by!(name: 'TERMS_URL').update!(value: 'https://commmate.com/terms')
-      InstallationConfig.find_or_create_by!(name: 'PRIVACY_URL').update!(value: 'https://commmate.com/privacy')
-      
-      # Update logos
-      InstallationConfig.find_or_create_by!(name: 'LOGO').update!(value: '/brand-assets/logo-full.png')
-      InstallationConfig.find_or_create_by!(name: 'LOGO_DARK').update!(value: '/brand-assets/logo-full-dark.png')
-      InstallationConfig.find_or_create_by!(name: 'LOGO_THUMBNAIL').update!(value: '/brand-assets/logo_thumbnail.png')
-      
-      # Disable SSO/OAuth
-      InstallationConfig.where(name: 'IS_ENTERPRISE').delete_all
-      
-      puts '✅ CommMate branding applied successfully!'
-    rescue StandardError => e
-      puts "❌ Error applying CommMate branding: #{e.message}"
-      raise
-    end
+    CommMateBrandingHelper.apply_branding
+    puts '✅ CommMate branding applied successfully!'
+  rescue StandardError => e
+    puts "❌ Error applying CommMate branding: #{e.message}"
+    raise
   end
-  
+
   desc 'Verify CommMate branding configuration'
   task verify: :environment do
     puts '🔍 Verifying CommMate branding...'
-    
-    checks = {
-      'Installation Name' => InstallationConfig.find_by(name: 'INSTALLATION_NAME')&.value,
-      'Brand Name' => InstallationConfig.find_by(name: 'BRAND_NAME')&.value,
-      'Brand URL' => InstallationConfig.find_by(name: 'BRAND_URL')&.value,
-      'Logo' => InstallationConfig.find_by(name: 'LOGO')&.value,
-      'Logo Dark' => InstallationConfig.find_by(name: 'LOGO_DARK')&.value,
-      'Logo Thumbnail' => InstallationConfig.find_by(name: 'LOGO_THUMBNAIL')&.value
-    }
-    
-    checks.each do |name, value|
-      status = value&.include?('CommMate') || value&.include?('commmate') || value&.include?('brand-assets') ? '✅' : '❌'
-      puts "#{status} #{name}: #{value || 'NOT SET'}"
-    end
-    
-    is_enterprise = InstallationConfig.exists?(name: 'IS_ENTERPRISE')
-    puts "#{is_enterprise ? '❌' : '✅'} SSO/Enterprise: #{is_enterprise ? 'ENABLED (should be disabled)' : 'Disabled'}"
+    CommMateBrandingHelper.verify_branding
   end
 end
