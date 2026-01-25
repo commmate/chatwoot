@@ -105,7 +105,9 @@ class Evolution::SendOnEvolutionBaileysService
 
   def handle_api_error(error)
     Rails.logger.error("[Evolution Baileys] API error sending message: #{error.message}")
-    Rails.logger.error("[Evolution Baileys] API error details - Status: #{error.status rescue 'N/A'}, Body: #{error.response_body rescue 'N/A'}")
+    status = error.respond_to?(:status) ? error.status : 'N/A'
+    body = error.respond_to?(:response_body) ? error.response_body : 'N/A'
+    Rails.logger.error("[Evolution Baileys] API error details - Status: #{status}, Body: #{body}")
     message.update!(
       status: :failed,
       external_error: error.message
@@ -135,4 +137,3 @@ class Evolution::SendOnEvolutionBaileysService
     @evolution_client ||= EvolutionApi::Client.new
   end
 end
-

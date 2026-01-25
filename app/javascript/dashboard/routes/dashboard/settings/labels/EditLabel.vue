@@ -55,7 +55,8 @@ export default {
       this.title = this.selectedResponse.title;
       this.description = this.selectedResponse.description;
       this.showOnSidebar = this.selectedResponse.show_on_sidebar;
-      this.availableForCampaigns = this.selectedResponse.available_for_campaigns;
+      this.availableForCampaigns =
+        this.selectedResponse.available_for_campaigns;
       this.color = this.selectedResponse.color;
     },
     editLabel() {

@@ -11,6 +11,8 @@ RSpec.describe Account::SignUpEmailValidationService, type: :service do
 
   before do
     allow(GlobalConfigService).to receive(:load).with('BLOCKED_EMAIL_DOMAINS', '').and_return(blocked_domains)
+    # CommMate: Stub the personal email signup config check
+    allow(GlobalConfigService).to receive(:load).with('COMMMATE_ALLOW_PERSONAL_EMAIL_SIGNUP', false).and_return(false)
   end
 
   describe '#perform' do

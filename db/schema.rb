@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_16_100001) do
+ActiveRecord::Schema[7.1].define(version: 2026_01_24_163545) do
   create_schema "auth"
   create_schema "chatwoot"
   create_schema "evolution"
@@ -1088,6 +1088,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_16_100001) do
     t.bigint "account_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "available_for_campaigns", default: false, null: false
   end
 
   create_table "leaves", force: :cascade do |t|
@@ -1639,4 +1640,36 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_16_100001) do
   add_foreign_key "inbox_migrations", "inboxes", column: "destination_inbox_id"
   add_foreign_key "inbox_migrations", "inboxes", column: "source_inbox_id"
   add_foreign_key "inbox_migrations", "users"
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "inboxes", "portals"
+  create_trigger("accounts_after_insert_row_tr", :generated => true, :compatibility => 1).
+      on("accounts").
+      after(:insert).
+      for_each(:row) do
+    "execute format('create sequence IF NOT EXISTS conv_dpid_seq_%s', NEW.id);"
+  end
+
+  create_trigger("conversations_before_insert_row_tr", :generated => true, :compatibility => 1).
+      on("conversations").
+      before(:insert).
+      for_each(:row) do
+    "NEW.display_id := nextval('conv_dpid_seq_' || NEW.account_id);"
+  end
+
+  create_trigger("camp_dpid_before_insert", :generated => true, :compatibility => 1).
+      on("accounts").
+      name("camp_dpid_before_insert").
+      after(:insert).
+      for_each(:row) do
+    "execute format('create sequence IF NOT EXISTS camp_dpid_seq_%s', NEW.id);"
+  end
+
+  create_trigger("campaigns_before_insert_row_tr", :generated => true, :compatibility => 1).
+      on("campaigns").
+      before(:insert).
+      for_each(:row) do
+    "NEW.display_id := nextval('camp_dpid_seq_' || NEW.account_id);"
+  end
+
 end

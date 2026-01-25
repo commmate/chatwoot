@@ -74,8 +74,14 @@ RSpec.describe SlackUnfurlJob do
     end
 
     context 'when another account URL is shared' do
+      let(:expected_body) { { channel: link_shared[:event][:channel] } }
+
       before do
         link_shared[:event][:links][0][:url] = 'https://qa.chatwoot.com/app/accounts/123/conversations/123'
+        # Stub the Slack API call for channel access check
+        stub_request(:post, 'https://slack.com/api/conversations.members')
+          .with(body: expected_body)
+          .to_return(status: 200, body: { 'ok' => true }.to_json, headers: {})
       end
 
       it 'does not unfurl' do

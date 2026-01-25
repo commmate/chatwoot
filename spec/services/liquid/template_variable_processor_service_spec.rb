@@ -169,4 +169,3 @@ describe Liquid::TemplateVariableProcessorService do
     end
   end
 end
-

@@ -21,16 +21,22 @@ export const getUserPermissions = (user, accountId) => {
   if (!accountId || !user?.accounts?.length) {
     // If user has only one account and is admin, assume admin permissions
     // This prevents menu flickering during initial load
-    if (user?.accounts?.length === 1 && user.accounts[0].role === 'administrator') {
+    if (
+      user?.accounts?.length === 1 &&
+      user.accounts[0].role === 'administrator'
+    ) {
       return ['administrator'];
     }
     return [];
   }
-  
+
   const currentAccount = getCurrentAccount(user, accountId) || {};
   const permissions = currentAccount.permissions || [];
   // CommMate: Include 'administrator' in permissions if user has administrator role
-  if (currentAccount.role === 'administrator' && !permissions.includes('administrator')) {
+  if (
+    currentAccount.role === 'administrator' &&
+    !permissions.includes('administrator')
+  ) {
     return ['administrator', ...permissions];
   }
   return permissions;

@@ -44,7 +44,12 @@ RSpec.describe ConversationPolicy, type: :policy do
       let(:inbox) { create(:inbox, account: account) }
       let(:conversation) { create(:conversation, account: account, inbox: inbox) }
 
-      before { create(:inbox_member, user: agent, inbox: inbox) }
+      before do
+        create(:inbox_member, user: agent, inbox: inbox)
+        # CommMate: Grant conversation_manage permission so agent can view conversations
+        # in their accessible inboxes (not just assigned ones)
+        agent.account_users.find_by(account: account).update!(access_permissions: ['conversation_manage'])
+      end
 
       it 'allows access' do
         expect(subject).to permit(agent_context, conversation)
@@ -55,7 +60,12 @@ RSpec.describe ConversationPolicy, type: :policy do
       let(:team) { create(:team, account: account) }
       let(:conversation) { create(:conversation, :with_team, account: account, team: team) }
 
-      before { create(:team_member, team: team, user: agent) }
+      before do
+        create(:team_member, team: team, user: agent)
+        # CommMate: Grant conversation_manage permission so agent can view conversations
+        # via team access (not just assigned ones)
+        agent.account_users.find_by(account: account).update!(access_permissions: ['conversation_manage'])
+      end
 
       it 'allows access' do
         expect(subject).to permit(agent_context, conversation)

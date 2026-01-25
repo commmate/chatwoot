@@ -102,7 +102,7 @@ class Whatsapp::FacebookApiClient
   def create_message_template(business_account_id, template_data)
     url = "#{BASE_URI}/#{@api_version}/#{business_account_id}/message_templates"
     Rails.logger.info "[FacebookApiClient] POST #{url} - starting request..."
-    start_time = Time.now
+    start_time = Time.zone.now
 
     response = HTTParty.post(
       url,
@@ -113,7 +113,7 @@ class Whatsapp::FacebookApiClient
       read_timeout: 60
     )
 
-    elapsed = ((Time.now - start_time) * 1000).round
+    elapsed = ((Time.zone.now - start_time) * 1000).round
     Rails.logger.info "[FacebookApiClient] POST completed in #{elapsed}ms - status: #{response.code}"
 
     handle_response(response, 'Failed to create message template')
@@ -201,11 +201,8 @@ class Whatsapp::FacebookApiClient
   end
 
   def handle_response(response, error_message)
-    return response.parsed_response if response.success?
+    raise "#{error_message}: #{response.body}" unless response.success?
 
-    # Extract user-friendly error message from Meta API response
-    parsed = response.parsed_response rescue nil
-    meta_error = parsed&.dig('error', 'error_user_msg') || parsed&.dig('error', 'message') || response.body
-    raise meta_error
+    response.parsed_response
   end
 end

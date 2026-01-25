@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # CommMate: Public preferences controller for campaign subscription management
 # Allows contacts to manage their label subscriptions via secure token links
 class Public::Api::V1::PreferencesController < PublicController

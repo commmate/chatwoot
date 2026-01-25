@@ -32,4 +32,3 @@ class Liquid::TemplateVariableProcessorService
     string
   end
 end
-
