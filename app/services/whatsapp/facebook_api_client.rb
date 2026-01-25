@@ -201,11 +201,8 @@ class Whatsapp::FacebookApiClient
   end
 
   def handle_response(response, error_message)
-    return response.parsed_response if response.success?
+    raise "#{error_message}: #{response.body}" unless response.success?
 
-    # Extract user-friendly error message from Meta API response
-    parsed = response.parsed_response rescue nil
-    meta_error = parsed&.dig('error', 'error_user_msg') || parsed&.dig('error', 'message') || response.body
-    raise meta_error
+    response.parsed_response
   end
 end
