@@ -5,8 +5,8 @@
 custom_initializers_path = Rails.root.join('custom/config/initializers')
 
 if Dir.exist?(custom_initializers_path)
-  Dir[custom_initializers_path.join('*.rb')].sort.each do |initializer|
-    Rails.logger.info "Loading CommMate initializer: #{File.basename(initializer)}" if Rails.logger
+  Dir[custom_initializers_path.join('*.rb')].each do |initializer|
+    Rails.logger&.info "Loading CommMate initializer: #{File.basename(initializer)}"
     load initializer
   end
 end

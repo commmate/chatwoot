@@ -24,9 +24,9 @@ class Whatsapp::MessageTemplateService
 
   def create_template(template_data)
     template_name = template_data[:name] || template_data['name']
-    Rails.logger.debug "Creating WhatsApp template with payload: #{template_data.to_json}"
+    Rails.logger.debug { "Creating WhatsApp template with payload: #{template_data.to_json}" }
     result = @client.create_message_template(business_account_id, template_data)
-    Rails.logger.debug "Meta API response: #{result}"
+    Rails.logger.debug { "Meta API response: #{result}" }
     { success: true, template: result }
   rescue Net::ReadTimeout, Net::OpenTimeout => e
     # Meta API sometimes times out but still creates the template

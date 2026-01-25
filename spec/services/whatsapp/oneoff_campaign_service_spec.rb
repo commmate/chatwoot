@@ -90,8 +90,9 @@ describe Whatsapp::OneoffCampaignService do
         contact_with_label2.update_labels([label2.title])
         contact_with_both_labels.update_labels([label1.title, label2.title])
 
-        expect(whatsapp_channel).to receive(:send_template_with_result).exactly(3).times
-          .and_return({ ok: true, message_id: 'test_id', error: nil })
+        expect(whatsapp_channel).to receive(:send_template_with_result).exactly(3).times.and_return(
+          { ok: true, message_id: 'test_id', error: nil }
+        )
 
         described_class.new(campaign: campaign).perform
       end
