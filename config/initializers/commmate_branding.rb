@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 # Load CommMate branding configuration
+module CommMate; end
+
 class CommMate::Branding
   class << self
     def config
