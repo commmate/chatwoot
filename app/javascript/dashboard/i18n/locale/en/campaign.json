@@ -314,9 +314,9 @@
           },
           "MESSAGE": {
             "LABEL": "Email Content (HTML)",
-            "PLACEHOLDER": "<h1>Hello {{contact.name}}!</h1>\n<p>Your message here...</p>",
+            "PLACEHOLDER": "<h1>Hello {'{{'} contact.name {'}}'} !</h1>\n<p>Your message here...</p>",
             "ERROR": "Message is required",
-            "HELP": "You can use Liquid variables like {{contact.name}}, {{contact.email}}, {{inbox.name}}"
+            "HELP": "You can use Liquid variables like {'{{'} contact.name {'}}'},  {'{{'} contact.email {'}}'},  {'{{'} inbox.name {'}}'}"
           },
           "PREVIEW": "Preview",
           "EDIT_HTML": "Edit HTML",

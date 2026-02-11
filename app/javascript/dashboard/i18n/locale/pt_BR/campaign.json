@@ -314,9 +314,9 @@
           },
           "MESSAGE": {
             "LABEL": "Conteúdo do E-mail (HTML)",
-            "PLACEHOLDER": "<h1>Olá {{contact.name}}!</h1>\n<p>Sua mensagem aqui...</p>",
+            "PLACEHOLDER": "<h1>Olá {'{{'} contact.name {'}}'} !</h1>\n<p>Sua mensagem aqui...</p>",
             "ERROR": "Mensagem é obrigatória",
-            "HELP": "Você pode usar variáveis Liquid como {{contact.name}}, {{contact.email}}, {{inbox.name}}"
+            "HELP": "Você pode usar variáveis Liquid como {'{{'} contact.name {'}}'},  {'{{'} contact.email {'}}'},  {'{{'} inbox.name {'}}'}"
           },
           "PREVIEW": "Pré-visualizar",
           "EDIT_HTML": "Editar HTML",

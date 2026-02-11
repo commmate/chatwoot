@@ -486,8 +486,8 @@ defineExpose({ openDialog });
                   :placeholder="
                     t('CAMPAIGN.EMAIL.CREATE.FORM.MESSAGE.PLACEHOLDER')
                   "
-                  rows="12"
-                  class="w-full px-3 py-3 font-mono text-sm transition-all duration-200 border rounded-lg resize-y bg-n-alpha-black2 border-n-weak text-n-slate-12 placeholder:text-n-slate-10 focus:border-n-brand focus:outline-none hover:border-n-slate-6"
+                  rows="24"
+                  class="w-full px-3 py-3 font-mono text-sm transition-all duration-200 border rounded-lg resize-y bg-n-alpha-black2 border-n-weak text-n-slate-12 placeholder:text-n-slate-10 focus:border-n-brand focus:outline-none hover:border-n-slate-6 min-h-[400px]"
                   :class="{
                     'border-n-ruby-8 hover:border-n-ruby-9': formErrors.message,
                   }"

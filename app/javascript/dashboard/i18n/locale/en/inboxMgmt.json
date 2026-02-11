@@ -576,10 +576,10 @@
       },
       "RESEND": {
         "TITLE": "Resend Email",
-        "DESC": "Connect your inbox to Resend to send and receive emails with full delivery tracking. Resend provides modern email APIs with high deliverability.",
+        "DESC": "Send email campaigns via Resend API with full delivery tracking. Track opens, clicks, and bounces in real-time. You can optionally configure IMAP to receive replies.",
         "CHANNEL_NAME": {
           "LABEL": "Inbox Name",
-          "PLACEHOLDER": "Enter your inbox name (eg: Support)",
+          "PLACEHOLDER": "Enter your inbox name (eg: Marketing)",
           "ERROR": "Please enter a valid inbox name"
         },
         "API_KEY": {
@@ -590,19 +590,19 @@
         },
         "FROM_EMAIL": {
           "LABEL": "From Email Address",
-          "PLACEHOLDER": "support@mail.example.com",
-          "SUBTITLE": "The email address that will be used to send emails. Must be from a verified domain in Resend.",
+          "PLACEHOLDER": "campaigns@mail.example.com",
+          "SUBTITLE": "The email address used to send emails. Must be from a verified domain in Resend.",
           "ERROR": "Please enter a valid email address"
         },
         "FROM_NAME": {
           "LABEL": "From Name (Optional)",
-          "PLACEHOLDER": "Support Team",
+          "PLACEHOLDER": "Your Company",
           "SUBTITLE": "The name that will appear in the 'From' field of sent emails."
         },
         "SUBMIT_BUTTON": "Create Resend Inbox",
         "API_CALLBACK": {
           "WEBHOOK_URL": "Webhook URL",
-          "SUBTITLE": "Copy this URL and add it to your Resend webhooks at resend.com/webhooks to receive delivery status updates and inbound emails."
+          "SUBTITLE": "Copy this URL and add it to your Resend webhooks at resend.com/webhooks to receive delivery status updates (opens, clicks, bounces)."
         },
         "API": {
           "ERROR_MESSAGE": "We were not able to create the Resend inbox, please try again"

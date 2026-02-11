@@ -1224,6 +1224,10 @@
       "SCRIPT_SETTINGS": "\n      window.chatwootSettings = {options};"
     },
     "EMAIL_PROVIDERS": {
+      "RESEND": {
+        "TITLE": "Resend",
+        "DESCRIPTION": "Enviar e-mails via API Resend com rastreamento de entrega"
+      },
       "MICROSOFT": {
         "TITLE": "Microsoft",
         "DESCRIPTION": "Conectar com Microsoft"

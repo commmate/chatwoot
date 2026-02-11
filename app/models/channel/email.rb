@@ -54,6 +54,7 @@ class Channel::Email < ApplicationRecord
 
   validates :email, uniqueness: true
   validates :forward_to_email, uniqueness: true
+  validate :validate_resend_configuration, on: :create, if: :resend?
 
   before_validation :ensure_forward_to_email, on: :create
 
@@ -81,5 +82,21 @@ class Channel::Email < ApplicationRecord
 
   def ensure_forward_to_email
     self.forward_to_email ||= "#{SecureRandom.hex}@#{account.inbound_email_domain}"
+  end
+
+  def validate_resend_configuration
+    api_key = provider_config&.dig('api_key')
+
+    if api_key.blank?
+      errors.add(:base, 'Resend API key is required')
+      return
+    end
+
+    validator = Resend::InboxValidator.new(api_key: api_key, from_email: email)
+    result = validator.validate
+
+    return if result[:valid]
+
+    errors.add(:base, result[:error])
   end
 end
