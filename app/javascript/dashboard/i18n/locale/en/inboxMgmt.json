@@ -573,6 +573,40 @@
         "SIGN_IN": "Sign in with Google",
         "EMAIL_PLACEHOLDER": "Enter email address",
         "ERROR_MESSAGE": "There was an error connecting to Google, please try again"
+      },
+      "RESEND": {
+        "TITLE": "Resend Email",
+        "DESC": "Send email campaigns via Resend API with full delivery tracking. Track opens, clicks, and bounces in real-time. You can optionally configure IMAP to receive replies.",
+        "CHANNEL_NAME": {
+          "LABEL": "Inbox Name",
+          "PLACEHOLDER": "Enter your inbox name (eg: Marketing)",
+          "ERROR": "Please enter a valid inbox name"
+        },
+        "API_KEY": {
+          "LABEL": "Resend API Key",
+          "PLACEHOLDER": "Enter your Resend API key (re_...)",
+          "SUBTITLE": "Get your API key from your Resend dashboard at resend.com/api-keys",
+          "ERROR": "Please enter a valid API key"
+        },
+        "FROM_EMAIL": {
+          "LABEL": "From Email Address",
+          "PLACEHOLDER": "campaigns@mail.example.com",
+          "SUBTITLE": "The email address used to send emails. Must be from a verified domain in Resend.",
+          "ERROR": "Please enter a valid email address"
+        },
+        "FROM_NAME": {
+          "LABEL": "From Name (Optional)",
+          "PLACEHOLDER": "Your Company",
+          "SUBTITLE": "The name that will appear in the 'From' field of sent emails."
+        },
+        "SUBMIT_BUTTON": "Create Resend Inbox",
+        "API_CALLBACK": {
+          "WEBHOOK_URL": "Webhook URL",
+          "SUBTITLE": "Copy this URL and add it to your Resend webhooks at resend.com/webhooks to receive delivery status updates (opens, clicks, bounces)."
+        },
+        "API": {
+          "ERROR_MESSAGE": "We were not able to create the Resend inbox, please try again"
+        }
       }
     },
     "DETAILS": {
@@ -681,7 +715,8 @@
       "CSAT": "CSAT",
       "WHATSAPP_TEMPLATES": "Templates",
       "EVOLUTION": "Evolution",
-      "MIGRATION": "Migration"
+      "MIGRATION": "Migration",
+      "RESEND": "Resend"
     },
     "MIGRATION": {
       "TITLE": "Migrate Conversations",
@@ -1224,6 +1259,10 @@
       "SCRIPT_SETTINGS": "\n      window.chatwootSettings = {options};"
     },
     "EMAIL_PROVIDERS": {
+      "RESEND": {
+        "TITLE": "Resend",
+        "DESCRIPTION": "Send emails via Resend API with delivery tracking"
+      },
       "MICROSOFT": {
         "TITLE": "Microsoft",
         "DESCRIPTION": "Connect with Microsoft"
@@ -1236,6 +1275,34 @@
         "TITLE": "Other Providers",
         "DESCRIPTION": "Connect with Other Providers"
       }
+    },
+    "RESEND_SETTINGS": {
+      "SECTION_TITLE": "Resend Campaign Settings",
+      "API_KEY_TITLE": "API Key",
+      "API_KEY_SUBTITLE": "Your Resend API key is used to authenticate with the Resend API.",
+      "API_KEY_NOT_CONFIGURED": "No API key configured. Email campaigns will fail without an API key.",
+      "API_KEY_PLACEHOLDER": "Enter your Resend API key (re_xxxxx)",
+      "UPDATE_API_KEY_TITLE": "Update API Key",
+      "UPDATE_API_KEY_SUBTITLE": "Enter a new API key to replace the current one. Get it from your Resend dashboard.",
+      "UPDATE_API_KEY": "Update",
+      "API_KEY_SAVED": "Resend API key saved successfully",
+      "WEBHOOK_URL_TITLE": "Webhook URL",
+      "WEBHOOK_URL_SUBTITLE": "Copy this URL and configure it in your Resend dashboard to receive delivery status updates.",
+      "SIGNING_SECRET_TITLE": "Webhook Signing Secret",
+      "SIGNING_SECRET_SUBTITLE": "This token is used to verify the authenticity of webhook requests.",
+      "UPDATE_SIGNING_SECRET_TITLE": "Update Signing Secret",
+      "UPDATE_SIGNING_SECRET_SUBTITLE": "Enter the signing secret from your Resend webhook configuration.",
+      "SIGNING_SECRET_PLACEHOLDER": "Enter the signing secret here",
+      "UPDATE_SIGNING_SECRET": "Update",
+      "SIGNING_SECRET_SAVED": "Webhook signing secret saved successfully",
+      "SENDER_SETTINGS_TITLE": "Sender Settings",
+      "SENDER_SETTINGS_SUBTITLE": "Configure the email address and sender name for outgoing emails.",
+      "FROM_EMAIL_LABEL": "From Email",
+      "FROM_EMAIL_PLACEHOLDER": "Enter the sender email address",
+      "FROM_NAME_LABEL": "From Name (Optional)",
+      "FROM_NAME_PLACEHOLDER": "Enter the sender name (e.g., Support Team)",
+      "UPDATE_SENDER_SETTINGS": "Update Sender Settings",
+      "SENDER_SETTINGS_SAVED": "Sender settings saved successfully"
     },
     "CHANNELS": {
       "MESSENGER": "Messenger",

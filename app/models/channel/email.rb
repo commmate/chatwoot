@@ -49,10 +49,12 @@ class Channel::Email < ApplicationRecord
   self.table_name = 'channel_email'
   EDITABLE_ATTRS = [:email, :imap_enabled, :imap_login, :imap_password, :imap_address, :imap_port, :imap_enable_ssl,
                     :smtp_enabled, :smtp_login, :smtp_password, :smtp_address, :smtp_port, :smtp_domain, :smtp_enable_starttls_auto,
-                    :smtp_enable_ssl_tls, :smtp_openssl_verify_mode, :smtp_authentication, :provider, :verified_for_sending].freeze
+                    :smtp_enable_ssl_tls, :smtp_openssl_verify_mode, :smtp_authentication, :provider, :verified_for_sending,
+                    { provider_config: {} }].freeze
 
   validates :email, uniqueness: true
   validates :forward_to_email, uniqueness: true
+  validate :validate_resend_configuration, on: :create, if: :resend?
 
   before_validation :ensure_forward_to_email, on: :create
 
@@ -68,6 +70,10 @@ class Channel::Email < ApplicationRecord
     provider == 'google'
   end
 
+  def resend?
+    provider == 'resend'
+  end
+
   def legacy_google?
     imap_enabled && imap_address == 'imap.gmail.com'
   end
@@ -76,5 +82,21 @@ class Channel::Email < ApplicationRecord
 
   def ensure_forward_to_email
     self.forward_to_email ||= "#{SecureRandom.hex}@#{account.inbound_email_domain}"
+  end
+
+  def validate_resend_configuration
+    api_key = provider_config&.dig('api_key')
+
+    if api_key.blank?
+      errors.add(:base, 'Resend API key is required')
+      return
+    end
+
+    validator = Resend::InboxValidator.new(api_key: api_key, from_email: email)
+    result = validator.validate
+
+    return if result[:valid]
+
+    errors.add(:base, result[:error])
   end
 end

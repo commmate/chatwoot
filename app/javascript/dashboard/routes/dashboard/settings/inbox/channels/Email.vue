@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import ForwardToOption from './emailChannels/ForwardToOption.vue';
 import Microsoft from './emailChannels/Microsoft.vue';
 import Google from './emailChannels/Google.vue';
+import Resend from './emailChannels/Resend.vue';
 import ChannelSelector from 'dashboard/components/ChannelSelector.vue';
 import PageHeader from '../../SettingsSubPageHeader.vue';
 
@@ -19,6 +20,13 @@ const isAChatwootInstance = getters['globalConfig/isAChatwootInstance'];
 
 const emailProviderList = computed(() => {
   return [
+    {
+      title: t('INBOX_MGMT.EMAIL_PROVIDERS.RESEND.TITLE'),
+      description: t('INBOX_MGMT.EMAIL_PROVIDERS.RESEND.DESCRIPTION'),
+      isEnabled: true,
+      key: 'resend',
+      icon: 'i-lucide-mail',
+    },
     {
       title: t('INBOX_MGMT.EMAIL_PROVIDERS.MICROSOFT.TITLE'),
       description: t('INBOX_MGMT.EMAIL_PROVIDERS.MICROSOFT.DESCRIPTION'),
@@ -76,5 +84,6 @@ function onClick(emailProvider) {
   </div>
   <Microsoft v-else-if="provider === 'microsoft'" />
   <Google v-else-if="provider === 'google'" />
+  <Resend v-else-if="provider === 'resend'" />
   <ForwardToOption v-else-if="provider === 'other_provider'" />
 </template>

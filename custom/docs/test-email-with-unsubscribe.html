@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Newsletter - CommMate</title>
+  <!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
+  <![endif]-->
+  <style>
+    /* Reset styles */
+    body, table, td, p, a, li, blockquote {
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+    table, td {
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+    }
+    img {
+      -ms-interpolation-mode: bicubic;
+      border: 0;
+      height: auto;
+      line-height: 100%;
+      outline: none;
+      text-decoration: none;
+    }
+    body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+    }
+    a[x-apple-data-detectors] {
+      color: inherit !important;
+      text-decoration: none !important;
+      font-size: inherit !important;
+      font-family: inherit !important;
+      font-weight: inherit !important;
+      line-height: inherit !important;
+    }
+    @media only screen and (max-width: 600px) {
+      .wrapper { width: 100% !important; }
+      .mobile-padding { padding: 20px !important; }
+      .mobile-stack { display: block !important; width: 100% !important; }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f7fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+
+<!-- Preview Text -->
+<div style="display: none; max-height: 0; overflow: hidden;">
+  Hi {{contact.name}}, check out our latest updates and news...
+</div>
+
+<!-- Main Container -->
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f7fa;">
+  <tr>
+    <td align="center" style="padding: 40px 20px;">
+
+      <!-- Email Content -->
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" class="wrapper" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);">
+        
+        <!-- Header -->
+        <tr>
+          <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 40px; text-align: center;">
+            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">
+              📬 Monthly Newsletter
+            </h1>
+            <p style="margin: 12px 0 0; color: rgba(255,255,255,0.9); font-size: 16px; font-weight: 400;">
+              Your latest updates from CommMate
+            </p>
+          </td>
+        </tr>
+
+        <!-- Body Content -->
+        <tr>
+          <td class="mobile-padding" style="padding: 48px 40px;">
+            
+            <!-- Greeting -->
+            <p style="margin: 0 0 24px; color: #1a1a2e; font-size: 18px; line-height: 1.6;">
+              Hi <strong>{{contact.name}}</strong>,
+            </p>
+
+            <p style="margin: 0 0 24px; color: #4a4a68; font-size: 16px; line-height: 1.7;">
+              Thank you for being part of our community! Here are the latest updates and features we've been working on.
+            </p>
+
+            <!-- Feature Box -->
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 32px 0;">
+              <tr>
+                <td style="background-color: #f8f9fc; border-radius: 12px; padding: 24px; border-left: 4px solid #667eea;">
+                  <h3 style="margin: 0 0 12px; color: #1a1a2e; font-size: 18px; font-weight: 600;">
+                    🚀 New Feature: Email Campaigns
+                  </h3>
+                  <p style="margin: 0; color: #6b6b80; font-size: 14px; line-height: 1.6;">
+                    Send beautiful HTML email campaigns to your contacts with our new Resend integration. Track delivery, opens, and clicks in real-time!
+                  </p>
+                </td>
+              </tr>
+            </table>
+
+            <!-- CTA Button -->
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 32px 0;">
+              <tr>
+                <td align="center">
+                  <a href="https://app.commmate.com" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; padding: 16px 40px; border-radius: 50px; box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);">
+                    Explore Now →
+                  </a>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Closing -->
+            <p style="margin: 32px 0 0; color: #4a4a68; font-size: 15px; line-height: 1.7;">
+              If you have any questions, just reply to this email - we're always happy to help!
+            </p>
+
+            <p style="margin: 24px 0 0; color: #1a1a2e; font-size: 15px; line-height: 1.7;">
+              Best regards,<br>
+              <strong>The CommMate Team</strong>
+            </p>
+
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background-color: #f8f9fc; padding: 32px 40px; text-align: center; border-top: 1px solid #e8e8ef;">
+            
+            <!-- Company Info -->
+            <p style="margin: 0 0 16px; color: #6b6b80; font-size: 13px; line-height: 1.6;">
+              © 2026 CommMate. All rights reserved.
+            </p>
+
+            <!-- Divider -->
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 16px 0;">
+              <tr>
+                <td style="border-top: 1px solid #e8e8ef;"></td>
+              </tr>
+            </table>
+
+            <!-- Unsubscribe Section -->
+            <p style="margin: 0 0 8px; color: #9999a8; font-size: 12px; line-height: 1.6;">
+              You're receiving this email because you're subscribed to our newsletter.
+            </p>
+
+            <p style="margin: 0; font-size: 12px; line-height: 1.8;">
+              <!-- Manage Preferences Link -->
+              <a href="{{contact.preference_link}}" style="color: #667eea; text-decoration: none;">
+                Manage Preferences
+              </a>
+              <span style="color: #d1d1d9; padding: 0 8px;">|</span>
+              
+              <!-- Unsubscribe from All Link -->
+              <a href="{{contact.unsubscribe_all_link}}" style="color: #667eea; text-decoration: none;">
+                Unsubscribe from All
+              </a>
+            </p>
+
+          </td>
+        </tr>
+
+      </table>
+
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>
+

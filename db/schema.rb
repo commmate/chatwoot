@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_16_100001) do
+ActiveRecord::Schema[7.1].define(version: 2026_01_25_000001) do
   create_schema "auth"
   create_schema "chatwoot"
   create_schema "evolution"
@@ -28,13 +28,13 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_16_100001) do
 
   # Custom types defined in this database.
   # Note that some types may not work with other database engines. Be careful if changing database.
-  create_enum "public.DeviceMessage", ["ios", "android", "web", "unknown", "desktop"]
-  create_enum "public.DifyBotType", ["chatBot", "textGenerator", "agent", "workflow"]
-  create_enum "public.InstanceConnectionStatus", ["open", "close", "connecting"]
-  create_enum "public.OpenaiBotType", ["assistant", "chatCompletion"]
-  create_enum "public.SessionStatus", ["opened", "closed", "paused"]
-  create_enum "public.TriggerOperator", ["contains", "equals", "startsWith", "endsWith", "regex"]
-  create_enum "public.TriggerType", ["all", "keyword", "none", "advanced"]
+  create_enum "DeviceMessage", ["ios", "android", "web", "unknown", "desktop"]
+  create_enum "DifyBotType", ["chatBot", "textGenerator", "agent", "workflow"]
+  create_enum "InstanceConnectionStatus", ["open", "close", "connecting"]
+  create_enum "OpenaiBotType", ["assistant", "chatCompletion"]
+  create_enum "SessionStatus", ["opened", "closed", "paused"]
+  create_enum "TriggerOperator", ["contains", "equals", "startsWith", "endsWith", "regex"]
+  create_enum "TriggerType", ["all", "keyword", "none", "advanced"]
 
   create_table "access_tokens", force: :cascade do |t|
     t.string "owner_type"
@@ -269,13 +269,16 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_16_100001) do
   create_table "campaign_message_mappings", force: :cascade do |t|
     t.bigint "campaign_delivery_report_id", null: false
     t.bigint "contact_id", null: false
-    t.string "whatsapp_message_id", null: false
+    t.string "whatsapp_message_id"
     t.string "status", default: "sent", null: false
     t.string "error_code"
     t.string "error_message"
     t.text "error_details"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "resend_email_id"
+    t.index ["resend_email_id"], name: "index_campaign_message_mappings_on_resend_email_id", unique: true, where: "(resend_email_id IS NOT NULL)"
+    t.index ["whatsapp_message_id"], name: "index_campaign_message_mappings_on_whatsapp_message_id", unique: true, where: "(whatsapp_message_id IS NOT NULL)"
   end
 
   create_table "campaigns", force: :cascade do |t|
@@ -296,6 +299,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_16_100001) do
     t.datetime "scheduled_at", precision: nil
     t.boolean "trigger_only_during_business_hours", default: false
     t.jsonb "template_params"
+    t.jsonb "additional_attributes", default: {}
   end
 
   create_table "canned_responses", id: :serial, force: :cascade do |t|
@@ -592,8 +596,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_16_100001) do
     t.datetime "updated_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }
     t.uuid "system_company_id", null: false
     t.jsonb "data_json"
-    t.check_constraint "campaign_type = ANY (ARRAY['P'::bpchar, 'M'::bpchar])", name: "company_campaigns_campaign_type_check"
-    t.check_constraint "system_price_type = ANY (ARRAY['N'::bpchar, 'L'::bpchar, 'C'::bpchar, 'A'::bpchar])", name: "company_campaigns_system_price_type_check"
+    t.check_constraint "campaign_type::bpchar = ANY (ARRAY['P'::bpchar, 'M'::bpchar])", name: "company_campaigns_campaign_type_check"
+    t.check_constraint "system_price_type::bpchar = ANY (ARRAY['N'::bpchar, 'L'::bpchar, 'C'::bpchar, 'A'::bpchar])", name: "company_campaigns_system_price_type_check"
   end
 
   create_table "company_invoice_items", id: false, force: :cascade do |t|
@@ -650,7 +654,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_16_100001) do
     t.datetime "created_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }
     t.datetime "updated_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }
     t.jsonb "data_json"
-    t.check_constraint "invoice_status = ANY (ARRAY['T'::bpchar, 'F'::bpchar, 'C'::bpchar])", name: "company_invoices_invoice_status_check"
+    t.check_constraint "invoice_status::bpchar = ANY (ARRAY['T'::bpchar, 'F'::bpchar, 'C'::bpchar])", name: "company_invoices_invoice_status_check"
   end
 
   create_table "company_partner_embedding", id: false, force: :cascade do |t|
@@ -724,8 +728,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_16_100001) do
     t.uuid "company_seller_id"
     t.uuid "system_company_id"
     t.boolean "is_active", default: true, comment: "Flag indicating if the partner is active in CISS system"
-    t.check_constraint "gender = ANY (ARRAY['M'::bpchar, 'F'::bpchar])", name: "company_clientes_gender_check"
-    t.check_constraint "tax_contributor = ANY (ARRAY['T'::bpchar, 'F'::bpchar])", name: "company_clientes_tax_contributor_check"
+    t.check_constraint "gender::bpchar = ANY (ARRAY['M'::bpchar, 'F'::bpchar])", name: "company_clientes_gender_check"
+    t.check_constraint "tax_contributor::bpchar = ANY (ARRAY['T'::bpchar, 'F'::bpchar])", name: "company_clientes_tax_contributor_check"
   end
 
   create_table "company_stock", id: false, force: :cascade do |t|
@@ -802,7 +806,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_16_100001) do
     t.jsonb "data_json", default: {}
     t.datetime "created_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }
     t.datetime "updated_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }
-    t.check_constraint "federal_tax_regime = ANY (ARRAY['R'::bpchar, 'P'::bpchar, 'S'::bpchar])", name: "company_store_federal_tax_regime_check"
+    t.check_constraint "federal_tax_regime::bpchar = ANY (ARRAY['R'::bpchar, 'P'::bpchar, 'S'::bpchar])", name: "company_store_federal_tax_regime_check"
   end
 
   create_table "company_suppliers", id: false, force: :cascade do |t|
@@ -1088,6 +1092,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_16_100001) do
     t.bigint "account_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "available_for_campaigns", default: false
   end
 
   create_table "leaves", force: :cascade do |t|
@@ -1639,4 +1644,38 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_16_100001) do
   add_foreign_key "inbox_migrations", "inboxes", column: "destination_inbox_id"
   add_foreign_key "inbox_migrations", "inboxes", column: "source_inbox_id"
   add_foreign_key "inbox_migrations", "users"
+  # WARNING: generating adapter-specific definition for camp_dpid_before_insert() due to a mismatch.
+  # either there's a bug in hairtrigger or you've messed up your migrations and/or db :-/
+  execute(<<-SQL)
+CREATE OR REPLACE FUNCTION public.camp_dpid_before_insert()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+  BEGIN
+    execute format('create sequence IF NOT EXISTS camp_dpid_seq_%s', NEW.id);
+    RETURN NEW;
+  END;
+  $function$
+  SQL
+
+  # no candidate create_trigger statement could be found, creating an adapter-specific one
+  execute("CREATE TRIGGER camp_dpid_before_insert AFTER INSERT ON \"accounts\" FOR EACH ROW EXECUTE FUNCTION camp_dpid_before_insert()")
+
+  # WARNING: generating adapter-specific definition for campaigns_before_insert_row_tr() due to a mismatch.
+  # either there's a bug in hairtrigger or you've messed up your migrations and/or db :-/
+  execute(<<-SQL)
+CREATE OR REPLACE FUNCTION public.campaigns_before_insert_row_tr()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+  BEGIN
+    NEW.display_id := nextval('camp_dpid_seq_' || NEW.account_id);
+    RETURN NEW;
+  END;
+  $function$
+  SQL
+
+  # no candidate create_trigger statement could be found, creating an adapter-specific one
+  execute("CREATE TRIGGER campaigns_before_insert_row_tr BEFORE INSERT ON \"campaigns\" FOR EACH ROW EXECUTE FUNCTION campaigns_before_insert_row_tr()")
+
 end

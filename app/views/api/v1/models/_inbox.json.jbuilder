@@ -130,6 +130,11 @@ if resource.whatsapp?
   json.reauthorization_required resource.channel.try(:reauthorization_required?)
 end
 
+### Resend Email Channel
+if resource.channel_type == 'Channel::Email' && resource.channel.try(:resend?)
+  json.provider_config resource.channel.try(:provider_config) if Current.account_user&.administrator?
+end
+
 ## Voice Channel Attributes
 if resource.channel_type == 'Channel::Voice'
   json.voice_call_webhook_url resource.channel.try(:voice_call_webhook_url)

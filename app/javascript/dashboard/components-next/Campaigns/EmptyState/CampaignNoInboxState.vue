@@ -34,7 +34,7 @@ const navigateToCreateInbox = () => {
     <div
       class="flex items-center justify-center w-16 h-16 mb-6 rounded-2xl bg-n-alpha-2"
     >
-      <i :class="[icon, 'text-3xl text-n-slate-11']" />
+      <i class="text-3xl text-n-slate-11" :class="[icon]" />
     </div>
 
     <h1 class="text-xl font-semibold text-n-slate-12 mb-2 text-center">
@@ -52,4 +52,3 @@ const navigateToCreateInbox = () => {
     </Button>
   </div>
 </template>
-

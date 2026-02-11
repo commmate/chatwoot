@@ -142,11 +142,11 @@ const smsInboxes = computed(() =>
 const whatsAppInboxes = computed(() =>
   inboxes.value.filter(inbox => inbox.channel_type === INBOX_TYPES.WHATSAPP)
 );
-const hasCampaignInboxes = computed(
-  () =>
-    websiteInboxes.value.length > 0 ||
-    smsInboxes.value.length > 0 ||
-    whatsAppInboxes.value.length > 0
+const resendInboxes = computed(() =>
+  inboxes.value.filter(
+    inbox =>
+      inbox.channel_type === INBOX_TYPES.EMAIL && inbox.provider === 'resend'
+  )
 );
 
 // CommMate: Build campaign menu children based on available inboxes
@@ -174,6 +174,14 @@ const campaignMenuChildren = computed(() => {
       name: 'WhatsApp',
       label: t('SIDEBAR.WHATSAPP'),
       to: accountScopedRoute('campaigns_whatsapp_index'),
+    });
+  }
+
+  if (resendInboxes.value.length > 0) {
+    children.push({
+      name: 'Email',
+      label: t('SIDEBAR.EMAIL'),
+      to: accountScopedRoute('campaigns_email_index'),
     });
   }
 

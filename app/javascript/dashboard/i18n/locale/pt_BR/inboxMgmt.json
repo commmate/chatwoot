@@ -1224,6 +1224,10 @@
       "SCRIPT_SETTINGS": "\n      window.chatwootSettings = {options};"
     },
     "EMAIL_PROVIDERS": {
+      "RESEND": {
+        "TITLE": "Resend",
+        "DESCRIPTION": "Enviar e-mails via API Resend com rastreamento de entrega"
+      },
       "MICROSOFT": {
         "TITLE": "Microsoft",
         "DESCRIPTION": "Conectar com Microsoft"
@@ -1423,6 +1427,34 @@
           "TIMESTAMP": "12:00"
         }
       }
+    },
+    "RESEND_SETTINGS": {
+      "SECTION_TITLE": "Configurações de Campanha Resend",
+      "API_KEY_TITLE": "Chave da API",
+      "API_KEY_SUBTITLE": "Sua chave da API Resend é usada para autenticar com a API do Resend.",
+      "API_KEY_NOT_CONFIGURED": "Nenhuma chave da API configurada. Campanhas de e-mail falharão sem uma chave da API.",
+      "API_KEY_PLACEHOLDER": "Digite sua chave da API Resend (re_xxxxx)",
+      "UPDATE_API_KEY_TITLE": "Atualizar Chave da API",
+      "UPDATE_API_KEY_SUBTITLE": "Digite uma nova chave da API para substituir a atual. Obtenha-a no painel do Resend.",
+      "UPDATE_API_KEY": "Atualizar",
+      "API_KEY_SAVED": "Chave da API Resend salva com sucesso",
+      "WEBHOOK_URL_TITLE": "URL do Webhook",
+      "WEBHOOK_URL_SUBTITLE": "Copie esta URL e configure-a no painel do Resend para receber atualizações de status de entrega.",
+      "SIGNING_SECRET_TITLE": "Segredo de Assinatura do Webhook",
+      "SIGNING_SECRET_SUBTITLE": "Este token é usado para verificar a autenticidade das requisições do webhook.",
+      "UPDATE_SIGNING_SECRET_TITLE": "Atualizar Segredo de Assinatura",
+      "UPDATE_SIGNING_SECRET_SUBTITLE": "Digite o segredo de assinatura da configuração do webhook do Resend.",
+      "SIGNING_SECRET_PLACEHOLDER": "Digite o segredo de assinatura aqui",
+      "UPDATE_SIGNING_SECRET": "Atualizar",
+      "SIGNING_SECRET_SAVED": "Segredo de assinatura do webhook salvo com sucesso",
+      "SENDER_SETTINGS_TITLE": "Configurações do Remetente",
+      "SENDER_SETTINGS_SUBTITLE": "Configure o endereço de e-mail e nome do remetente para e-mails enviados.",
+      "FROM_EMAIL_LABEL": "E-mail do Remetente",
+      "FROM_EMAIL_PLACEHOLDER": "Digite o endereço de e-mail do remetente",
+      "FROM_NAME_LABEL": "Nome do Remetente (Opcional)",
+      "FROM_NAME_PLACEHOLDER": "Digite o nome do remetente (ex: Equipe de Suporte)",
+      "UPDATE_SENDER_SETTINGS": "Atualizar Configurações do Remetente",
+      "SENDER_SETTINGS_SAVED": "Configurações do remetente salvas com sucesso"
     }
   },
   "TEMPLATES": {

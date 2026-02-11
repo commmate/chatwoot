@@ -8,6 +8,9 @@ module Api::V1::InboxesHelper
   def validate_email_channel(attributes)
     channel_data = permitted_params(attributes)[:channel]
 
+    # IMAP/SMTP validation only runs when imap_enabled/smtp_enabled is true,
+    # so Resend inboxes skip it at creation (no IMAP/SMTP configured yet)
+    # but get validated if the user later adds IMAP/SMTP for receiving replies.
     validate_imap(channel_data)
     validate_smtp(channel_data)
   end
