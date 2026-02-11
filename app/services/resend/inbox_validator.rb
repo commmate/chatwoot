@@ -14,88 +14,91 @@
 #   result = validator.validate
 #   # => { valid: true } or { valid: false, error: 'Error message' }
 #
-module Resend
-  class InboxValidator
-    def initialize(api_key:, from_email:)
-      @api_key = api_key
-      @from_email = from_email
+class Resend::InboxValidator
+  def initialize(api_key:, from_email:)
+    @api_key = api_key
+    @from_email = from_email
+  end
+
+  def validate
+    return error_result('API key is required') if @api_key.blank?
+    return error_result('From email is required') if @from_email.blank?
+
+    validate_with_resend
+  rescue Resend::Client::ConfigurationError => e
+    error_result(e.message)
+  rescue Resend::Client::ApiError => e
+    handle_api_error(e)
+  rescue StandardError => e
+    Rails.logger.error("[Resend::InboxValidator] Unexpected error: #{e.message}")
+    error_result("Failed to validate with Resend: #{e.message}")
+  end
+
+  private
+
+  def validate_with_resend
+    domains = fetch_domains
+    email_domain = extract_domain(@from_email)
+    return error_result("Invalid email format: #{@from_email}") if email_domain.blank?
+
+    check_domain_status(domains, email_domain)
+  end
+
+  def fetch_domains
+    client = Resend::Client.new(api_key: @api_key)
+    domains_response = client.list_domains
+    domains = domains_response['data'] || []
+    Rails.logger.info("[Resend::InboxValidator] Found #{domains.count} domains in Resend account")
+    domains
+  end
+
+  def check_domain_status(domains, email_domain)
+    verified_domain = domains.find { |d| d['name'] == email_domain && d['status'] == 'verified' }
+
+    if verified_domain
+      Rails.logger.info("[Resend::InboxValidator] Domain '#{email_domain}' is verified")
+      return { valid: true }
     end
 
-    def validate
-      return error_result('API key is required') if @api_key.blank?
-      return error_result('From email is required') if @from_email.blank?
+    build_domain_error(domains, email_domain)
+  end
 
-      validate_with_resend
-    rescue Resend::Client::ConfigurationError => e
-      error_result(e.message)
-    rescue Resend::Client::ApiError => e
-      handle_api_error(e)
-    rescue StandardError => e
-      Rails.logger.error("[Resend::InboxValidator] Unexpected error: #{e.message}")
-      error_result("Failed to validate with Resend: #{e.message}")
+  def build_domain_error(domains, email_domain)
+    existing_domain = domains.find { |d| d['name'] == email_domain }
+    if existing_domain
+      return error_result("Domain '#{email_domain}' exists in Resend but is not verified " \
+                          "(status: #{existing_domain['status']}). Please verify the domain first.")
     end
 
-    private
-
-    def validate_with_resend
-      client = Resend::Client.new(api_key: @api_key)
-
-      # First, validate API key by listing domains
-      domains_response = client.list_domains
-      domains = domains_response['data'] || []
-
-      Rails.logger.info("[Resend::InboxValidator] Found #{domains.count} domains in Resend account")
-
-      # Extract the domain from the from_email
-      email_domain = extract_domain(@from_email)
-      return error_result("Invalid email format: #{@from_email}") if email_domain.blank?
-
-      Rails.logger.info("[Resend::InboxValidator] Checking if domain '#{email_domain}' is verified")
-
-      # Check if the domain is verified
-      verified_domain = domains.find do |domain|
-        domain['name'] == email_domain && domain['status'] == 'verified'
-      end
-
-      if verified_domain
-        Rails.logger.info("[Resend::InboxValidator] Domain '#{email_domain}' is verified")
-        { valid: true }
-      else
-        # Check if domain exists but isn't verified
-        existing_domain = domains.find { |d| d['name'] == email_domain }
-        if existing_domain
-          error_result("Domain '#{email_domain}' exists in Resend but is not verified (status: #{existing_domain['status']}). Please verify the domain first.")
-        else
-          available_domains = domains.select { |d| d['status'] == 'verified' }.map { |d| d['name'] }
-          if available_domains.any?
-            error_result("Domain '#{email_domain}' is not configured in your Resend account. Available verified domains: #{available_domains.join(', ')}")
-          else
-            error_result("Domain '#{email_domain}' is not configured in your Resend account. Please add and verify this domain in Resend first.")
-          end
-        end
-      end
+    available_domains = domains.select { |d| d['status'] == 'verified' }.pluck('name')
+    if available_domains.any?
+      error_result("Domain '#{email_domain}' is not configured in your Resend account. " \
+                   "Available verified domains: #{available_domains.join(', ')}")
+    else
+      error_result("Domain '#{email_domain}' is not configured in your Resend account. " \
+                   'Please add and verify this domain in Resend first.')
     end
+  end
 
-    def extract_domain(email)
-      return nil unless email.include?('@')
+  def extract_domain(email)
+    return nil unless email.include?('@')
 
-      email.split('@').last&.downcase
+    email.split('@').last&.downcase
+  end
+
+  def handle_api_error(error)
+    case error.status
+    when 401, 403
+      error_result('Invalid API key. Please check your Resend API key and try again.')
+    when 429
+      error_result('Rate limited by Resend. Please try again in a few moments.')
+    else
+      error_result("Resend API error: #{error.message}")
     end
+  end
 
-    def handle_api_error(error)
-      case error.status
-      when 401, 403
-        error_result('Invalid API key. Please check your Resend API key and try again.')
-      when 429
-        error_result('Rate limited by Resend. Please try again in a few moments.')
-      else
-        error_result("Resend API error: #{error.message}")
-      end
-    end
-
-    def error_result(message)
-      Rails.logger.warn("[Resend::InboxValidator] Validation failed: #{message}")
-      { valid: false, error: message }
-    end
+  def error_result(message)
+    Rails.logger.warn("[Resend::InboxValidator] Validation failed: #{message}")
+    { valid: false, error: message }
   end
 end

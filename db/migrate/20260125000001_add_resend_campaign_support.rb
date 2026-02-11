@@ -4,15 +4,15 @@ class AddResendCampaignSupport < ActiveRecord::Migration[7.0]
   def change
     # Track Resend email IDs for delivery status webhooks
     add_column :campaign_message_mappings, :resend_email_id, :string unless column_exists?(:campaign_message_mappings, :resend_email_id)
-    add_index :campaign_message_mappings, :resend_email_id, unique: true, where: 'resend_email_id IS NOT NULL' unless index_exists?(:campaign_message_mappings, :resend_email_id)
+    unless index_exists?(:campaign_message_mappings, :resend_email_id)
+      add_index :campaign_message_mappings, :resend_email_id, unique: true, where: 'resend_email_id IS NOT NULL'
+    end
 
     # Make whatsapp_message_id nullable to support either WhatsApp or Resend campaigns
     change_column_null :campaign_message_mappings, :whatsapp_message_id, true
 
     # Update unique index on whatsapp_message_id to only apply when not null (only if index exists)
-    if index_exists?(:campaign_message_mappings, :whatsapp_message_id)
-      remove_index :campaign_message_mappings, :whatsapp_message_id
-    end
+    remove_index :campaign_message_mappings, :whatsapp_message_id if index_exists?(:campaign_message_mappings, :whatsapp_message_id)
     unless index_exists?(:campaign_message_mappings, :whatsapp_message_id)
       add_index :campaign_message_mappings, :whatsapp_message_id, unique: true, where: 'whatsapp_message_id IS NOT NULL'
     end
@@ -27,9 +27,9 @@ class AddResendCampaignSupport < ActiveRecord::Migration[7.0]
 
   private
 
-  def ensure_campaign_triggers_and_sequences
+  def ensure_campaign_triggers_and_sequences # rubocop:disable Metrics/MethodLength
     # 1. Create function and trigger for auto-creating sequences when accounts are created
-    execute <<-SQL
+    execute <<-SQL.squish
       CREATE OR REPLACE FUNCTION camp_dpid_before_insert()
       RETURNS TRIGGER AS $$
       BEGIN
@@ -39,7 +39,7 @@ class AddResendCampaignSupport < ActiveRecord::Migration[7.0]
       $$ LANGUAGE plpgsql;
     SQL
 
-    execute <<-SQL
+    execute <<-SQL.squish
       DROP TRIGGER IF EXISTS camp_dpid_before_insert ON accounts;
       CREATE TRIGGER camp_dpid_before_insert
       AFTER INSERT ON accounts
@@ -48,7 +48,7 @@ class AddResendCampaignSupport < ActiveRecord::Migration[7.0]
     SQL
 
     # 2. Create function and trigger for setting campaign display_id
-    execute <<-SQL
+    execute <<-SQL.squish
       CREATE OR REPLACE FUNCTION campaigns_before_insert_row_tr()
       RETURNS TRIGGER AS $$
       BEGIN
@@ -58,7 +58,7 @@ class AddResendCampaignSupport < ActiveRecord::Migration[7.0]
       $$ LANGUAGE plpgsql;
     SQL
 
-    execute <<-SQL
+    execute <<-SQL.squish
       DROP TRIGGER IF EXISTS campaigns_before_insert_row_tr ON campaigns;
       CREATE TRIGGER campaigns_before_insert_row_tr
       BEFORE INSERT ON campaigns
@@ -72,4 +72,3 @@ class AddResendCampaignSupport < ActiveRecord::Migration[7.0]
     end
   end
 end
-
