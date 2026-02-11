@@ -590,7 +590,7 @@
         },
         "FROM_EMAIL": {
           "LABEL": "From Email Address",
-          "PLACEHOLDER": "campaigns@mail.example.com",
+          "PLACEHOLDER": "campaigns{'@'}mail.example.com",
           "SUBTITLE": "The email address used to send emails. Must be from a verified domain in Resend.",
           "ERROR": "Please enter a valid email address"
         },

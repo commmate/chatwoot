@@ -303,7 +303,7 @@
             "TITLE": "Reply-To Email",
             "DESCRIPTION": "Choose where replies to this campaign will be sent.",
             "LABEL": "Custom Reply-To Email",
-            "PLACEHOLDER": "support@yourcompany.com",
+            "PLACEHOLDER": "support{'@'}yourcompany.com",
             "ERROR": "Please enter a valid email address",
             "IMAP_OPTION": "Use IMAP inbox email",
             "RESEND_OPTION": "Use Resend sender email",

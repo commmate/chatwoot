@@ -303,7 +303,7 @@
             "TITLE": "E-mail de Resposta",
             "DESCRIPTION": "Escolha para onde as respostas desta campanha serão enviadas.",
             "LABEL": "E-mail de resposta personalizado",
-            "PLACEHOLDER": "suporte@suaempresa.com",
+            "PLACEHOLDER": "suporte{'@'}suaempresa.com",
             "ERROR": "Por favor, insira um endereço de e-mail válido",
             "IMAP_OPTION": "Usar e-mail da caixa de entrada IMAP",
             "RESEND_OPTION": "Usar e-mail do remetente Resend",
