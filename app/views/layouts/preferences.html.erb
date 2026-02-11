@@ -6,8 +6,6 @@
     <meta name="robots" content="noindex, nofollow">
     <title><%= t('public_preferences.page_title', account: @account&.name || 'CommMate') %></title>
     <%= csrf_meta_tags %>
-    <%= vite_client_tag %>
-    <%= vite_stylesheet_tag 'portal' %>
 
     <script>
       // Dark mode detection
