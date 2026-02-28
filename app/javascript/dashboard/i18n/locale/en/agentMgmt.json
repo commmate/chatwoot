@@ -147,7 +147,8 @@
       "SETTINGS_CUSTOM_ATTRIBUTES_MANAGE": "Manage custom attributes",
       "SETTINGS_AUTOMATION_MANAGE": "Manage automation rules",
       "SETTINGS_AGENT_BOTS_MANAGE": "Manage agent bots",
-      "SETTINGS_INTEGRATIONS_MANAGE": "Manage integrations"
+      "SETTINGS_INTEGRATIONS_MANAGE": "Manage integrations",
+      "SETTINGS_CONVERSATION_WORKFLOW_MANAGE": "Manage conversation workflows"
     }
   }
 }

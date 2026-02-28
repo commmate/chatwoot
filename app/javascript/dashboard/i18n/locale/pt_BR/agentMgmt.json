@@ -147,7 +147,8 @@
       "SETTINGS_CUSTOM_ATTRIBUTES_MANAGE": "Gerenciar atributos personalizados",
       "SETTINGS_AUTOMATION_MANAGE": "Gerenciar regras de automação",
       "SETTINGS_AGENT_BOTS_MANAGE": "Gerenciar bots de agente",
-      "SETTINGS_INTEGRATIONS_MANAGE": "Gerenciar integrações"
+      "SETTINGS_INTEGRATIONS_MANAGE": "Gerenciar integrações",
+      "SETTINGS_CONVERSATION_WORKFLOW_MANAGE": "Gerenciar fluxos de conversa"
     }
   }
 }
