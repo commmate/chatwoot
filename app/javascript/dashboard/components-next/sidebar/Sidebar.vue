@@ -831,16 +831,6 @@ const menuItems = computed(() => {
         ...(hasMenuPermission(['administrator'])
           ? [
               {
-                name: 'Settings Custom Roles',
-                label: t('SIDEBAR.CUSTOM_ROLES'),
-                icon: 'i-lucide-shield-plus',
-                to: accountScopedRoute('custom_roles_list'),
-              },
-            ]
-          : []),
-        ...(hasMenuPermission(['administrator'])
-          ? [
-              {
                 name: 'Settings Sla',
                 label: t('SIDEBAR.SLA'),
                 icon: 'i-lucide-clock-alert',
