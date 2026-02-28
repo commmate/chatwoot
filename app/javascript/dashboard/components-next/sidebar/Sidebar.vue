@@ -838,7 +838,10 @@ const menuItems = computed(() => {
               },
             ]
           : []),
-        ...(hasMenuPermission(['administrator'])
+        ...(hasMenuPermission([
+          'administrator',
+          'settings_conversation_workflow_manage',
+        ])
           ? [
               {
                 name: 'Conversation Workflow',

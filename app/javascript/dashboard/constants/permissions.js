@@ -21,6 +21,7 @@ export const AVAILABLE_PERMISSIONS = [
   'settings_automation_manage',
   'settings_agent_bots_manage',
   'settings_integrations_manage',
+  'settings_conversation_workflow_manage',
 ];
 
 // Legacy alias for backwards compatibility

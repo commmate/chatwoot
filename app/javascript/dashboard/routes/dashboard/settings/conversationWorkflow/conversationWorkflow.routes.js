@@ -13,7 +13,7 @@ export default {
           name: 'conversation_workflow_index',
           component: ConversationWorkflowIndex,
           meta: {
-            permissions: ['administrator'],
+            permissions: ['administrator', 'settings_conversation_workflow_manage'],
           },
         },
       ],

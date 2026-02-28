@@ -48,6 +48,7 @@ class AccountUser < ApplicationRecord
     settings_automation_manage
     settings_agent_bots_manage
     settings_integrations_manage
+    settings_conversation_workflow_manage
   ].freeze
 
   belongs_to :account
