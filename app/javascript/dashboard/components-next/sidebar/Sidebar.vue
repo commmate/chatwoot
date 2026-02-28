@@ -72,7 +72,6 @@ const hasAdvancedAssignment = computed(() => {
 
 // CommMate: Get user permissions for menu filtering
 const currentUser = useMapGetter('getCurrentUser');
-const accountId = useMapGetter('getCurrentAccountId');
 const userPermissions = computed(() =>
   getUserPermissions(currentUser.value, accountId.value)
 );
