@@ -56,6 +56,11 @@ const props = defineProps({
         value
       ),
   },
+  position: {
+    type: String,
+    default: 'center',
+    validator: value => ['center', 'top'].includes(value),
+  },
 });
 
 const emit = defineEmits(['confirm', 'close']);
@@ -64,6 +69,7 @@ const { t } = useI18n();
 
 const dialogRef = ref(null);
 const dialogContentRef = ref(null);
+const isOpen = ref(false);
 
 const maxWidthClass = computed(() => {
   const classesMap = {
@@ -81,13 +87,19 @@ const maxWidthClass = computed(() => {
   return classesMap[props.width] ?? 'max-w-md';
 });
 
+const positionClass = computed(() =>
+  props.position === 'top' ? 'dialog-position-top' : ''
+);
+
 const open = () => {
+  isOpen.value = true;
   dialogRef.value?.showModal();
 };
 
 const close = () => {
   emit('close');
   dialogRef.value?.close();
+  isOpen.value = false;
 };
 
 const confirm = () => {
@@ -104,6 +116,7 @@ defineExpose({ open, close });
       class="w-full transition-all duration-300 ease-in-out shadow-xl rounded-xl"
       :class="[
         maxWidthClass,
+        positionClass,
         overflowYAuto ? 'overflow-y-auto' : 'overflow-visible',
       ]"
       @close="close"
@@ -111,7 +124,7 @@ defineExpose({ open, close });
       <OnClickOutside @trigger="close">
         <form
           ref="dialogContentRef"
-          class="flex flex-col w-full h-auto gap-6 p-6 overflow-visible text-left align-middle transition-all duration-300 ease-in-out transform bg-n-alpha-3 backdrop-blur-[100px] shadow-xl rounded-xl"
+          class="flex flex-col w-full h-auto gap-6 p-6 overflow-visible text-start align-middle transition-all duration-300 ease-in-out transform bg-n-alpha-3 backdrop-blur-[100px] shadow-xl rounded-xl"
           @submit.prevent="confirm"
           @click.stop
         >
@@ -125,7 +138,7 @@ defineExpose({ open, close });
               </p>
             </slot>
           </div>
-          <slot />
+          <slot v-if="isOpen" />
           <!-- Dialog content will be injected here -->
           <slot name="footer">
             <div
@@ -161,5 +174,10 @@ defineExpose({ open, close });
 <style scoped>
 dialog::backdrop {
   @apply bg-n-alpha-black1 backdrop-blur-[4px];
+}
+
+.dialog-position-top {
+  margin-top: clamp(2rem, 5vh, 5rem);
+  margin-bottom: auto;
 }
 </style>

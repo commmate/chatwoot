@@ -22,7 +22,6 @@ const getSSOAccountPath = ({ ssoAccountId, user }) => {
   return accountPath;
 };
 
-// CommMate: Check if post-signup Evolution onboarding is enabled
 const shouldRedirectToEvolutionOnboarding = () => {
   const config = window.chatwootConfig || {};
   return (
@@ -31,12 +30,10 @@ const shouldRedirectToEvolutionOnboarding = () => {
   );
 };
 
-// CommMate: Build Evolution onboarding URL for new signups
 const getEvolutionOnboardingURL = user => {
   const { accounts = [], account_id = null } = user || {};
   if (!accounts.length) return null;
 
-  // Use the first/active account
   const accountId = account_id || accounts[0].id;
   const accountName = accounts[0]?.name || '';
 
@@ -46,6 +43,21 @@ const getEvolutionOnboardingURL = user => {
   return frontendURL(
     `accounts/${accountId}/settings/inboxes/new/evolution?inbox_name=${inboxName}&auto_load_qr=1`
   );
+};
+
+const capitalize = str =>
+  str
+    .split(/[._-]+/)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+
+export const getCredentialsFromEmail = email => {
+  const [localPart, domain] = email.split('@');
+  const namePart = localPart.split('+')[0];
+  return {
+    fullName: capitalize(namePart),
+    accountName: capitalize(domain.split('.')[0]),
+  };
 };
 
 export const getLoginRedirectURL = ({

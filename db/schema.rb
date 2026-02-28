@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_25_000001) do
+ActiveRecord::Schema[7.1].define(version: 2026_01_30_061021) do
   create_schema "auth"
   create_schema "chatwoot"
   create_schema "evolution"
@@ -1401,6 +1401,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_25_000001) do
     t.float "value_in_business_hours"
     t.datetime "event_start_time", precision: nil
     t.datetime "event_end_time", precision: nil
+    t.index ["account_id", "name", "created_at"], name: "reporting_events__account_id__name__created_at"
+    t.index ["account_id", "name", "inbox_id", "created_at"], name: "index_reporting_events_for_response_distribution"
+    t.index ["account_id"], name: "index_reporting_events_on_account_id"
+    t.index ["conversation_id"], name: "index_reporting_events_on_conversation_id"
+    t.index ["created_at"], name: "index_reporting_events_on_created_at"
+    t.index ["inbox_id"], name: "index_reporting_events_on_inbox_id"
+    t.index ["name"], name: "index_reporting_events_on_name"
+    t.index ["user_id"], name: "index_reporting_events_on_user_id"
   end
 
   create_table "sla_events", force: :cascade do |t|
