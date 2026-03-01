@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { messageStamp } from 'shared/helpers/timeHelper';
+import { format, fromUnixTime } from 'date-fns';
 import { useMapGetter } from 'dashboard/composables/store';
 
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
@@ -167,9 +167,9 @@ const formatDate = timestamp => {
   if (!timestamp) return '-';
   const date =
     typeof timestamp === 'number'
-      ? new Date(timestamp * 1000)
+      ? fromUnixTime(timestamp)
       : new Date(timestamp);
-  return messageStamp(date, 'LLL d, h:mm a');
+  return format(date, 'LLL d, h:mm a');
 };
 
 // Map campaign template to preview props

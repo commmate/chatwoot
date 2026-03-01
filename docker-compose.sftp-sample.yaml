@@ -1,0 +1,36 @@
+# Sample SFTP sidecar for CommMate SFTP Campaigns
+# The operator deploys and manages this container independently.
+# CommMate only monitors the path where this container writes files
+# (e.g. a shared volume mounted at /data/sftp/campaigns in rails/sidekiq).
+#
+# Secured with SSH key auth (password disabled).
+# Generate key: ssh-keygen -t ed25519 -f sftp_keys/tmw_sftp_key -C "tmw-sftp" -N ""
+# Multiple clients: mount additional .pub files into /home/sftp_user/.ssh/keys/
+# Rotate: replace .pub file, restart container — old key immediately revoked.
+
+services:
+  sftp:
+    image: atmoz/sftp:alpine
+    container_name: commmate-sftp
+    restart: unless-stopped
+    volumes:
+      - sftp_data:/home/sftp_user/campaigns
+      - ./sftp_keys/tmw_sftp_key.pub:/home/sftp_user/.ssh/keys/tmw_sftp_key.pub:ro
+    ports:
+      - "127.0.0.1:2222:22"
+    command: "sftp_user::1001:1001:campaigns"
+    networks:
+      - commmate_default
+
+volumes:
+  sftp_data:
+    external: true
+
+# --- CommMate side: add to docker-compose.commmate.yaml ---
+# In rails and sidekiq services, mount the shared volume:
+#   volumes:
+#     - sftp_data:/data/sftp/campaigns
+#
+# Then in Super Admin console set:
+#   SFTP_CAMPAIGNS_ENABLED = true
+#   SFTP_CAMPAIGNS_PATH = /data/sftp/campaigns

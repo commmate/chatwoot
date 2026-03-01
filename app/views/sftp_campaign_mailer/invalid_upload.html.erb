@@ -1,0 +1,33 @@
+<h2>SFTP Campaign — Invalid Upload</h2>
+
+<p>An SFTP campaign batch was rejected because it could not be processed.</p>
+
+<table style="border-collapse: collapse; margin: 16px 0;">
+  <tr>
+    <td style="padding: 6px 12px; font-weight: bold; vertical-align: top;">Folder:</td>
+    <td style="padding: 6px 12px;"><%= @entry_name %></td>
+  </tr>
+  <tr>
+    <td style="padding: 6px 12px; font-weight: bold; vertical-align: top;">Reason:</td>
+    <td style="padding: 6px 12px;">
+      <% case @reason.to_s %>
+      <% when 'no_mtr_files' %>
+        No .mtr files found in the batch folder.
+      <% when 'xml_parse_error' %>
+        Failed to parse the .mtr file (invalid XML).
+      <% when 'missing_required_fields' %>
+        Required fields are missing (CompanyName or From email).
+      <% else %>
+        <%= @reason %>
+      <% end %>
+    </td>
+  </tr>
+  <% if @details.present? %>
+  <tr>
+    <td style="padding: 6px 12px; font-weight: bold; vertical-align: top;">Details:</td>
+    <td style="padding: 6px 12px;"><code><%= @details %></code></td>
+  </tr>
+  <% end %>
+</table>
+
+<p>The batch has been discarded. Please check the source files and re-upload if needed.</p>

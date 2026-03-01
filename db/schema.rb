@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_30_061021) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_01_115653) do
   create_schema "auth"
   create_schema "chatwoot"
   create_schema "evolution"
@@ -277,6 +277,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_30_061021) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "resend_email_id"
+    t.string "external_job_id"
+    t.index ["external_job_id"], name: "index_campaign_message_mappings_on_external_job_id"
     t.index ["resend_email_id"], name: "index_campaign_message_mappings_on_resend_email_id", unique: true, where: "(resend_email_id IS NOT NULL)"
     t.index ["whatsapp_message_id"], name: "index_campaign_message_mappings_on_whatsapp_message_id", unique: true, where: "(whatsapp_message_id IS NOT NULL)"
   end

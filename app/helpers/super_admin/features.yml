@@ -150,3 +150,15 @@ evolution_api:
   enabled: true
   icon: 'icon-whatsapp-line'
   config_key: 'evolution_api'
+resend:
+  name: 'Resend Email'
+  description: 'Configuration for Resend email inbox integration'
+  enabled: true
+  icon: 'icon-mail-send-fill'
+  config_key: 'resend'
+sftp_campaigns:
+  name: 'SFTP Campaigns'
+  description: 'Monitor an SFTP directory for email campaign batches and auto-dispatch via Resend inboxes'
+  enabled: true
+  icon: 'icon-folder-3-line'
+  config_key: 'sftp_campaigns'

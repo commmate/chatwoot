@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { messageStamp } from 'shared/helpers/timeHelper';
+import { format, fromUnixTime } from 'date-fns';
 import { useMapGetter } from 'dashboard/composables/store';
 
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
@@ -38,6 +38,11 @@ watch(
   }
 );
 
+// SFTP campaign detection
+const isSftpCampaign = computed(
+  () => !!props.campaign?.additional_attributes?.sftp_source
+);
+
 // Email-specific computed properties
 const emailSubject = computed(
   () =>
@@ -47,6 +52,18 @@ const emailSubject = computed(
 );
 
 const emailHtmlBody = computed(() => props.campaign?.message || '');
+
+const recipientCount = computed(
+  () => props.campaign?.additional_attributes?.recipient_count || 0
+);
+
+const hasAttachments = computed(
+  () => !!props.campaign?.additional_attributes?.has_attachments
+);
+
+const attachmentCount = computed(
+  () => props.campaign?.additional_attributes?.attachment_count || 0
+);
 
 const replyToEmail = computed(() => {
   const attrs = props.campaign?.additional_attributes;
@@ -125,9 +142,9 @@ const formatDate = timestamp => {
   if (!timestamp) return '-';
   const date =
     typeof timestamp === 'number'
-      ? new Date(timestamp * 1000)
+      ? fromUnixTime(timestamp)
       : new Date(timestamp);
-  return messageStamp(date, 'LLL d, h:mm a');
+  return format(date, 'LLL d, h:mm a');
 };
 
 const handleClose = () => emit('close');
@@ -402,6 +419,12 @@ const handleClose = () => emit('close');
             >
               {{ t('CAMPAIGN.EMAIL.CREATE_DIALOG.PREVIEW_TITLE') }}
             </span>
+            <span
+              v-if="isSftpCampaign"
+              class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-n-amber-3 text-n-amber-11 uppercase tracking-wide"
+            >
+              {{ t('CAMPAIGN.EMAIL.DETAILS.SFTP_FIRST_EMAIL') }}
+            </span>
           </div>
 
           <!-- Email Preview Container -->
@@ -418,12 +441,44 @@ const handleClose = () => emit('close');
                   {{ emailSubject || 'No subject' }}
                 </span>
               </div>
-              <div v-if="replyToEmail" class="flex items-center gap-2">
+              <div v-if="replyToEmail" class="flex items-center gap-2 mb-2">
                 <span class="text-xs font-medium text-n-slate-11">
                   {{ t('CAMPAIGN.EMAIL.DETAILS.REPLY_TO_LABEL') }}
                 </span>
                 <span class="text-xs text-n-slate-10">
                   {{ replyToEmail }}
+                </span>
+              </div>
+              <div
+                v-if="isSftpCampaign && recipientCount"
+                class="flex items-center gap-2 mb-2"
+              >
+                <Icon
+                  icon="i-lucide-users"
+                  class="size-3.5 text-n-slate-10 shrink-0"
+                />
+                <span class="text-xs text-n-slate-11">
+                  {{
+                    t('CAMPAIGN.EMAIL.DETAILS.RECIPIENT_COUNT', {
+                      count: recipientCount,
+                    })
+                  }}
+                </span>
+              </div>
+              <div
+                v-if="isSftpCampaign && hasAttachments"
+                class="flex items-center gap-2"
+              >
+                <Icon
+                  icon="i-lucide-paperclip"
+                  class="size-3.5 text-n-slate-10"
+                />
+                <span class="text-xs text-n-slate-11">
+                  {{
+                    t('CAMPAIGN.EMAIL.DETAILS.ATTACHMENT_COUNT', {
+                      count: attachmentCount,
+                    })
+                  }}
                 </span>
               </div>
             </div>

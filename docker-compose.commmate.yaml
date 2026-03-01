@@ -265,6 +265,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      rails:
+        condition: service_healthy
     volumes:
       - evolution-instances:/evolution/instances
       - evolution-store:/evolution/store
@@ -284,9 +286,24 @@ services:
       - '1025:1025'
       - '8025:8025'
 
+  # SFTP - Campaign drop (optional; enable SFTP Campaigns in Super Admin)
+  sftp:
+    image: atmoz/sftp:alpine
+    container_name: commmate-sftp
+    restart: unless-stopped
+    volumes:
+      - sftp_data:/home/sftp_user/campaigns
+      - ./custom/docs/sftp_keys/tmw_sftp_key.pub:/home/sftp_user/.ssh/keys/tmw_sftp_key.pub:ro
+    ports:
+      - '127.0.0.1:2222:22'
+    command: 'sftp_user::1001:1001:campaigns'
+    profiles:
+      - sftp
+
 volumes:
   postgres-data:
   redis-data:
   commmate-storage:
   evolution-instances:
   evolution-store:
+  sftp_data:

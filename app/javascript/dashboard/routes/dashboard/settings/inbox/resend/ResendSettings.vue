@@ -1,4 +1,5 @@
 <script>
+import { mapGetters } from 'vuex';
 import { useAlert } from 'dashboard/composables';
 import SettingsSection from 'dashboard/components/SettingsSection.vue';
 import NextButton from 'dashboard/components-next/button/Button.vue';
@@ -23,9 +24,14 @@ export default {
       isUpdatingApiKey: false,
       isUpdatingSenderSettings: false,
       isUpdatingSigningSecret: false,
+      isUpdatingSftpCampaigns: false,
     };
   },
   computed: {
+    ...mapGetters({ currentAccount: 'getCurrentAccount' }),
+    accountName() {
+      return this.currentAccount?.name || '';
+    },
     webhookUrl() {
       return this.inbox.callback_webhook_url;
     },
@@ -40,6 +46,21 @@ export default {
     },
     currentSigningSecret() {
       return this.inbox.provider_config?.webhook_signing_secret;
+    },
+    showSftpToggle() {
+      return (
+        window.chatwootConfig?.resendEnabled === 'true' &&
+        window.chatwootConfig?.sftpCampaignsEnabled === 'true'
+      );
+    },
+    currentSftpCampaignsEnabled() {
+      return this.inbox.provider_config?.sftp_campaigns_enabled === true;
+    },
+    sftpCampaignsDomain() {
+      const email =
+        this.inbox.provider_config?.from_email || this.inbox.email || '';
+      const parts = email.split('@');
+      return parts.length === 2 ? parts[1] : '';
     },
   },
   mounted() {
@@ -114,6 +135,27 @@ export default {
         this.isUpdatingSigningSecret = false;
       }
     },
+    async updateSftpCampaigns(enabled) {
+      this.isUpdatingSftpCampaigns = true;
+      try {
+        const payload = {
+          id: this.inbox.id,
+          formData: false,
+          channel: {
+            provider_config: {
+              ...this.inbox.provider_config,
+              sftp_campaigns_enabled: enabled,
+            },
+          },
+        };
+        await this.$store.dispatch('inboxes/updateInbox', payload);
+        useAlert(this.$t('INBOX_MGMT.RESEND_SETTINGS.SFTP_CAMPAIGNS_SAVED'));
+      } catch (error) {
+        useAlert(this.$t('INBOX_MGMT.EDIT.API.ERROR_MESSAGE'));
+      } finally {
+        this.isUpdatingSftpCampaigns = false;
+      }
+    },
   },
 };
 </script>
@@ -159,6 +201,58 @@ export default {
           >
             {{ $t('INBOX_MGMT.RESEND_SETTINGS.UPDATE_SENDER_SETTINGS') }}
           </NextButton>
+        </div>
+      </div>
+    </SettingsSection>
+
+    <!-- SFTP Campaigns (only when both Resend and SFTP Campaigns are enabled globally) -->
+    <SettingsSection
+      v-if="showSftpToggle"
+      :title="$t('INBOX_MGMT.RESEND_SETTINGS.SFTP_CAMPAIGNS_TITLE')"
+      :sub-title="$t('INBOX_MGMT.RESEND_SETTINGS.SFTP_CAMPAIGNS_SUBTITLE')"
+    >
+      <div class="flex flex-col gap-4">
+        <div class="flex items-center gap-2">
+          <input
+            :id="'sftp-campaigns-' + inbox.id"
+            type="checkbox"
+            class="h-4 w-4 rounded border-n-slate-8"
+            :checked="currentSftpCampaignsEnabled"
+            :disabled="isUpdatingSftpCampaigns"
+            @change="updateSftpCampaigns($event.target.checked)"
+          />
+          <label
+            :for="'sftp-campaigns-' + inbox.id"
+            class="text-sm font-medium text-n-slate-12"
+          >
+            {{ $t('INBOX_MGMT.RESEND_SETTINGS.SFTP_CAMPAIGNS_ENABLED_LABEL') }}
+          </label>
+        </div>
+        <div
+          v-if="currentSftpCampaignsEnabled && sftpCampaignsDomain"
+          class="flex flex-col gap-2 p-3 rounded-lg bg-n-amber-2 border border-n-amber-6"
+        >
+          <p class="text-sm text-n-slate-12">
+            {{
+              $t('INBOX_MGMT.RESEND_SETTINGS.SFTP_CAMPAIGNS_INFO', {
+                domain: sftpCampaignsDomain,
+              })
+            }}
+          </p>
+          <div class="flex flex-col gap-1 text-xs text-n-slate-11">
+            <span>
+              <strong>{{
+                $t('INBOX_MGMT.RESEND_SETTINGS.SFTP_MATCH_DOMAIN')
+              }}</strong>
+              {{ sftpCampaignsDomain }}
+            </span>
+            <span>
+              <strong>{{
+                $t('INBOX_MGMT.RESEND_SETTINGS.SFTP_MATCH_COMPANY')
+              }}</strong>
+              {{ accountName || '—' }}
+            </span>
+          </div>
         </div>
       </div>
     </SettingsSection>

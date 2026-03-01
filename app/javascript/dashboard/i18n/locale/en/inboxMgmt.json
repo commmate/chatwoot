@@ -1349,7 +1349,14 @@
       "FROM_NAME_LABEL": "From Name (Optional)",
       "FROM_NAME_PLACEHOLDER": "Enter the sender name (e.g., Support Team)",
       "UPDATE_SENDER_SETTINGS": "Update Sender Settings",
-      "SENDER_SETTINGS_SAVED": "Sender settings saved successfully"
+      "SENDER_SETTINGS_SAVED": "Sender settings saved successfully",
+      "SFTP_CAMPAIGNS_TITLE": "SFTP Campaigns",
+      "SFTP_CAMPAIGNS_SUBTITLE": "Allow this inbox to receive campaign batches uploaded via SFTP. Campaigns are matched automatically: the sender domain in the .mtr file must match this inbox's domain, and the CompanyName must match the account name.",
+      "SFTP_CAMPAIGNS_ENABLED_LABEL": "Allow SFTP Campaigns",
+      "SFTP_CAMPAIGNS_INFO": "Campaigns uploaded via SFTP will be routed to this inbox when the sender domain matches {domain}. The CompanyName field in the .mtr file must also match the account name for the campaign to be processed.",
+      "SFTP_CAMPAIGNS_SAVED": "SFTP campaigns setting saved successfully",
+      "SFTP_MATCH_DOMAIN": "Sender domain must match:",
+      "SFTP_MATCH_COMPANY": "CompanyName must match:"
     },
     "CHANNELS": {
       "MESSENGER": "Messenger",

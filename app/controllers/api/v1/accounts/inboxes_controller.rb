@@ -107,19 +107,30 @@ class Api::V1::Accounts::InboxesController < Api::V1::Accounts::BaseController
   def create_channel
     return unless allowed_channel_types.include?(permitted_params[:channel][:type])
 
+    if params[:channel][:provider] == 'resend'
+      resend_enabled = GlobalConfigService.load('RESEND_ENABLED', 'false')
+      unless resend_enabled == true || resend_enabled == 'true'
+        return render json: { message: 'Resend integration is not enabled for this installation' }, status: :unprocessable_entity
+      end
+    end
+
     editable_attrs = channel_type_from_params::EDITABLE_ATTRS
     channel_attrs = permitted_params(editable_attrs)[:channel].except(:type)
 
     # Debug logging for Resend inbox creation
     if params[:channel][:provider] == 'resend'
-      Rails.logger.info("[Inbox Create] === RESEND INBOX DEBUG ===")
+      Rails.logger.info('[Inbox Create] === RESEND INBOX DEBUG ===')
       Rails.logger.info("[Inbox Create] EDITABLE_ATTRS: #{editable_attrs.inspect}")
       Rails.logger.info("[Inbox Create] Raw params[:channel]: #{params[:channel].to_unsafe_h.inspect}")
-      Rails.logger.info("[Inbox Create] Raw params[:channel][:provider_config]: #{params[:channel][:provider_config].to_unsafe_h.inspect rescue 'N/A'}")
+      Rails.logger.info("[Inbox Create] Raw params[:channel][:provider_config]: #{begin
+        params[:channel][:provider_config].to_unsafe_h.inspect
+      rescue StandardError
+        'N/A'
+      end}")
       Rails.logger.info("[Inbox Create] Permitted channel attrs keys: #{channel_attrs.keys.inspect}")
       Rails.logger.info("[Inbox Create] Permitted provider_config: #{channel_attrs[:provider_config].inspect}")
       Rails.logger.info("[Inbox Create] provider_config class: #{channel_attrs[:provider_config].class}")
-      Rails.logger.info("[Inbox Create] === END DEBUG ===")
+      Rails.logger.info('[Inbox Create] === END DEBUG ===')
     end
 
     account_channels_method.create!(channel_attrs)

@@ -31,6 +31,15 @@
 
 en:
   hello: 'Hello world'
+  sftp_campaign_mailer:
+    invalid_upload:
+      subject: '[CommMate] SFTP Campaign failed — invalid upload "%{entry_name}"'
+    no_account_found:
+      subject: '[CommMate] SFTP Campaign failed — unknown company "%{company_name}"'
+    no_inbox_found:
+      subject: '[CommMate] SFTP Campaign failed — no inbox for domain "%{from_domain}"'
+    connection_error:
+      subject: '[CommMate] SFTP Campaign — connection error'
   custom_role:
     permissions:
       conversation_manage: 'Conversation manage'

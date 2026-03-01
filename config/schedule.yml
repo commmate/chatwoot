@@ -19,6 +19,12 @@ trigger_imap_email_inboxes_job:
   class: 'Inboxes::FetchImapEmailInboxesJob'
   queue: scheduled_jobs
 
+# executed every minute - scan SFTP campaigns path for batch folders
+sftp_watcher:
+  cron: '*/1 * * * *'
+  class: 'Sftp::WatcherJob'
+  queue: scheduled_jobs
+
 # executed daily at 2230 UTC
 # which is our lowest traffic time
 remove_stale_contact_inboxes_job.rb:

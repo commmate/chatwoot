@@ -560,3 +560,53 @@
   locked: false
   type: secret
 # ------- End of Evolution API Integration Config ------- #
+
+# ------- Resend Email Integration Config ------- #
+- name: RESEND_ENABLED
+  display_title: 'Resend Email Integration Enabled'
+  value: false
+  description: 'Enable Resend as an email inbox provider'
+  locked: false
+  type: boolean
+# ------- End of Resend Email Integration Config ------- #
+
+# ------- SFTP Campaigns Config ------- #
+- name: SFTP_CAMPAIGNS_ENABLED
+  display_title: 'SFTP Campaigns Enabled'
+  value: false
+  description: 'Enable SFTP-based campaign ingestion for Resend inboxes. Requires Resend to be enabled.'
+  locked: false
+  type: boolean
+- name: SFTP_CAMPAIGNS_HOST
+  display_title: 'SFTP Server Host'
+  value: ''
+  description: 'Hostname or IP of the SFTP server (e.g. sftp.example.com)'
+  locked: false
+- name: SFTP_CAMPAIGNS_PORT
+  display_title: 'SFTP Server Port'
+  value: '22'
+  description: 'SSH port of the SFTP server'
+  locked: false
+- name: SFTP_CAMPAIGNS_USERNAME
+  display_title: 'SFTP Username'
+  value: ''
+  description: 'Username for SFTP authentication'
+  locked: false
+- name: SFTP_CAMPAIGNS_PRIVATE_KEY
+  display_title: 'SFTP Private Key'
+  value: ''
+  description: 'PEM-encoded private key for SFTP key-based authentication. Paste the full key including BEGIN/END lines.'
+  locked: false
+  type: secret
+- name: SFTP_CAMPAIGNS_PASSWORD
+  display_title: 'SFTP Password (optional)'
+  value: ''
+  description: 'Password for SFTP authentication (used if private key is not provided)'
+  locked: false
+  type: secret
+- name: SFTP_CAMPAIGNS_REMOTE_PATH
+  display_title: 'SFTP Remote Path'
+  value: '/campaigns'
+  description: 'Remote directory on the SFTP server where campaign batch folders are uploaded'
+  locked: false
+# ------- End of SFTP Campaigns Config ------- #

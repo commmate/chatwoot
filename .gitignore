@@ -96,6 +96,8 @@ yarn-debug.log*
 .cursor
 .codex/
 CLAUDE.local.md
+.playwright-mcp/
+sftp_keys/
 
 # Histoire deployment
 .netlify

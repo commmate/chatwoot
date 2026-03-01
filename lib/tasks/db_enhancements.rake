@@ -19,7 +19,15 @@ db_namespace = namespace :db do
       ActiveRecord::Base.establish_connection(db_config.configuration_hash)
       unless ActiveRecord::Base.connection.table_exists? 'ar_internal_metadata'
         db_namespace['load_config'].invoke if ActiveRecord.schema_format == :ruby
-        ActiveRecord::Tasks::DatabaseTasks.load_schema_current(:ruby, ENV.fetch('SCHEMA', nil))
+        begin
+          ActiveRecord::Tasks::DatabaseTasks.load_schema_current(:ruby, ENV.fetch('SCHEMA', nil))
+        rescue ActiveRecord::StatementInvalid => e
+          raise unless e.cause.is_a?(PG::DuplicateSchema)
+          puts 'Schemas already exist (e.g. from Evolution API), running migrations and seed...'
+          db_namespace['migrate'].invoke
+          db_namespace['seed'].invoke
+          next
+        end
         db_namespace['seed'].invoke
       end
 

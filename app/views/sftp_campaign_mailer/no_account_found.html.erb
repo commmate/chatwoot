@@ -1,0 +1,30 @@
+<h2>SFTP Campaign — Unknown Company</h2>
+
+<p>An SFTP campaign batch was rejected because the company name does not match any account in CommMate.</p>
+
+<table style="border-collapse: collapse; margin: 16px 0;">
+  <tr>
+    <td style="padding: 6px 12px; font-weight: bold;">Company Name:</td>
+    <td style="padding: 6px 12px;"><strong><%= @company_name %></strong></td>
+  </tr>
+  <% if @batch_info.is_a?(Hash) %>
+  <tr>
+    <td style="padding: 6px 12px; font-weight: bold;">Batch ID:</td>
+    <td style="padding: 6px 12px;"><%= @batch_info[:batch_id] %></td>
+  </tr>
+  <tr>
+    <td style="padding: 6px 12px; font-weight: bold;">From Email:</td>
+    <td style="padding: 6px 12px;"><%= @batch_info[:from_email] %></td>
+  </tr>
+  <tr>
+    <td style="padding: 6px 12px; font-weight: bold;">Email Count:</td>
+    <td style="padding: 6px 12px;"><%= @batch_info[:email_count] %></td>
+  </tr>
+  <tr>
+    <td style="padding: 6px 12px; font-weight: bold;">Folder:</td>
+    <td style="padding: 6px 12px;"><%= @batch_info[:folder_name] %></td>
+  </tr>
+  <% end %>
+</table>
+
+<p>To process this batch, create an account named "<strong><%= @company_name %></strong>" or update the .mtr files with the correct CompanyName.</p>

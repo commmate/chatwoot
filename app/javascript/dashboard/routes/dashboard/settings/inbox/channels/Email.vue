@@ -23,7 +23,7 @@ const emailProviderList = computed(() => {
     {
       title: t('INBOX_MGMT.EMAIL_PROVIDERS.RESEND.TITLE'),
       description: t('INBOX_MGMT.EMAIL_PROVIDERS.RESEND.DESCRIPTION'),
-      isEnabled: true,
+      isEnabled: window.chatwootConfig?.resendEnabled === 'true',
       key: 'resend',
       icon: 'i-lucide-mail',
     },

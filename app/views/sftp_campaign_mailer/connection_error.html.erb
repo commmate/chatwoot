@@ -1,0 +1,18 @@
+<h2>SFTP Campaign — Connection Error</h2>
+
+<p>The SFTP campaign watcher failed to connect to the remote SFTP server.</p>
+
+<table style="border-collapse: collapse; margin: 16px 0;">
+  <tr>
+    <td style="padding: 6px 12px; font-weight: bold; vertical-align: top;">Error:</td>
+    <td style="padding: 6px 12px;"><code><%= @exception_message %></code></td>
+  </tr>
+</table>
+
+<p>Please verify the SFTP server settings in the Super Admin console:</p>
+<ul>
+  <li>Host and port are correct and reachable</li>
+  <li>Username is valid</li>
+  <li>Private key or password is properly configured</li>
+  <li>The remote path exists and is accessible</li>
+</ul>

@@ -44,6 +44,10 @@ gem 'down'
 gem 'gmail_xoauth'
 # Lock net-smtp to 0.3.4 to avoid issues with gmail_xoauth2
 gem 'net-smtp',  '~> 0.3.4'
+# SFTP client for remote campaign batch ingestion
+gem 'net-sftp', '~> 4.0'
+gem 'ed25519', '>= 1.2', '< 2.0'
+gem 'bcrypt_pbkdf', '>= 1.0', '< 2.0'
 # Prevent CSV injection
 gem 'csv-safe'
 

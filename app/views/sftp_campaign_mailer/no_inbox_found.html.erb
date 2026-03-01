@@ -1,0 +1,40 @@
+<h2>SFTP Campaign — No Matching Inbox</h2>
+
+<p>An SFTP campaign batch was rejected because no Resend inbox matches the sender domain.</p>
+
+<table style="border-collapse: collapse; margin: 16px 0;">
+  <tr>
+    <td style="padding: 6px 12px; font-weight: bold;">Account:</td>
+    <td style="padding: 6px 12px;"><%= @account.name %></td>
+  </tr>
+  <tr>
+    <td style="padding: 6px 12px; font-weight: bold;">Sender Domain:</td>
+    <td style="padding: 6px 12px;"><strong><%= @from_domain %></strong></td>
+  </tr>
+  <tr>
+    <td style="padding: 6px 12px; font-weight: bold;">Reason:</td>
+    <td style="padding: 6px 12px;">
+      <% if @reason.to_s == 'sftp_disabled' %>
+        A Resend inbox with domain <strong><%= @from_domain %></strong> exists, but SFTP campaigns are disabled on it.
+      <% else %>
+        No Resend inbox found with sender domain <strong><%= @from_domain %></strong>.
+      <% end %>
+    </td>
+  </tr>
+  <% if @batch_info.is_a?(Hash) %>
+  <tr>
+    <td style="padding: 6px 12px; font-weight: bold;">Batch ID:</td>
+    <td style="padding: 6px 12px;"><%= @batch_info[:batch_id] %></td>
+  </tr>
+  <tr>
+    <td style="padding: 6px 12px; font-weight: bold;">Email Count:</td>
+    <td style="padding: 6px 12px;"><%= @batch_info[:email_count] %></td>
+  </tr>
+  <% end %>
+</table>
+
+<% if @reason.to_s == 'sftp_disabled' %>
+<p>To process this batch, enable SFTP campaigns in the inbox settings for the Resend inbox with domain <strong><%= @from_domain %></strong>.</p>
+<% else %>
+<p>To process this batch, create a Resend inbox with the sender domain <strong><%= @from_domain %></strong> and enable SFTP campaigns on it.</p>
+<% end %>

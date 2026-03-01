@@ -24,8 +24,8 @@ const handleView = campaign => emit('view', campaign);
     <CampaignCard
       v-for="campaign in campaigns"
       :key="campaign.id"
-      :title="campaign.title"
-      :message="campaign.message"
+      :title="campaign.additional_attributes?.email_subject || campaign.title"
+      :message="campaign.description || campaign.message"
       :is-enabled="campaign.enabled"
       :status="campaign.campaign_status"
       :sender="campaign.sender"
