@@ -40,7 +40,7 @@ class Sftp::BatchCampaignService
     return notify_no_account(sample[:company_name], batch_info) unless account
 
     from_domain = sample[:from]&.split('@')&.last
-    inbox = find_resend_inbox(account, from_domain)
+    inbox = find_resend_inbox(account, sample[:from], from_domain)
 
     return notify_no_inbox(account, from_domain, batch_info, reason: :no_matching_inbox) unless inbox
     return notify_no_inbox(account, from_domain, batch_info, reason: :sftp_disabled) unless inbox.channel.provider_config['sftp_campaigns_enabled']
@@ -48,16 +48,16 @@ class Sftp::BatchCampaignService
     inbox
   end
 
-  def find_resend_inbox(account, from_domain)
+  def find_resend_inbox(account, from_email, from_domain)
     return nil if from_domain.blank?
 
-    account.inboxes
-           .where(channel_type: 'Channel::Email')
-           .find do |inb|
-             ch = inb.channel
-             ch.provider == 'resend' &&
-               ch.provider_config['from_email']&.split('@')&.last == from_domain
-           end
+    resend_inboxes = account.inboxes
+                            .where(channel_type: 'Channel::Email')
+                            .select { |inb| inb.channel.provider == 'resend' }
+
+    # Prefer exact from_email match so multiple Resend inboxes per domain resolve correctly
+    resend_inboxes.find { |inb| inb.channel.provider_config['from_email'] == from_email } ||
+      resend_inboxes.find { |inb| inb.channel.provider_config['from_email']&.split('@')&.last == from_domain }
   end
 
   def send_campaign(inbox, mtr_files, sample)
