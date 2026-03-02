@@ -108,6 +108,43 @@ class ReportsAPI extends ApiClient {
       },
     });
   }
+
+  getCampaignSummary({ from, to }) {
+    const summaryUrl = this.url.replace('/reports', '/summary_reports');
+    return axios.get(`${summaryUrl}/campaign`, {
+      params: { since: from, until: to },
+    });
+  }
+
+  getCampaignList({ from, to }) {
+    return axios.get(`${this.url}/campaign_list`, {
+      params: { since: from, until: to },
+    });
+  }
+
+  getCampaignTimeseries({ from, to, groupBy }) {
+    return axios.get(`${this.url}/campaign_timeseries`, {
+      params: { since: from, until: to, group_by: groupBy },
+    });
+  }
+
+  getCampaignBreakdown({ from, to, breakdownType }) {
+    return axios.get(`${this.url}/campaign_breakdown`, {
+      params: { since: from, until: to, breakdown_type: breakdownType },
+    });
+  }
+
+  getCampaignsCSV({ from, to }) {
+    return axios.get(`${this.url}/campaigns`, {
+      params: { since: from, until: to },
+    });
+  }
+
+  getCampaignDeliveryCSV({ from, to }) {
+    return axios.get(`${this.url}/campaign_delivery_detail`, {
+      params: { since: from, until: to },
+    });
+  }
 }
 
 export default new ReportsAPI();

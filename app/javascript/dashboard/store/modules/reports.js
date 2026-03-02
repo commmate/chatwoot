@@ -53,6 +53,13 @@ const state = {
     bot_handoffs_count: 0,
     previous: {},
   },
+  campaignReport: {
+    summary: {},
+    summaryStatus: STATUS.FINISHED,
+    list: [],
+    timeseries: {},
+    breakdown: {},
+  },
   overview: {
     uiFlags: {
       isFetchingAccountConversationMetric: false,
@@ -102,6 +109,21 @@ const getters = {
   },
   getOverviewUIFlags($state) {
     return $state.overview.uiFlags;
+  },
+  getCampaignReportSummary(_state) {
+    return _state.campaignReport.summary;
+  },
+  getCampaignReportSummaryStatus(_state) {
+    return _state.campaignReport.summaryStatus;
+  },
+  getCampaignReportList(_state) {
+    return _state.campaignReport.list;
+  },
+  getCampaignReportTimeseries(_state) {
+    return _state.campaignReport.timeseries;
+  },
+  getCampaignReportBreakdown(_state) {
+    return _state.campaignReport.breakdown;
   },
 };
 
@@ -286,6 +308,59 @@ export const actions = {
         console.error(error);
       });
   },
+  fetchCampaignReportSummary({ commit }, reportObj) {
+    commit(types.default.SET_CAMPAIGN_REPORT_SUMMARY_STATUS, STATUS.FETCHING);
+    Report.getCampaignSummary(reportObj)
+      .then(response => {
+        commit(types.default.SET_CAMPAIGN_REPORT_SUMMARY, response.data);
+        commit(
+          types.default.SET_CAMPAIGN_REPORT_SUMMARY_STATUS,
+          STATUS.FINISHED
+        );
+      })
+      .catch(() => {
+        commit(types.default.SET_CAMPAIGN_REPORT_SUMMARY_STATUS, STATUS.FAILED);
+      });
+  },
+  fetchCampaignReportList({ commit }, reportObj) {
+    Report.getCampaignList(reportObj)
+      .then(response => {
+        commit(types.default.SET_CAMPAIGN_REPORT_LIST, response.data);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  },
+  fetchCampaignReportTimeseries({ commit }, reportObj) {
+    Report.getCampaignTimeseries(reportObj)
+      .then(response => {
+        commit(types.default.SET_CAMPAIGN_REPORT_TIMESERIES, response.data);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  },
+  fetchCampaignReportBreakdown(_, reportObj) {
+    return Report.getCampaignBreakdown(reportObj);
+  },
+  downloadCampaignsCSV(_, reportObj) {
+    return Report.getCampaignsCSV(reportObj)
+      .then(response => {
+        downloadCsvFile(reportObj.fileName, response.data);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  },
+  downloadCampaignDeliveryCSV(_, reportObj) {
+    return Report.getCampaignDeliveryCSV(reportObj)
+      .then(response => {
+        downloadCsvFile(reportObj.fileName, response.data);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  },
   downloadAccountConversationHeatmap(_, reportObj) {
     Report.getConversationTrafficCSV({ daysBefore: reportObj.daysBefore })
       .then(response => {
@@ -356,6 +431,21 @@ const mutations = {
   },
   [types.default.TOGGLE_TEAM_CONVERSATION_METRIC_LOADING](_state, flag) {
     _state.overview.uiFlags.isFetchingTeamConversationMetric = flag;
+  },
+  [types.default.SET_CAMPAIGN_REPORT_SUMMARY](_state, data) {
+    _state.campaignReport.summary = data;
+  },
+  [types.default.SET_CAMPAIGN_REPORT_SUMMARY_STATUS](_state, status) {
+    _state.campaignReport.summaryStatus = status;
+  },
+  [types.default.SET_CAMPAIGN_REPORT_LIST](_state, data) {
+    _state.campaignReport.list = data;
+  },
+  [types.default.SET_CAMPAIGN_REPORT_TIMESERIES](_state, data) {
+    _state.campaignReport.timeseries = data;
+  },
+  [types.default.SET_CAMPAIGN_REPORT_BREAKDOWN](_state, data) {
+    _state.campaignReport.breakdown = data;
   },
 };
 

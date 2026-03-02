@@ -578,5 +578,48 @@
     "AVG_REPLY_TIME": "Tempo Médio de Espera do Cliente",
     "RESOLUTION_COUNT": "Contagem de Resolução",
     "CONVERSATIONS": "Nº de Conversas"
+  },
+  "CAMPAIGN_REPORTS": {
+    "HEADER": "Relatórios de Campanhas",
+    "CAMPAIGNS_CREATED": "Campanhas criadas",
+    "TOTAL_SENT": "Mensagens enviadas",
+    "TOTAL_FAILED": "Mensagens com falha",
+    "TOTAL_REPLIES": "Respostas recebidas",
+    "REPLY_RATE": "Taxa de resposta",
+    "CAMPAIGNS": "Campanhas",
+    "SUCCEEDED": "Enviadas",
+    "FAILED": "Com falha",
+    "PENDING": "Pendentes",
+    "NO_DATA": "Sem dados de campanha para o período selecionado",
+    "DOWNLOAD_LIST": "Baixar lista de campanhas (CSV)",
+    "DOWNLOAD_DELIVERY": "Baixar detalhes de entrega (CSV)",
+    "CHARTS": {
+      "CAMPAIGNS_OVER_TIME": "Campanhas ao longo do tempo",
+      "SENT_VS_FAILED": "Mensagens enviadas vs com falha",
+      "BY_INBOX": "Campanhas por caixa de entrada",
+      "BY_CHANNEL": "Campanhas por tipo de canal",
+      "DELIVERY_STATUS": "Distribuição do status de entrega",
+      "PER_CAMPAIGN_TABLE": "Taxa de resposta por campanha",
+      "VOLUME_HEATMAP": "Mapa de calor de volume de campanhas"
+    },
+    "TABLE": {
+      "TITLE": "Campanha",
+      "CHANNEL": "Canal",
+      "SENT": "Enviadas",
+      "REPLIES": "Respostas",
+      "REPLY_RATE": "Taxa de resposta",
+      "PAGINATION_INFO": "{from}\u2013{to} de {total}",
+      "PREV": "Anterior",
+      "NEXT": "Próximo"
+    },
+    "DAYS": {
+      "SUN": "Dom",
+      "MON": "Seg",
+      "TUE": "Ter",
+      "WED": "Qua",
+      "THU": "Qui",
+      "FRI": "Sex",
+      "SAT": "Sáb"
+    }
   }
 }

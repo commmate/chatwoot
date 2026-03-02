@@ -468,6 +468,7 @@ Rails.application.routes.draw do
               get :inbox
               get :label
               get :channel
+              get :campaign
             end
           end
           resources :reports, only: [:index] do
@@ -485,6 +486,11 @@ Rails.application.routes.draw do
               get :inbox_label_matrix
               get :first_response_time_distribution
               get :outgoing_messages_count
+              get :campaign_list
+              get :campaigns
+              get :campaign_delivery_detail
+              get :campaign_timeseries
+              get :campaign_breakdown
             end
           end
           resource :year_in_review, only: [:show]
@@ -607,7 +613,7 @@ Rails.application.routes.draw do
   post 'webhooks/sms/:phone_number', to: 'webhooks/sms#process_payload'
   get 'webhooks/whatsapp/:phone_number', to: 'webhooks/whatsapp#verify'
   post 'webhooks/whatsapp/:phone_number', to: 'webhooks/whatsapp#process_payload'
-  post 'webhooks/resend/:email', to: 'webhooks/resend#process_payload', constraints: { email: /[^\/]+/ }
+  post 'webhooks/resend/:email', to: 'webhooks/resend#process_payload', constraints: { email: %r{[^/]+} }
   get 'webhooks/instagram', to: 'webhooks/instagram#verify'
   post 'webhooks/instagram', to: 'webhooks/instagram#events'
   post 'webhooks/tiktok', to: 'webhooks/tiktok#events'

@@ -156,6 +156,27 @@ pt_BR:
       avg_resolution_time: Tempo médio de resolução
       resolution_count: Contagem de Resolução
       avg_customer_waiting_time: Tempo médio de espera do cliente
+    campaign_csv:
+      title: Título da campanha
+      inbox: Caixa de entrada
+      channel_type: Tipo de canal
+      campaign_type: Tipo de campanha
+      status: Status
+      source: Origem
+      total: Total
+      succeeded: Enviadas
+      failed: Com falha
+      replies: Respostas
+      reply_rate: Taxa de resposta
+      scheduled_at: Agendada em
+      completed_at: Concluída em
+    campaign_delivery_csv:
+      campaign_title: Título da campanha
+      contact: Contato
+      status: Status
+      replied_at: Respondida em
+      error_code: Código de erro
+      error_message: Mensagem de erro
     conversation_traffic_csv:
       timezone: Fuso horário
     sla_csv:

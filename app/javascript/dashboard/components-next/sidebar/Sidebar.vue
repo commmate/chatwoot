@@ -615,6 +615,11 @@ const menuItems = computed(() => {
                 label: t('SIDEBAR.REPORTS_BOT'),
                 to: accountScopedRoute('bot_reports'),
               },
+              {
+                name: 'Reports Campaigns',
+                label: t('SIDEBAR.REPORTS_CAMPAIGNS'),
+                to: accountScopedRoute('campaign_reports'),
+              },
             ],
           },
         ]
@@ -989,7 +994,6 @@ const menuItems = computed(() => {
       <div
         class="pointer-events-none absolute inset-x-0 -top-[1.938rem] h-8 bg-gradient-to-t from-n-background to-transparent"
       />
-      <YearInReviewBanner />
       <SidebarChangelogCard
         v-if="
           isOnChatwootCloud &&

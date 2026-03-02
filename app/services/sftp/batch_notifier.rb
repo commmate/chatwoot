@@ -11,6 +11,7 @@ module Sftp::BatchNotifier
       entry_name: File.basename(@batch_path), reason: reason,
       details: details, recipients: super_admin_emails
     ).deliver_later
+    nil
   end
 
   def notify_no_account(company_name, batch_info)
@@ -20,11 +21,13 @@ module Sftp::BatchNotifier
     SftpCampaignMailer.no_account_found(
       company_name: company_name, batch_info: batch_info, recipients: super_admin_emails
     ).deliver_later
+    nil
   end
 
   def notify_no_inbox(account, from_domain, batch_info, reason:)
     SftpCampaignMailer.no_inbox_found(
       account: account, from_domain: from_domain, batch_info: batch_info, reason: reason
     ).deliver_later
+    nil
   end
 end
