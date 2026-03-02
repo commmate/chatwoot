@@ -202,6 +202,27 @@ en:
       avg_resolution_time: Avg resolution time
       resolution_count: Resolution count
       avg_customer_waiting_time: Avg customer waiting time
+    campaign_csv:
+      title: Campaign title
+      inbox: Inbox
+      channel_type: Channel type
+      campaign_type: Campaign type
+      status: Status
+      source: Source
+      total: Total
+      succeeded: Succeeded
+      failed: Failed
+      replies: Replies
+      reply_rate: Reply rate
+      scheduled_at: Scheduled at
+      completed_at: Completed at
+    campaign_delivery_csv:
+      campaign_title: Campaign title
+      contact: Contact
+      status: Status
+      replied_at: Replied at
+      error_code: Error code
+      error_message: Error message
     conversation_traffic_csv:
       timezone: Timezone
     sla_csv:

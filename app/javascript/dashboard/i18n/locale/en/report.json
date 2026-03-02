@@ -646,5 +646,48 @@
     "AVG_REPLY_TIME": "Avg. Customer Waiting Time",
     "RESOLUTION_COUNT": "Resolution Count",
     "CONVERSATIONS": "No. of conversations"
+  },
+  "CAMPAIGN_REPORTS": {
+    "HEADER": "Campaign Reports",
+    "CAMPAIGNS_CREATED": "Campaigns created",
+    "TOTAL_SENT": "Messages sent",
+    "TOTAL_FAILED": "Messages failed",
+    "TOTAL_REPLIES": "Replies received",
+    "REPLY_RATE": "Reply rate",
+    "CAMPAIGNS": "Campaigns",
+    "SUCCEEDED": "Succeeded",
+    "FAILED": "Failed",
+    "PENDING": "Pending",
+    "NO_DATA": "No campaign data for the selected period",
+    "DOWNLOAD_LIST": "Download campaign list (CSV)",
+    "DOWNLOAD_DELIVERY": "Download delivery detail (CSV)",
+    "CHARTS": {
+      "CAMPAIGNS_OVER_TIME": "Campaigns over time",
+      "SENT_VS_FAILED": "Messages sent vs failed",
+      "BY_INBOX": "Campaigns by inbox",
+      "BY_CHANNEL": "Campaigns by channel type",
+      "DELIVERY_STATUS": "Delivery status distribution",
+      "PER_CAMPAIGN_TABLE": "Per-campaign reply rate",
+      "VOLUME_HEATMAP": "Campaign volume heatmap"
+    },
+    "TABLE": {
+      "TITLE": "Campaign",
+      "CHANNEL": "Channel",
+      "SENT": "Sent",
+      "REPLIES": "Replies",
+      "REPLY_RATE": "Reply rate",
+      "PAGINATION_INFO": "{from}\u2013{to} of {total}",
+      "PREV": "Previous",
+      "NEXT": "Next"
+    },
+    "DAYS": {
+      "SUN": "Sun",
+      "MON": "Mon",
+      "TUE": "Tue",
+      "WED": "Wed",
+      "THU": "Thu",
+      "FRI": "Fri",
+      "SAT": "Sat"
+    }
   }
 }

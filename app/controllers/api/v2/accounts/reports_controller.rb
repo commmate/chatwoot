@@ -1,6 +1,8 @@
 class Api::V2::Accounts::ReportsController < Api::V1::Accounts::BaseController
   include Api::V2::Accounts::ReportsHelper
+  include Api::V2::Accounts::CampaignReportsHelper
   include Api::V2::Accounts::HeatmapHelper
+  include CampaignReportActions
 
   before_action :check_authorization
 

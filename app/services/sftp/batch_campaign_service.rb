@@ -40,7 +40,7 @@ class Sftp::BatchCampaignService
     return notify_no_account(sample[:company_name], batch_info) unless account
 
     from_domain = sample[:from]&.split('@')&.last
-    inbox = find_resend_inbox(account, from_domain)
+    inbox = find_resend_inbox(account, sample[:from], from_domain)
 
     return notify_no_inbox(account, from_domain, batch_info, reason: :no_matching_inbox) unless inbox
     return notify_no_inbox(account, from_domain, batch_info, reason: :sftp_disabled) unless inbox.channel.provider_config['sftp_campaigns_enabled']
@@ -48,16 +48,16 @@ class Sftp::BatchCampaignService
     inbox
   end
 
-  def find_resend_inbox(account, from_domain)
+  def find_resend_inbox(account, from_email, from_domain)
     return nil if from_domain.blank?
 
-    account.inboxes
-           .where(channel_type: 'Channel::Email')
-           .find do |inb|
-             ch = inb.channel
-             ch.provider == 'resend' &&
-               ch.provider_config['from_email']&.split('@')&.last == from_domain
-           end
+    resend_inboxes = account.inboxes
+                            .where(channel_type: 'Channel::Email')
+                            .select { |inb| inb.channel.provider == 'resend' }
+
+    # Prefer exact from_email match so multiple Resend inboxes per domain resolve correctly
+    resend_inboxes.find { |inb| inb.channel.provider_config['from_email'] == from_email } ||
+      resend_inboxes.find { |inb| inb.channel.provider_config['from_email']&.split('@')&.last == from_domain }
   end
 
   def send_campaign(inbox, mtr_files, sample)
@@ -65,8 +65,8 @@ class Sftp::BatchCampaignService
     campaign = create_campaign(inbox, mtr_files, sample, preview)
     report = create_delivery_report(campaign, mtr_files.size)
 
-    sender = build_sender(inbox)
-    mtr_files.each { |mtr_path| deliver_email(sender, campaign, report, mtr_path) }
+    client = build_sender(inbox)
+    mtr_files.each { |mtr_path| deliver_email(client, campaign, report, mtr_path) }
     report.finalize!
   end
 
@@ -110,19 +110,14 @@ class Sftp::BatchCampaignService
   end
 
   def build_sender(inbox)
-    channel = inbox.channel
-    config = channel.provider_config
-    from_name = config['from_name'] || inbox.name
-    {
-      client: Resend::Client.new(api_key: config['api_key']),
-      from_address: "#{from_name} <#{config['from_email']}>"
-    }
+    config = inbox.channel.provider_config
+    Resend::Client.new(api_key: config['api_key'])
   end
 
-  def deliver_email(sender, campaign, report, mtr_path)
+  def deliver_email(client, campaign, report, mtr_path)
     data = Sftp::MtrParser.new(mtr_path).parse
-    payload = build_email_payload(sender[:from_address], data, mtr_path)
-    response = sender[:client].send_email(**payload)
+    payload = build_email_payload(data, mtr_path)
+    response = client.send_email(**payload)
 
     record_success(campaign, report, data, response)
   rescue Resend::Client::ApiError => e
@@ -131,9 +126,9 @@ class Sftp::BatchCampaignService
     report.record_error(code: e.error_code, message: e.message, details: "MTR: #{mtr_path}")
   end
 
-  def build_email_payload(from_address, data, mtr_path)
+  def build_email_payload(data, mtr_path)
     payload = {
-      from: from_address,
+      from: data[:from],
       to: data[:to_email],
       subject: data[:subject] || '(No subject)',
       html: data[:html_body].presence || '<p></p>'

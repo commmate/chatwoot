@@ -610,3 +610,12 @@
   description: 'Remote directory on the SFTP server where campaign batch folders are uploaded'
   locked: false
 # ------- End of SFTP Campaigns Config ------- #
+
+# ------- Campaign Reply Tracking Config ------- #
+- name: CAMPAIGN_REPLY_WINDOW_HOURS
+  display_title: 'Campaign Reply Window (hours)'
+  value: '24'
+  description: 'For WhatsApp and SMS, inbound messages from a contact within this many hours of a campaign send are counted as campaign replies.'
+  locked: false
+  type: text
+# ------- End of Campaign Reply Tracking Config ------- #

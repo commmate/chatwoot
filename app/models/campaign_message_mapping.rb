@@ -27,18 +27,18 @@ class CampaignMessageMapping < ApplicationRecord
   belongs_to :campaign_delivery_report
   belongs_to :contact
 
-  # Either whatsapp_message_id or resend_email_id must be present
   validates :whatsapp_message_id, uniqueness: true, allow_nil: true
   validates :resend_email_id, uniqueness: true, allow_nil: true
+  validates :sms_message_id, uniqueness: true, allow_nil: true
   validates :status, presence: true
   validate :external_id_present
 
   private
 
   def external_id_present
-    return if whatsapp_message_id.present? || resend_email_id.present?
+    return if whatsapp_message_id.present? || resend_email_id.present? || sms_message_id.present?
 
-    errors.add(:base, 'Either whatsapp_message_id or resend_email_id must be present')
+    errors.add(:base, 'At least one external message ID must be present')
   end
 
   public
