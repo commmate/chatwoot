@@ -43,6 +43,12 @@
   display_title: 'CommMate Metadata'
   description: 'Display default CommMate metadata like favicons and upgrade warnings'
   type: boolean
+- name: BRAND_PRIMARY_COLOR
+  value: '#107e44'
+  display_title: 'Brand Primary Color'
+  description: 'Hex color for brand theming (e.g. #107e44). Leave empty for default CommMate green.'
+  locked: false
+  type: text
 # ------- End of Branding Related Config ------- #
 
 # ------- Signup & Account Related Config ------- #

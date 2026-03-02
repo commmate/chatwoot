@@ -1,5 +1,6 @@
 class DashboardController < ActionController::Base
   include SwitchLocale
+  include BrandColorHelper
 
   GLOBAL_CONFIG_KEYS = %w[
     LOGO
@@ -24,11 +25,13 @@ class DashboardController < ActionController::Base
     DISABLE_USER_PROFILE_UPDATE
     DEPLOYMENT_ENV
     INSTALLATION_PRICING_PLAN
+    BRAND_PRIMARY_COLOR
   ].freeze
 
   before_action :set_application_pack
   before_action :set_global_config
   before_action :set_dashboard_scripts
+  before_action :set_brand_color_css
   around_action :switch_locale
   before_action :ensure_installation_onboarding, only: [:index]
   before_action :render_hc_if_custom_domain, only: [:index]
@@ -67,6 +70,10 @@ class DashboardController < ActionController::Base
   end
 
   def app_config
+    core_app_config.merge(commmate_app_config)
+  end
+
+  def core_app_config
     {
       APP_VERSION: Chatwoot.config[:version],
       VAPID_PUBLIC_KEY: VapidService.public_key,
@@ -83,8 +90,12 @@ class DashboardController < ActionController::Base
       ALLOWED_LOGIN_METHODS: allowed_login_methods,
       EVOLUTION_API_ENABLED: GlobalConfigService.load('EVOLUTION_API_ENABLED', 'false'),
       RESEND_ENABLED: GlobalConfigService.load('RESEND_ENABLED', 'false'),
-      SFTP_CAMPAIGNS_ENABLED: GlobalConfigService.load('SFTP_CAMPAIGNS_ENABLED', 'false'),
-      # CommMate flags
+      SFTP_CAMPAIGNS_ENABLED: GlobalConfigService.load('SFTP_CAMPAIGNS_ENABLED', 'false')
+    }
+  end
+
+  def commmate_app_config
+    {
       COMMMATE_ALLOW_PERSONAL_EMAIL_SIGNUP: GlobalConfigService.load('COMMMATE_ALLOW_PERSONAL_EMAIL_SIGNUP', 'false'),
       COMMMATE_POST_SIGNUP_EVOLUTION_ONBOARDING: GlobalConfigService.load('COMMMATE_POST_SIGNUP_EVOLUTION_ONBOARDING', 'false')
     }
@@ -95,6 +106,11 @@ class DashboardController < ActionController::Base
     methods << 'google_oauth' if GlobalConfigService.load('ENABLE_GOOGLE_OAUTH_LOGIN', 'true').to_s != 'false'
     methods << 'saml' if ChatwootHub.pricing_plan != 'community' && GlobalConfigService.load('ENABLE_SAML_SSO_LOGIN', 'true').to_s != 'false'
     methods
+  end
+
+  def set_brand_color_css
+    color = @global_config['BRAND_PRIMARY_COLOR']
+    @brand_color_css = color.present? ? brand_color_style_tag(color) : nil
   end
 
   def set_application_pack
