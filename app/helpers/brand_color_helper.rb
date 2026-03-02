@@ -5,6 +5,6 @@ module BrandColorHelper
     service = BrandColorService.new(hex_color)
     return '' unless service.valid?
 
-    tag.style(service.generate_css.html_safe, id: 'brand-color-override') # rubocop:disable Rails/OutputSafety
+    "<style id=\"brand-color-override\">#{service.generate_css}</style>".html_safe # rubocop:disable Rails/OutputSafety
   end
 end

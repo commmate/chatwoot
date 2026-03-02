@@ -34,6 +34,7 @@ class BrandColorService
     {
       primary: "##{hex}",
       **primary_shades(hue, sat, lum),
+      **woot_shades(hue, sat),
       **secondary_shades(hue, sat, lum),
       **tertiary_shades(hue, sat, lum),
       **quaternary_shades(hue, sat, lum)
@@ -44,6 +45,20 @@ class BrandColorService
     {
       primary_dark: ColorMath.hsl_to_hex(hue, sat, (lum - 0.08).clamp(0.05, 0.95)),
       primary_light: ColorMath.hsl_to_hex(hue, sat, (lum + 0.08).clamp(0.05, 0.95))
+    }
+  end
+
+  def woot_shades(hue, sat)
+    {
+      woot_25: ColorMath.hsl_to_hex(hue, sat, 0.97),
+      woot_50: ColorMath.hsl_to_hex(hue, sat, 0.95),
+      woot_100: ColorMath.hsl_to_hex(hue, sat, 0.90),
+      woot_200: ColorMath.hsl_to_hex(hue, sat, 0.82),
+      woot_300: ColorMath.hsl_to_hex(hue, sat, 0.72),
+      woot_400: ColorMath.hsl_to_hex(hue, sat, 0.62),
+      woot_600: ColorMath.hsl_to_hex(hue, sat, 0.42),
+      woot_700: ColorMath.hsl_to_hex(hue, sat, 0.35),
+      woot_800: ColorMath.hsl_to_hex(hue, sat, 0.28)
     }
   end
 

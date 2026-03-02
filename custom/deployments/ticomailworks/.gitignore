@@ -1,0 +1,3 @@
+.env
+sftp_keys/tmw_sftp_key
+sftp_keys/authorized_keys
