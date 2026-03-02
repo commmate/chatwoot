@@ -1,0 +1,344 @@
+# Tico Mail Works - CRM Deployment
+# Image: commmate/commmate:v4.11.1.3 (runtime-branded)
+# Brand: Tico Mail Works (www.ticomailworks.ie)
+# Primary Color: #4681CF
+#
+# Reuses the existing Traefik reverse proxy on tutorialsbot-web network.
+#
+# Services:
+#   - Rails: CRM web application
+#   - Sidekiq: Background job processor
+#   - PostgreSQL: Database (with pgvector)
+#   - Redis: Cache and queues
+#   - Evolution API: WhatsApp integration
+#   - SFTP: Campaign file ingestion
+
+services:
+  # ─── Rails Application ──────────────────────────────────
+  rails:
+    image: commmate/commmate:v4.11.1.3
+    container_name: tmw-rails
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - RAILS_ENV=production
+      - NODE_ENV=production
+      - INSTALLATION_ENV=docker
+
+      # Database
+      - POSTGRES_HOST=tmw-postgres
+      - POSTGRES_DATABASE=tmw_production
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
+      # Redis
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@tmw-redis:6379
+
+      # Rails
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+      - RAILS_MAX_THREADS=5
+      - RACK_TIMEOUT_SERVICE_TIMEOUT=45
+
+      # Frontend
+      - FRONTEND_URL=https://${CRM_DOMAIN}
+
+      # ── Tico Mail Works Branding ──
+      - INSTALLATION_NAME=Tico Mail Works
+      - BRAND_NAME=Tico Mail Works
+      - BRAND_URL=https://www.ticomailworks.ie
+      - BRAND_PRIMARY_COLOR=#4681CF
+
+      # Localization
+      - DEFAULT_LOCALE=en
+
+      # Privacy & Security
+      - DISABLE_CHATWOOT_CONNECTIONS=true
+      - DISABLE_TELEMETRY=true
+      - ENABLE_PUSH_RELAY_SERVER=false
+
+      # Evolution WhatsApp Integration
+      - EVOLUTION_API_ENABLED=true
+      - EVOLUTION_API_URL=http://tmw-evolution:8080
+      - EVOLUTION_API_KEY=${EVOLUTION_API_KEY}
+
+      # SFTP Campaigns
+      - SFTP_CAMPAIGNS_ENABLED=true
+      - RESEND_ENABLED=true
+
+      # Features
+      - ACTIVE_STORAGE_SERVICE=local
+      - RAILS_LOG_TO_STDOUT=true
+      - USE_INBOX_AVATAR_FOR_BOT=true
+      - ENABLE_ACCOUNT_SIGNUP=false
+      - WEBHOOK_TIMEOUT=30
+
+      # Email
+      - MAILER_SENDER_EMAIL=${MAILER_SENDER_EMAIL}
+
+    volumes:
+      - tmw-storage:/app/storage
+      - tmw-sftp-data:/app/sftp-data
+      - ./brand-assets/logo_light.svg:/app/public/brand-assets/logo_light.svg:ro
+      - ./brand-assets/logo.svg:/app/public/brand-assets/logo.svg:ro
+      - ./brand-assets/logo.svg:/app/public/brand-assets/logo_dark.svg:ro
+      - ./brand-assets/favicon.png:/app/public/brand-assets/logo_thumbnail.png:ro
+    depends_on:
+      tmw-postgres:
+        condition: service_healthy
+      tmw-redis:
+        condition: service_healthy
+    networks:
+      - tutorialsbot-web
+      - tmw-internal
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=tutorialsbot-web
+      - traefik.http.routers.tmw-rails.rule=Host(`${CRM_DOMAIN}`)
+      - traefik.http.routers.tmw-rails.entrypoints=websecure
+      - traefik.http.routers.tmw-rails.tls.certresolver=letsencrypt
+      - traefik.http.services.tmw-rails.loadbalancer.server.port=3000
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep puma | grep -v grep || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ─── Sidekiq Background Jobs ────────────────────────────
+  sidekiq:
+    image: commmate/commmate:v4.11.1.3
+    container_name: tmw-sidekiq
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - RAILS_ENV=production
+      - NODE_ENV=production
+      - INSTALLATION_ENV=docker
+
+      # Database
+      - POSTGRES_HOST=tmw-postgres
+      - POSTGRES_DATABASE=tmw_production
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
+      # Redis
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@tmw-redis:6379
+
+      # Rails
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+      - RACK_TIMEOUT_SERVICE_TIMEOUT=45
+
+      # Frontend URL (needed for email links)
+      - FRONTEND_URL=https://${CRM_DOMAIN}
+
+      # Branding (must match rails)
+      - INSTALLATION_NAME=Tico Mail Works
+      - BRAND_NAME=Tico Mail Works
+      - BRAND_URL=https://www.ticomailworks.ie
+      - BRAND_PRIMARY_COLOR=#4681CF
+
+      # Privacy & Security
+      - DISABLE_CHATWOOT_CONNECTIONS=true
+      - DISABLE_TELEMETRY=true
+      - ENABLE_PUSH_RELAY_SERVER=false
+
+      # Evolution WhatsApp Integration
+      - EVOLUTION_API_ENABLED=true
+      - EVOLUTION_API_URL=http://tmw-evolution:8080
+      - EVOLUTION_API_KEY=${EVOLUTION_API_KEY}
+
+      # SFTP Campaigns
+      - SFTP_CAMPAIGNS_ENABLED=true
+      - RESEND_ENABLED=true
+
+      # Email
+      - MAILER_SENDER_EMAIL=${MAILER_SENDER_EMAIL}
+
+    depends_on:
+      tmw-postgres:
+        condition: service_healthy
+      tmw-redis:
+        condition: service_healthy
+      rails:
+        condition: service_healthy
+    volumes:
+      - tmw-storage:/app/storage
+      - tmw-sftp-data:/app/sftp-data
+    networks:
+      - tmw-internal
+    command: ['bundle', 'exec', 'sidekiq', '-C', 'config/sidekiq.yml']
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep sidekiq | grep -v grep || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ─── PostgreSQL Database ────────────────────────────────
+  tmw-postgres:
+    image: pgvector/pgvector:pg16
+    container_name: tmw-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=tmw_production
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - tmw-postgres-data:/var/lib/postgresql/data
+    networks:
+      - tmw-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ─── Redis Cache ────────────────────────────────────────
+  tmw-redis:
+    image: redis:8-alpine
+    container_name: tmw-redis
+    restart: unless-stopped
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    volumes:
+      - tmw-redis-data:/data
+    networks:
+      - tmw-internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ─── Evolution API (WhatsApp) ───────────────────────────
+  tmw-evolution:
+    image: evoapicloud/evolution-api:v2.3.7
+    container_name: tmw-evolution
+    restart: unless-stopped
+    environment:
+      - SERVER_TYPE=http
+      - SERVER_PORT=8080
+      - SERVER_URL=https://${EVOLUTION_DOMAIN}
+
+      - CORS_ORIGIN=*
+      - CORS_METHODS=GET,POST,PUT,DELETE
+      - CORS_CREDENTIALS=true
+
+      # Database (own PostgreSQL, separate schema)
+      - DATABASE_ENABLED=true
+      - DATABASE_PROVIDER=postgresql
+      - DATABASE_CONNECTION_URI=postgresql://postgres:${POSTGRES_PASSWORD}@tmw-postgres:5432/tmw_production?schema=evolution
+      - DATABASE_CONNECTION_CLIENT_NAME=tmw_evolution
+      - DATABASE_SAVE_DATA_INSTANCE=true
+      - DATABASE_SAVE_DATA_NEW_MESSAGE=true
+      - DATABASE_SAVE_MESSAGE_UPDATE=true
+      - DATABASE_SAVE_DATA_CONTACTS=true
+      - DATABASE_SAVE_DATA_CHATS=true
+
+      # Redis
+      - CACHE_REDIS_ENABLED=true
+      - CACHE_REDIS_URI=redis://:${REDIS_PASSWORD}@tmw-redis:6379
+      - CACHE_REDIS_PREFIX_KEY=tmw_evolution
+
+      # Authentication
+      - AUTHENTICATION_TYPE=apikey
+      - AUTHENTICATION_API_KEY=${EVOLUTION_API_KEY}
+      - AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES=true
+
+      # Locale
+      - LANGUAGE=en
+      - TIMEZONE=Europe/Dublin
+
+      # Logs
+      - LOG_LEVEL=INFO
+      - LOG_COLOR=true
+      - LOG_BAILEYS=error
+
+      # Instance
+      - DEL_INSTANCE=false
+      - DEL_TEMP_INSTANCES=true
+
+      # Store
+      - STORE_MESSAGES=true
+      - STORE_MESSAGE_UP=true
+      - STORE_CONTACTS=true
+      - STORE_CHATS=true
+
+      # Clean Store
+      - CLEAN_STORE_CLEANING_INTERVAL=7200
+      - CLEAN_STORE_MESSAGES=true
+      - CLEAN_STORE_MESSAGE_UP=true
+      - CLEAN_STORE_CONTACTS=true
+      - CLEAN_STORE_CHATS=true
+
+      # CRM Integration
+      - CHATWOOT_ENABLED=true
+      - CHATWOOT_MESSAGE_READ=true
+      - CHATWOOT_MESSAGE_DELETE=true
+      - CHATWOOT_IMPORT_DATABASE=false
+      - CHATWOOT_CONVERSATION_PENDING=false
+      - CHATWOOT_SIGN_MSG=false
+      - CHATWOOT_REOPEN_CONVERSATION=false
+      - CHATWOOT_DAYS_LIMIT_IMPORT_MESSAGES=0
+
+      # Webhook
+      - WEBHOOK_GLOBAL_ENABLED=false
+      - WEBHOOK_GLOBAL_URL=''
+      - WEBHOOK_GLOBAL_WEBHOOK_BY_EVENTS=false
+
+      # QR Code
+      - QRCODE_LIMIT=30
+      - QRCODE_COLOR=#4681CF
+
+    depends_on:
+      tmw-postgres:
+        condition: service_healthy
+      tmw-redis:
+        condition: service_healthy
+      rails:
+        condition: service_healthy
+    volumes:
+      - tmw-evolution-instances:/evolution/instances
+      - tmw-evolution-store:/evolution/store
+    networks:
+      - tutorialsbot-web
+      - tmw-internal
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=tutorialsbot-web
+      - traefik.http.routers.tmw-evolution.rule=Host(`${EVOLUTION_DOMAIN}`)
+      - traefik.http.routers.tmw-evolution.entrypoints=websecure
+      - traefik.http.routers.tmw-evolution.tls.certresolver=letsencrypt
+      - traefik.http.services.tmw-evolution.loadbalancer.server.port=8080
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ─── SFTP Campaign Ingestion ────────────────────────────
+  tmw-sftp:
+    image: atmoz/sftp:alpine
+    container_name: tmw-sftp
+    restart: unless-stopped
+    volumes:
+      - tmw-sftp-data:/home/sftp_user/campaigns
+      - ./sftp_keys/authorized_keys:/home/sftp_user/.ssh/keys/authorized_keys:ro
+    ports:
+      - '2222:22'
+    command: 'sftp_user::1001:1001:campaigns'
+    networks:
+      - tmw-internal
+
+networks:
+  tutorialsbot-web:
+    external: true
+  tmw-internal:
+    driver: bridge
+
+volumes:
+  tmw-postgres-data:
+  tmw-redis-data:
+  tmw-storage:
+  tmw-evolution-instances:
+  tmw-evolution-store:
+  tmw-sftp-data:

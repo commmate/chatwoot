@@ -55,22 +55,77 @@ const { t } = useI18n();
 const isImageValid = ref(true);
 const fileInput = ref(null);
 
+function hexToHSL(hex) {
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0;
+  let s = 0;
+  const l = (max + min) / 2;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+    else if (max === g) h = ((b - r) / d + 2) / 6;
+    else h = ((r - g) / d + 4) / 6;
+  }
+  return [h * 360, s, l];
+}
+
+function hslToHex(h, s, l) {
+  const hue2rgb = (p, q, raw) => {
+    let v = raw;
+    if (v < 0) v += 1;
+    else if (v > 1) v -= 1;
+    if (v < 1 / 6) return p + (q - p) * 6 * v;
+    if (v < 1 / 2) return q;
+    if (v < 2 / 3) return p + (q - p) * (2 / 3 - v) * 6;
+    return p;
+  };
+  const hN = h / 360;
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  const r = Math.round(hue2rgb(p, q, hN + 1 / 3) * 255);
+  const g = Math.round(hue2rgb(p, q, hN) * 255);
+  const b = Math.round(hue2rgb(p, q, hN - 1 / 3) * 255);
+  return `#${[r, g, b].map(x => x.toString(16).padStart(2, '0')).join('')}`;
+}
+
+function brandAvatarColors(hex) {
+  const [h, s] = hexToHSL(hex);
+  return {
+    light: [
+      [hslToHex(h, s * 0.4, 0.92), hslToHex(h, s, 0.3)],
+      [hslToHex(h, s * 0.5, 0.87), hslToHex(h, s * 0.8, 0.22)],
+    ],
+    dark: [
+      [hslToHex(h, s * 0.8, 0.15), hslToHex(h, s * 0.7, 0.6)],
+      [hslToHex(h, s * 0.7, 0.12), hslToHex(h, s * 0.6, 0.55)],
+    ],
+  };
+}
+
+const brandColor = window.globalConfig?.BRAND_PRIMARY_COLOR || '';
+const brandPairs = brandColor ? brandAvatarColors(brandColor) : null;
+
 const AVATAR_COLORS = {
   dark: [
     ['#4B143D', '#FF8DCC'],
     ['#3F220D', '#FFA366'],
     ['#2A2A2A', '#ADB1B8'],
     ['#023B37', '#0BD8B6'],
-    ['#0d6636', '#59b44b'], // CommMate green (was purple/blue)
-    ['#0a4d2a', '#8cc540'], // CommMate green (was blue)
+    brandPairs ? brandPairs.dark[0] : ['#0d6636', '#59b44b'],
+    brandPairs ? brandPairs.dark[1] : ['#0a4d2a', '#8cc540'],
   ],
   light: [
     ['#FBDCEF', '#C2298A'],
     ['#FFE0BB', '#99543A'],
     ['#E8E8E8', '#60646C'],
     ['#CCF3EA', '#008573'],
-    ['#d7eee1', '#107e44'], // CommMate green (was purple/blue)
-    ['#c3e6d2', '#0d6636'], // CommMate green (was blue)
+    brandPairs ? brandPairs.light[0] : ['#d7eee1', '#107e44'],
+    brandPairs ? brandPairs.light[1] : ['#c3e6d2', '#0d6636'],
   ],
   default: { bg: '#E8E8E8', text: '#60646C' },
 };

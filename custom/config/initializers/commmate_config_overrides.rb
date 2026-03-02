@@ -3,18 +3,24 @@
 # and overrides only CommMate-specific configs (branding, privacy)
 
 Rails.application.config.after_initialize do
-  begin
-    # Check if database and table exist
-    return unless ActiveRecord::Base.connection.active?
-    return unless ActiveRecord::Base.connection.table_exists?('installation_configs')
+  # Check if database and table exist
+  return unless ActiveRecord::Base.connection.active?
+  return unless ActiveRecord::Base.connection.table_exists?('installation_configs')
 
-    commmate_config_path = Rails.root.join('custom/config/installation_config.yml')
-    return unless File.exist?(commmate_config_path)
+  commmate_config_path = Rails.root.join('custom/config/installation_config.yml')
+  return unless File.exist?(commmate_config_path)
 
-    Rails.logger.info '🎨 Applying CommMate config overrides...'
+  Rails.logger.info '🎨 Applying CommMate config overrides...'
 
-    # Load CommMate overrides
-    commmate_configs = YAML.safe_load(File.read(commmate_config_path))
+  # Skip branding overrides if a different brand is configured via env vars
+  if ENV.fetch('BRAND_NAME', nil).present? && ENV.fetch('BRAND_NAME', nil) != 'CommMate'
+    Rails.logger.info "  ⏭ Skipping CommMate branding — deployment brand is '#{ENV.fetch('BRAND_NAME', nil)}'"
+    Rails.logger.info '✅ CommMate config overrides applied'
+    return
+  end
+
+  # Load CommMate overrides
+  commmate_configs = YAML.safe_load(File.read(commmate_config_path))
 
   # Apply each override (only if not already set by user)
   commmate_configs.each do |config|
@@ -52,14 +58,12 @@ Rails.application.config.after_initialize do
     end
   end
 
-    # Clear cache to pick up new values
-    GlobalConfig.clear_cache
+  # Clear cache to pick up new values
+  GlobalConfig.clear_cache
 
-    Rails.logger.info '✅ CommMate config overrides applied'
-  rescue StandardError => e
-    # Silently skip if database not ready or any error occurs
-    # This is expected during initial setup or migrations
-    Rails.logger.debug "CommMate config overrides skipped: #{e.message}" if Rails.logger
-  end
+  Rails.logger.info '✅ CommMate config overrides applied'
+rescue StandardError => e
+  # Silently skip if database not ready or any error occurs
+  # This is expected during initial setup or migrations
+  Rails.logger&.debug { "CommMate config overrides skipped: #{e.message}" }
 end
-
