@@ -361,7 +361,47 @@
       "LOADING_MEDIA": "Loading media...",
       "MEDIA_NOT_AVAILABLE": "Media no longer available",
       "DOCUMENT_ATTACHMENT": "Document Attachment",
-      "CLOSE": "Close"
+      "CLOSE": "Close",
+      "REPLY_TO": "Reply-To",
+      "CREATED_AT": "Created at",
+      "CHANNEL": "Channel",
+      "SENDER": "Sender"
+    },
+    "CARD": {
+      "VIEW_DETAILS": "View details",
+      "SEARCH_PLACEHOLDER": "Search campaigns..."
+    },
+    "DETAIL_PAGE": {
+      "BREADCRUMB": {
+        "EMAIL": "Email Campaigns",
+        "WHATSAPP": "WhatsApp Campaigns",
+        "SMS": "SMS Campaigns"
+      },
+      "CAMPAIGN_INFO": "Campaign Information",
+      "RECIPIENTS": "Recipients",
+      "PREVIEW": "Preview",
+      "FILTER_PLACEHOLDER": "Filter by email or phone...",
+      "FILTER_PLACEHOLDER_EMAIL": "Filter by email...",
+      "FILTER_PLACEHOLDER_WHATSAPP": "Filter by phone number...",
+      "FILTER_PLACEHOLDER_SMS": "Filter by phone number...",
+      "BACK_TO_LIST": "Back to campaigns",
+      "DELETE": "Delete",
+      "NOT_FOUND": "Campaign not found",
+      "NOT_FOUND_DESCRIPTION": "The campaign you are looking for does not exist or has been deleted.",
+      "PDF": "PDF",
+      "DELETE_TITLE": "Delete campaign",
+      "DELETE_DESCRIPTION": "Permanently delete this campaign. This action is irreversible.",
+      "PLANNED_SUMMARY": "Planned Summary",
+      "ESTIMATED_RECIPIENTS": "Estimated Recipients",
+      "AWAITING_SEND": "This campaign is scheduled and has not been sent yet.",
+      "MESSAGE_CONTENT": "Message Content"
+    },
+    "FILTER": {
+      "ALL": "All",
+      "COMPLETED": "Completed",
+      "SCHEDULED": "Scheduled",
+      "FAILED": "Failed",
+      "ALL_INBOXES": "All inboxes"
     },
     "DELIVERY_REPORT": {
       "TITLE": "Delivery Report",

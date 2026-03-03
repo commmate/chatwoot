@@ -6,6 +6,7 @@ import SMSCampaignsPage from './pages/SMSCampaignsPage.vue';
 import WhatsAppCampaignsPage from './pages/WhatsAppCampaignsPage.vue';
 import EmailCampaignsPage from './pages/EmailCampaignsPage.vue';
 import CampaignsGettingStartedPage from './pages/CampaignsGettingStartedPage.vue';
+import CampaignDetailPage from './pages/CampaignDetailPage.vue';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 
 const meta = {
@@ -55,6 +56,12 @@ const campaignsRoutes = {
           component: SMSCampaignsPage,
         },
         {
+          path: 'sms/:campaignId',
+          name: 'campaigns_sms_detail',
+          meta,
+          component: CampaignDetailPage,
+        },
+        {
           path: 'whatsapp',
           name: 'campaigns_whatsapp_index',
           meta: {
@@ -64,10 +71,25 @@ const campaignsRoutes = {
           component: WhatsAppCampaignsPage,
         },
         {
+          path: 'whatsapp/:campaignId',
+          name: 'campaigns_whatsapp_detail',
+          meta: {
+            ...meta,
+            featureFlag: FEATURE_FLAGS.WHATSAPP_CAMPAIGNS,
+          },
+          component: CampaignDetailPage,
+        },
+        {
           path: 'email',
           name: 'campaigns_email_index',
           meta,
           component: EmailCampaignsPage,
+        },
+        {
+          path: 'email/:campaignId',
+          name: 'campaigns_email_detail',
+          meta,
+          component: CampaignDetailPage,
         },
         {
           path: 'getting-started',

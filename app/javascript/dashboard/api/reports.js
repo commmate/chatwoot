@@ -145,6 +145,26 @@ class ReportsAPI extends ApiClient {
       params: { since: from, until: to },
     });
   }
+
+  getCampaignMessages({
+    campaignId,
+    page = 1,
+    perPage = 25,
+    sortBy,
+    sortOrder,
+    filter,
+  }) {
+    return axios.get(`${this.url}/campaign_messages`, {
+      params: {
+        campaign_id: campaignId,
+        page,
+        per_page: perPage,
+        sort_by: sortBy,
+        sort_order: sortOrder,
+        filter,
+      },
+    });
+  }
 }
 
 export default new ReportsAPI();

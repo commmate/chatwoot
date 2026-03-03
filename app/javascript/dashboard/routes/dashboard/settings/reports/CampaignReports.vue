@@ -61,28 +61,43 @@ function sortIndicator(col) {
   return sortDirection.value === 'asc' ? ' \u2191' : ' \u2193';
 }
 
-const summaryCards = computed(() => [
-  {
-    label: t('CAMPAIGN_REPORTS.CAMPAIGNS_CREATED'),
-    value: summary.value.campaigns_created ?? 0,
-  },
-  {
-    label: t('CAMPAIGN_REPORTS.TOTAL_SENT'),
-    value: summary.value.total_sent ?? 0,
-  },
-  {
-    label: t('CAMPAIGN_REPORTS.TOTAL_FAILED'),
-    value: summary.value.total_failed ?? 0,
-  },
-  {
-    label: t('CAMPAIGN_REPORTS.TOTAL_REPLIES'),
-    value: summary.value.total_replies ?? 0,
-  },
-  {
-    label: t('CAMPAIGN_REPORTS.REPLY_RATE'),
-    value: `${summary.value.reply_rate ?? 0}%`,
-  },
-]);
+const summaryCards = computed(() => {
+  const cards = [
+    {
+      label: t('CAMPAIGN_REPORTS.CAMPAIGNS_CREATED'),
+      value: summary.value.campaigns_created ?? 0,
+    },
+    {
+      label: t('CAMPAIGN_REPORTS.TOTAL_SENT'),
+      value: summary.value.total_sent ?? 0,
+    },
+    {
+      label: t('CAMPAIGN_REPORTS.TOTAL_FAILED'),
+      value: summary.value.total_failed ?? 0,
+    },
+    {
+      label: t('CAMPAIGN_REPORTS.TOTAL_REPLIES'),
+      value: summary.value.total_replies ?? 0,
+    },
+    {
+      label: t('CAMPAIGN_REPORTS.REPLY_RATE'),
+      value: `${summary.value.reply_rate ?? 0}%`,
+    },
+  ];
+  if (summary.value.total_opened > 0) {
+    cards.push({
+      label: t('CAMPAIGN_REPORTS.OPEN_RATE'),
+      value: `${summary.value.open_rate ?? 0}%`,
+    });
+  }
+  if (summary.value.total_clicked > 0) {
+    cards.push({
+      label: t('CAMPAIGN_REPORTS.CLICK_RATE'),
+      value: `${summary.value.click_rate ?? 0}%`,
+    });
+  }
+  return cards;
+});
 
 const timeseriesChartData = computed(() => {
   const ts = timeseries.value;
@@ -280,13 +295,29 @@ function downloadDeliveryDetail() {
   });
 }
 
-const tableColumns = [
-  { key: 'title', label: t('CAMPAIGN_REPORTS.TABLE.TITLE') },
-  { key: 'channel_type', label: t('CAMPAIGN_REPORTS.TABLE.CHANNEL') },
-  { key: 'succeeded', label: t('CAMPAIGN_REPORTS.TABLE.SENT') },
-  { key: 'replies', label: t('CAMPAIGN_REPORTS.TABLE.REPLIES') },
-  { key: 'reply_rate', label: t('CAMPAIGN_REPORTS.TABLE.REPLY_RATE') },
-];
+const hasAnyOpened = computed(() =>
+  campaignList.value.some(c => (c.opened || 0) > 0)
+);
+const hasAnyClicked = computed(() =>
+  campaignList.value.some(c => (c.clicked || 0) > 0)
+);
+
+const tableColumns = computed(() => {
+  const cols = [
+    { key: 'title', label: t('CAMPAIGN_REPORTS.TABLE.TITLE') },
+    { key: 'channel_type', label: t('CAMPAIGN_REPORTS.TABLE.CHANNEL') },
+    { key: 'succeeded', label: t('CAMPAIGN_REPORTS.TABLE.SENT') },
+    { key: 'replies', label: t('CAMPAIGN_REPORTS.TABLE.REPLIES') },
+    { key: 'reply_rate', label: t('CAMPAIGN_REPORTS.TABLE.REPLY_RATE') },
+  ];
+  if (hasAnyOpened.value) {
+    cols.push({ key: 'opened', label: t('CAMPAIGN_REPORTS.TABLE.OPENED') });
+  }
+  if (hasAnyClicked.value) {
+    cols.push({ key: 'clicked', label: t('CAMPAIGN_REPORTS.TABLE.CLICKED') });
+  }
+  return cols;
+});
 </script>
 
 <template>
@@ -300,7 +331,12 @@ const tableColumns = [
     />
 
     <!-- Summary metric cards -->
-    <div class="grid grid-cols-5 gap-3">
+    <div
+      class="grid gap-3"
+      :style="{
+        gridTemplateColumns: `repeat(${summaryCards.length}, minmax(0, 1fr))`,
+      }"
+    >
       <div
         v-for="card in summaryCards"
         :key="card.label"
@@ -422,25 +458,22 @@ const tableColumns = [
               :key="row.id"
               class="border-b border-slate-100 dark:border-slate-700"
             >
-              <td class="px-3 py-2 text-slate-800 dark:text-slate-200">
-                {{ row.title }}
-              </td>
-              <td class="px-3 py-2 text-slate-600 dark:text-slate-300">
-                {{ row.channel_type }}
-              </td>
-              <td class="px-3 py-2 text-slate-600 dark:text-slate-300">
-                {{ row.succeeded }}
-              </td>
-              <td class="px-3 py-2 text-slate-600 dark:text-slate-300">
-                {{ row.replies }}
-              </td>
-              <td class="px-3 py-2 text-slate-600 dark:text-slate-300">
-                {{ `${row.reply_rate}%` }}
+              <td
+                v-for="col in tableColumns"
+                :key="col.key"
+                class="px-3 py-2 text-slate-600 dark:text-slate-300"
+                :class="{
+                  'text-slate-800 dark:text-slate-200': col.key === 'title',
+                }"
+              >
+                {{
+                  col.key.includes('rate') ? `${row[col.key]}%` : row[col.key]
+                }}
               </td>
             </tr>
             <tr v-if="!sortedCampaignList.length">
               <td
-                colspan="5"
+                :colspan="tableColumns.length"
                 class="px-3 py-4 text-center text-slate-400 dark:text-slate-500"
               >
                 {{ $t('CAMPAIGN_REPORTS.NO_DATA') }}

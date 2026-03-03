@@ -612,6 +612,23 @@
       "PREV": "Anterior",
       "NEXT": "Próximo"
     },
+    "MESSAGES_TABLE": {
+      "TITLE": "Destinatários",
+      "CONTACT": "Contato",
+      "EMAIL_PHONE": "E-mail / Telefone",
+      "STATUS": "Status",
+      "SENT_AT": "Enviado em",
+      "OPENED": "Aberto",
+      "READ": "Lido",
+      "CLICKED": "Clicado",
+      "REPLIED": "Respondido",
+      "ERROR": "Erro",
+      "NO_DATA": "Nenhuma mensagem enviada encontrada para esta campanha",
+      "LOADING": "Carregando mensagens enviadas...",
+      "PAGINATION_INFO": "{from}\u2013{to} de {total}",
+      "PREV": "Anterior",
+      "NEXT": "Próximo"
+    },
     "DAYS": {
       "SUN": "Dom",
       "MON": "Seg",

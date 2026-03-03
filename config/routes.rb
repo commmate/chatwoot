@@ -491,6 +491,7 @@ Rails.application.routes.draw do
               get :campaign_delivery_detail
               get :campaign_timeseries
               get :campaign_breakdown
+              get :campaign_messages
             end
           end
           resource :year_in_review, only: [:show]

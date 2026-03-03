@@ -107,11 +107,22 @@ class Resend::DeliveryStatusService
   end
 
   def update_campaign_mapping_status
+    track_campaign_engagement and return if %w[email.opened email.clicked].include?(event_type)
+
     status = map_event_to_campaign_status
     return if status.blank?
 
     errors = build_campaign_errors if %w[email.bounced email.failed email.complained].include?(event_type)
     campaign_mapping.update_from_webhook(status: status, errors: errors)
+  end
+
+  def track_campaign_engagement
+    case event_type
+    when 'email.opened'
+      campaign_mapping.update!(opened_at: Time.current) if campaign_mapping.opened_at.nil?
+    when 'email.clicked'
+      campaign_mapping.update!(clicked_at: Time.current) if campaign_mapping.clicked_at.nil?
+    end
   end
 
   def map_event_to_campaign_status
@@ -139,4 +150,3 @@ class Resend::DeliveryStatusService
     end
   end
 end
-

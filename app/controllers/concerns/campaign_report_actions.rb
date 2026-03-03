@@ -30,6 +30,14 @@ module CampaignReportActions
     render json: builder.build
   end
 
+  def campaign_messages
+    builder = V2::Reports::CampaignMessagesBuilder.new(
+      account: Current.account,
+      params: campaign_messages_params
+    )
+    render json: builder.build
+  end
+
   private
 
   def campaign_report_params
@@ -38,5 +46,12 @@ module CampaignReportActions
 
   def campaign_breakdown_params
     { since: params[:since], until: params[:until], breakdown_type: params[:breakdown_type] }
+  end
+
+  def campaign_messages_params
+    {
+      campaign_id: params[:campaign_id], page: params[:page], per_page: params[:per_page],
+      sort_by: params[:sort_by], sort_order: params[:sort_order], filter: params[:filter]
+    }
   end
 end

@@ -272,7 +272,9 @@
         "SUBJECT_LABEL": "Assunto:",
         "REPLY_TO": "Responder para",
         "REPLY_TO_LABEL": "Responder para:",
-        "EMAIL_PREVIEW": "Pré-visualização do E-mail"
+        "EMAIL_PREVIEW": "Pré-visualização do E-mail",
+        "RECIPIENT_COUNT": "{count} destinatário(s)",
+        "ATTACHMENT_COUNT": "{count} anexo(s) PDF"
       },
       "CREATE_DIALOG": {
         "TITLE": "Criar Campanha de E-mail",
@@ -358,7 +360,47 @@
       "LOADING_MEDIA": "Carregando mídia...",
       "MEDIA_NOT_AVAILABLE": "Mídia não está mais disponível",
       "DOCUMENT_ATTACHMENT": "Documento Anexado",
-      "CLOSE": "Fechar"
+      "CLOSE": "Fechar",
+      "REPLY_TO": "Responder para",
+      "CREATED_AT": "Criado em",
+      "CHANNEL": "Canal",
+      "SENDER": "Remetente"
+    },
+    "CARD": {
+      "VIEW_DETAILS": "Ver detalhes",
+      "SEARCH_PLACEHOLDER": "Pesquisar campanhas..."
+    },
+    "DETAIL_PAGE": {
+      "BREADCRUMB": {
+        "EMAIL": "Campanhas de E-mail",
+        "WHATSAPP": "Campanhas do WhatsApp",
+        "SMS": "Campanhas SMS"
+      },
+      "CAMPAIGN_INFO": "Informações da Campanha",
+      "RECIPIENTS": "Destinatários",
+      "PREVIEW": "Pré-visualização",
+      "FILTER_PLACEHOLDER": "Filtrar por e-mail ou telefone...",
+      "FILTER_PLACEHOLDER_EMAIL": "Filtrar por e-mail...",
+      "FILTER_PLACEHOLDER_WHATSAPP": "Filtrar por número de telefone...",
+      "FILTER_PLACEHOLDER_SMS": "Filtrar por número de telefone...",
+      "BACK_TO_LIST": "Voltar para campanhas",
+      "DELETE": "Excluir",
+      "NOT_FOUND": "Campanha não encontrada",
+      "NOT_FOUND_DESCRIPTION": "A campanha que você procura não existe ou foi excluída.",
+      "PDF": "PDF",
+      "DELETE_TITLE": "Excluir campanha",
+      "DELETE_DESCRIPTION": "Excluir permanentemente esta campanha. Esta ação é irreversível.",
+      "PLANNED_SUMMARY": "Resumo Planejado",
+      "ESTIMATED_RECIPIENTS": "Destinatários Estimados",
+      "AWAITING_SEND": "Esta campanha está agendada e ainda não foi enviada.",
+      "MESSAGE_CONTENT": "Conteúdo da Mensagem"
+    },
+    "FILTER": {
+      "ALL": "Todas",
+      "COMPLETED": "Concluídas",
+      "SCHEDULED": "Agendadas",
+      "FAILED": "Com falha",
+      "ALL_INBOXES": "Todas as caixas"
     },
     "DELIVERY_REPORT": {
       "TITLE": "Relatório de Entrega",
