@@ -71,3 +71,12 @@
   description: 'Default locale for CommMate (Brazilian Portuguese)'
 # ------- End of Locale Related Config ------- #
 
+# ------- Resend Integration Config ------- #
+- name: RESEND_MASTER_API_KEY
+  value: ''
+  display_title: 'Resend Master API Key'
+  description: 'Optional master Resend API key (full_access) for automated domain provisioning.'
+  locked: false
+  type: secret
+# ------- End of Resend Integration Config ------- #
+

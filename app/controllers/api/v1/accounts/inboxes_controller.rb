@@ -40,6 +40,7 @@ class Api::V1::Accounts::InboxesController < Api::V1::Accounts::BaseController
       )
       @inbox.save!
     end
+    provision_resend_webhook if @inbox.channel.is_a?(Channel::Email) && @inbox.channel.resend?
   end
 
   def update
@@ -116,22 +117,6 @@ class Api::V1::Accounts::InboxesController < Api::V1::Accounts::BaseController
 
     editable_attrs = channel_type_from_params::EDITABLE_ATTRS
     channel_attrs = permitted_params(editable_attrs)[:channel].except(:type)
-
-    # Debug logging for Resend inbox creation
-    if params[:channel][:provider] == 'resend'
-      Rails.logger.info('[Inbox Create] === RESEND INBOX DEBUG ===')
-      Rails.logger.info("[Inbox Create] EDITABLE_ATTRS: #{editable_attrs.inspect}")
-      Rails.logger.info("[Inbox Create] Raw params[:channel]: #{params[:channel].to_unsafe_h.inspect}")
-      Rails.logger.info("[Inbox Create] Raw params[:channel][:provider_config]: #{begin
-        params[:channel][:provider_config].to_unsafe_h.inspect
-      rescue StandardError
-        'N/A'
-      end}")
-      Rails.logger.info("[Inbox Create] Permitted channel attrs keys: #{channel_attrs.keys.inspect}")
-      Rails.logger.info("[Inbox Create] Permitted provider_config: #{channel_attrs[:provider_config].inspect}")
-      Rails.logger.info("[Inbox Create] provider_config class: #{channel_attrs[:provider_config].class}")
-      Rails.logger.info('[Inbox Create] === END DEBUG ===')
-    end
 
     account_channels_method.create!(channel_attrs)
   end
@@ -237,6 +222,13 @@ class Api::V1::Accounts::InboxesController < Api::V1::Accounts::BaseController
     elsif @inbox.twilio? && @inbox.channel.whatsapp?
       Channels::Twilio::TemplatesSyncJob.perform_later(@inbox.channel)
     end
+  end
+
+  def provision_resend_webhook
+    result = Resend::WebhookProvisionService.new(inbox: @inbox).perform
+    Rails.logger.info("[Inbox Create] Resend webhook auto-config: #{result[:success] ? 'success' : result[:error]}")
+  rescue StandardError => e
+    Rails.logger.warn("[Inbox Create] Resend webhook auto-config failed (non-fatal): #{e.message}")
   end
 end
 

@@ -24,6 +24,7 @@ class InstallationConfig < ApplicationRecord
   before_validation :set_lock
   validates :name, presence: true
   validate :saml_sso_users_check, if: -> { name == 'ENABLE_SAML_SSO_LOGIN' }
+  validate :resend_master_key_check, if: -> { name == 'RESEND_MASTER_API_KEY' }
 
   # TODO: Get rid of default scope
   # https://stackoverflow.com/a/1834250/939299
@@ -54,6 +55,19 @@ class InstallationConfig < ApplicationRecord
 
   def clear_cache
     GlobalConfig.clear_cache
+  end
+
+  def resend_master_key_check
+    return if value.blank?
+
+    client = Resend::Client.new(api_key: value)
+    return if client.health_check
+
+    errors.add(:base, 'Invalid Resend API key. Please verify the key has full_access permission.')
+  rescue Resend::Client::ApiError => e
+    errors.add(:base, "Resend API key validation failed: #{e.message}")
+  rescue StandardError => e
+    errors.add(:base, "Could not validate Resend API key: #{e.message}")
   end
 
   def saml_sso_users_check

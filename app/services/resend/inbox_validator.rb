@@ -15,14 +15,19 @@
 #   # => { valid: true } or { valid: false, error: 'Error message' }
 #
 class Resend::InboxValidator
-  def initialize(api_key:, from_email:)
+  # @param skip_domain_verified [Boolean] when true, only validates the API key (used for new domain flow)
+  def initialize(api_key:, from_email:, skip_domain_verified: false)
     @api_key = api_key
     @from_email = from_email
+    @skip_domain_verified = skip_domain_verified
   end
 
   def validate
     return error_result('API key is required') if @api_key.blank?
     return error_result('From email is required') if @from_email.blank?
+    return error_result('API key must start with re_') unless @api_key.start_with?('re_')
+
+    return validate_key_only if @skip_domain_verified
 
     validate_with_resend
   rescue Resend::Client::ConfigurationError => e
@@ -35,6 +40,16 @@ class Resend::InboxValidator
   end
 
   private
+
+  def validate_key_only
+    client = Resend::Client.new(api_key: @api_key)
+    client.health_check
+    { valid: true }
+  rescue Resend::Client::ApiError => e
+    handle_api_error(e)
+  rescue StandardError => e
+    error_result("Could not validate API key: #{e.message}")
+  end
 
   def validate_with_resend
     domains = fetch_domains

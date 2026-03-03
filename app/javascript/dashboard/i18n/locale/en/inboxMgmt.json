@@ -577,6 +577,10 @@
       "RESEND": {
         "TITLE": "Resend Email",
         "DESC": "Send email campaigns via Resend API with full delivery tracking. Track opens, clicks, and bounces in real-time. You can optionally configure IMAP to receive replies.",
+        "MODE_EXISTING": "Use existing domain",
+        "MODE_EXISTING_DESC": "Provide your own Resend API key and domain",
+        "MODE_NEW": "Add new domain",
+        "MODE_NEW_DESC": "Automatically create a domain and API key",
         "CHANNEL_NAME": {
           "LABEL": "Inbox Name",
           "PLACEHOLDER": "Enter your inbox name (eg: Marketing)",
@@ -586,7 +590,8 @@
           "LABEL": "Resend API Key",
           "PLACEHOLDER": "Enter your Resend API key (re_...)",
           "SUBTITLE": "Get your API key from your Resend dashboard at resend.com/api-keys",
-          "ERROR": "Please enter a valid API key"
+          "ERROR": "Please enter a valid API key",
+          "FORMAT_ERROR": "API key must start with re_"
         },
         "FROM_EMAIL": {
           "LABEL": "From Email Address",
@@ -598,6 +603,22 @@
           "LABEL": "From Name (Optional)",
           "PLACEHOLDER": "Your Company",
           "SUBTITLE": "The name that will appear in the 'From' field of sent emails."
+        },
+        "NEW_DOMAIN": {
+          "DOMAIN_NAME": {
+            "LABEL": "Domain Name",
+            "PLACEHOLDER": "mail.example.com",
+            "SUBTITLE": "Enter the domain you want to use for sending emails. Do not include http:// or https://.",
+            "ERROR": "Please enter a valid domain name",
+            "FORMAT_ERROR": "Please enter a valid domain name (e.g. example.com)",
+            "DUPLICATE_ERROR": "Domain '{domain}' already exists in Resend. Use 'Existing domain' mode instead."
+          },
+          "REGION": {
+            "LABEL": "Region",
+            "SUBTITLE": "Select the Resend region closest to your recipients for optimal delivery speed."
+          },
+          "FROM_EMAIL_SUBTITLE": "The email address for sending. Must use the domain you are creating above.",
+          "WEBHOOK_WARNING": "Inbox created successfully but webhook auto-configuration failed. You can configure it manually in inbox settings."
         },
         "SUBMIT_BUTTON": "Create Resend Inbox",
         "API_CALLBACK": {
@@ -1356,7 +1377,35 @@
       "SFTP_CAMPAIGNS_INFO": "Campaigns uploaded via SFTP will be routed to this inbox when the sender domain matches {domain}. The CompanyName field in the .mtr file must also match the account name for the campaign to be processed.",
       "SFTP_CAMPAIGNS_SAVED": "SFTP campaigns setting saved successfully",
       "SFTP_MATCH_DOMAIN": "Sender domain must match:",
-      "SFTP_MATCH_COMPANY": "CompanyName must match:"
+      "SFTP_MATCH_COMPANY": "CompanyName must match:",
+      "DOMAIN_STATUS_TITLE": "Domain Status",
+      "DOMAIN_STATUS_SUBTITLE": "View and manage the DNS verification status of your Resend domain.",
+      "STATUS_VERIFIED": "Verified",
+      "STATUS_PENDING": "Pending",
+      "CHECK_STATUS": "Check Status",
+      "VERIFY_RECORDS": "I've added the records",
+      "DNS_RECORDS_TITLE": "DNS Records",
+      "DNS_RECORDS_INSTRUCTIONS": "Add the following records to your domain's DNS settings. This is usually done through your domain registrar or DNS hosting provider (e.g. Cloudflare, Route 53, GoDaddy). Once all records are added, click \"I've added the records\" above to start verification.",
+      "DNS_TYPE": "Type",
+      "DNS_NAME": "Name",
+      "DNS_VALUE": "Value",
+      "DNS_PRIORITY": "Priority",
+      "DNS_STATUS": "Status",
+      "SEND_DNS_TITLE": "Send DNS Instructions",
+      "SEND_DNS_PLACEHOLDER": "Enter recipient email address",
+      "SEND_DNS_BUTTON": "Send Instructions",
+      "DOMAIN_VERIFIED_SUCCESS": "Domain is verified and ready to send emails!",
+      "DOMAIN_STATUS_ERROR": "Failed to check domain status. Please try again.",
+      "VERIFY_TRIGGERED": "Domain verification triggered. DNS propagation may take a few hours.",
+      "VERIFY_ERROR": "Failed to trigger domain verification.",
+      "DNS_SENT_SUCCESS": "DNS instructions sent successfully!",
+      "DNS_SENT_ERROR": "Failed to send DNS instructions.",
+      "WEBHOOK_AUTO_SUBTITLE": "Webhook was automatically configured when this inbox was created.",
+      "WEBHOOK_CONFIGURED": "Auto-configured",
+      "WEBHOOK_MANUAL": "Manual setup required",
+      "CONFIGURE_WEBHOOK": "Auto-configure",
+      "WEBHOOK_CONFIGURE_SUCCESS": "Webhook configured successfully!",
+      "WEBHOOK_CONFIGURE_ERROR": "Failed to configure webhook. Check that FRONTEND_URL is set."
     },
     "CHANNELS": {
       "MESSENGER": "Messenger",

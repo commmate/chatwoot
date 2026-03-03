@@ -90,6 +90,7 @@ class DashboardController < ActionController::Base
       ALLOWED_LOGIN_METHODS: allowed_login_methods,
       EVOLUTION_API_ENABLED: GlobalConfigService.load('EVOLUTION_API_ENABLED', 'false'),
       RESEND_ENABLED: GlobalConfigService.load('RESEND_ENABLED', 'false'),
+      RESEND_MASTER_KEY_CONFIGURED: GlobalConfig.get_value('RESEND_MASTER_API_KEY').present?,
       SFTP_CAMPAIGNS_ENABLED: GlobalConfigService.load('SFTP_CAMPAIGNS_ENABLED', 'false')
     }
   end

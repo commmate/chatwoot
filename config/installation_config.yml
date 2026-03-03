@@ -574,6 +574,12 @@
   description: 'Enable Resend as an email inbox provider'
   locked: false
   type: boolean
+- name: RESEND_MASTER_API_KEY
+  display_title: 'Resend Master API Key'
+  value: ''
+  description: 'Optional master Resend API key (full_access) for automated domain provisioning, API key creation, and webhook setup. Leave empty to require users to provide their own keys.'
+  locked: false
+  type: secret
 # ------- End of Resend Email Integration Config ------- #
 
 # ------- SFTP Campaigns Config ------- #

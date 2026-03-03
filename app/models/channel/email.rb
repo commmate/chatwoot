@@ -92,6 +92,8 @@ class Channel::Email < ApplicationRecord
       return
     end
 
+    return if provider_config&.dig('domain_provisioned')
+
     validator = Resend::InboxValidator.new(api_key: api_key, from_email: email)
     result = validator.validate
 

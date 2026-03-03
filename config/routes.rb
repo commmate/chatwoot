@@ -233,6 +233,17 @@ Rails.application.routes.draw do
               patch :update
             end
           end
+
+          resources :resend, only: [], controller: 'resend' do
+            collection do
+              post :provision_domain
+              get :domains
+              post :send_dns_instructions
+            end
+          end
+          get 'resend/domain_status/:inbox_id', to: 'resend#domain_status', as: :resend_domain_status
+          post 'resend/verify_domain/:inbox_id', to: 'resend#verify_domain', as: :resend_verify_domain
+          post 'resend/configure_webhook/:inbox_id', to: 'resend#configure_webhook', as: :resend_configure_webhook
           resources :labels, only: [:index, :show, :create, :update, :destroy]
 
           resources :notifications, only: [:index, :update, :destroy] do
