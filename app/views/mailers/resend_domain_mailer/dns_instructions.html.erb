@@ -1,0 +1,64 @@
+<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <h2 style="color: #1a1a2e; margin-bottom: 8px;">DNS Configuration Required</h2>
+  <p style="color: #555; font-size: 14px; line-height: 1.6;">
+    To complete the setup of <strong><%= @domain_name %></strong> in <%= @brand_name %>,
+    you need to add the DNS records listed below to your domain's DNS settings.
+  </p>
+
+  <div style="margin: 20px 0; padding: 16px; background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px;">
+    <h3 style="color: #0c4a6e; font-size: 14px; margin: 0 0 8px;">How to add DNS records</h3>
+    <ol style="color: #555; font-size: 13px; line-height: 1.8; margin: 0; padding-left: 20px;">
+      <li>Log in to the account where you manage DNS for <strong><%= @domain_name %></strong> (e.g. Cloudflare, Route 53, GoDaddy, Namecheap).</li>
+      <li>Navigate to the <strong>DNS settings</strong> or <strong>DNS records</strong> section for your domain.</li>
+      <li>For each record in the table below, click <strong>Add record</strong> and enter the Type, Name, and Value exactly as shown. For MX records, also set the Priority.</li>
+      <li>Save each record. DNS propagation can take up to 72 hours, but typically completes within a few hours.</li>
+      <li>Once done, return to your <%= @brand_name %> inbox settings and click <strong>"I've added the records"</strong> to trigger domain verification.</li>
+    </ol>
+  </div>
+
+  <% grouped = @dns_records.group_by { |r| r['record'] || r['type'] } %>
+
+  <% grouped.each do |record_type, records| %>
+    <h3 style="color: #1a1a2e; margin-top: 24px; margin-bottom: 8px; font-size: 16px;"><%= record_type %></h3>
+    <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 16px;">
+      <thead>
+        <tr style="background-color: #f4f4f5;">
+          <th style="padding: 8px 12px; text-align: left; border: 1px solid #e4e4e7;">Type</th>
+          <th style="padding: 8px 12px; text-align: left; border: 1px solid #e4e4e7;">Name</th>
+          <th style="padding: 8px 12px; text-align: left; border: 1px solid #e4e4e7;">Value</th>
+          <% if records.any? { |r| r['priority'].present? } %>
+            <th style="padding: 8px 12px; text-align: left; border: 1px solid #e4e4e7;">Priority</th>
+          <% end %>
+        </tr>
+      </thead>
+      <tbody>
+        <% records.each do |record| %>
+          <tr>
+            <td style="padding: 8px 12px; border: 1px solid #e4e4e7; font-family: monospace;"><%= record['type'] %></td>
+            <td style="padding: 8px 12px; border: 1px solid #e4e4e7; font-family: monospace; word-break: break-all;"><%= record['name'] %></td>
+            <td style="padding: 8px 12px; border: 1px solid #e4e4e7; font-family: monospace; word-break: break-all;"><%= record['value'] %></td>
+            <% if records.any? { |r| r['priority'].present? } %>
+              <td style="padding: 8px 12px; border: 1px solid #e4e4e7;"><%= record['priority'] || '—' %></td>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+
+  <div style="margin-top: 24px; padding: 16px; background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;">
+    <p style="color: #92400e; font-size: 13px; margin: 0 0 8px; line-height: 1.5;">
+      <strong>Important notes:</strong>
+    </p>
+    <ul style="color: #92400e; font-size: 13px; margin: 0; padding-left: 20px; line-height: 1.8;">
+      <li>Copy the Name and Value fields exactly — even a small typo will prevent verification.</li>
+      <li>If your DNS provider appends the domain automatically, enter only the subdomain part of the Name (e.g. <code>resend._domainkey</code> instead of <code>resend._domainkey.<%= @domain_name %></code>).</li>
+      <li>Set <strong>TTL</strong> to Auto or the lowest available value for faster propagation.</li>
+      <li>After adding all records, return to your <%= @brand_name %> inbox settings and click <strong>"I've added the records"</strong>.</li>
+    </ul>
+  </div>
+
+  <p style="color: #999; font-size: 12px; margin-top: 32px;">
+    This email was sent from <%= @brand_name %> for inbox "<%= @inbox.name %>".
+  </p>
+</div>

@@ -11,6 +11,7 @@
 #
 class Webhooks::ResendController < ActionController::API
   before_action :validate_inbox
+  before_action :verify_event_ownership
   before_action :verify_webhook_signature
 
   def process_payload
@@ -25,10 +26,43 @@ class Webhooks::ResendController < ActionController::API
     channel = Channel::Email.find_by(email: email_address, provider: 'resend')
     @inbox = channel&.inbox
 
-    unless @inbox.present?
-      Rails.logger.warn("[Resend Webhook] Invalid email address: #{email_address}")
-      render json: { error: 'Invalid inbox' }, status: :not_found
+    return if @inbox.present?
+
+    Rails.logger.warn("[Resend Webhook] Invalid email address: #{email_address}")
+    render json: { error: 'Invalid inbox' }, status: :not_found
+  end
+
+  def verify_event_ownership
+    event_data = params[:data]
+    return if event_data.blank?
+    return if event_belongs_to_inbox?(params[:type], event_data)
+
+    Rails.logger.debug { "[Resend Webhook] Discarding event #{params[:type]} for inbox #{@inbox.id}" }
+    head :ok
+  end
+
+  def event_belongs_to_inbox?(event_type, event_data)
+    if event_type == 'email.received'
+      inbound_event_matches?(event_data)
+    else
+      outbound_event_matches?(event_data)
     end
+  end
+
+  def inbound_event_matches?(event_data)
+    inbox_email = @inbox.channel.email&.downcase
+    Array(event_data[:to]).any? { |addr| addr.downcase.include?(inbox_email) }
+  end
+
+  def outbound_event_matches?(event_data)
+    event_from = event_data[:from]&.downcase || ''
+    domain_matches_from?(event_from, @inbox.channel.email) ||
+      domain_matches_from?(event_from, @inbox.channel.provider_config&.dig('from_email'))
+  end
+
+  def domain_matches_from?(event_from, email)
+    domain = email&.split('@')&.last&.downcase
+    domain.present? && event_from.include?(domain)
   end
 
   def verify_webhook_signature
@@ -46,10 +80,10 @@ class Webhooks::ResendController < ActionController::API
     signing_secret = @inbox.channel.provider_config['webhook_signing_secret']
     return if signing_secret.blank?
 
-    unless valid_signature?(signature, timestamp, webhook_id, signing_secret)
-      Rails.logger.warn("[Resend Webhook] Invalid signature for inbox: #{@inbox.id}")
-      render json: { error: 'Invalid signature' }, status: :unauthorized
-    end
+    return if valid_signature?(signature, timestamp, webhook_id, signing_secret)
+
+    Rails.logger.warn("[Resend Webhook] Invalid signature for inbox: #{@inbox.id}")
+    render json: { error: 'Invalid signature' }, status: :unauthorized
   end
 
   def skip_signature_verification?
@@ -73,7 +107,7 @@ class Webhooks::ResendController < ActionController::API
     )
 
     # Compare signatures (signature header may contain multiple signatures)
-    signature.split(' ').any? do |sig|
+    signature.split.any? do |sig|
       sig_value = sig.split(',').last
       ActiveSupport::SecurityUtils.secure_compare(sig_value, expected_signature)
     end
@@ -82,4 +116,3 @@ class Webhooks::ResendController < ActionController::API
     false
   end
 end
-

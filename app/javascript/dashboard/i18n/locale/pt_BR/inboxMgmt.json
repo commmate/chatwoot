@@ -577,6 +577,10 @@
       "RESEND": {
         "TITLE": "E-mail Resend",
         "DESC": "Envie campanhas de e-mail via API Resend com rastreamento completo de entrega. Acompanhe aberturas, cliques e devoluções em tempo real. Você pode opcionalmente configurar IMAP para receber respostas.",
+        "MODE_EXISTING": "Usar domínio existente",
+        "MODE_EXISTING_DESC": "Forneça sua própria chave de API e domínio Resend",
+        "MODE_NEW": "Adicionar novo domínio",
+        "MODE_NEW_DESC": "Criar automaticamente um domínio e chave de API",
         "CHANNEL_NAME": {
           "LABEL": "Nome da Caixa de Entrada",
           "PLACEHOLDER": "Digite o nome da sua caixa de entrada (ex: Marketing)",
@@ -586,7 +590,8 @@
           "LABEL": "Chave da API Resend",
           "PLACEHOLDER": "Digite sua chave da API Resend (re_...)",
           "SUBTITLE": "Obtenha sua chave da API no painel do Resend em resend.com/api-keys",
-          "ERROR": "Por favor, insira uma chave de API válida"
+          "ERROR": "Por favor, insira uma chave de API válida",
+          "FORMAT_ERROR": "A chave de API deve começar com re_"
         },
         "FROM_EMAIL": {
           "LABEL": "Endereço de E-mail do Remetente",
@@ -598,6 +603,22 @@
           "LABEL": "Nome do Remetente (Opcional)",
           "PLACEHOLDER": "Sua Empresa",
           "SUBTITLE": "O nome que aparecerá no campo 'De' dos e-mails enviados."
+        },
+        "NEW_DOMAIN": {
+          "DOMAIN_NAME": {
+            "LABEL": "Nome do Domínio",
+            "PLACEHOLDER": "mail.exemplo.com",
+            "SUBTITLE": "Digite o domínio que deseja usar para enviar e-mails. Não inclua http:// ou https://.",
+            "ERROR": "Por favor, insira um nome de domínio válido",
+            "FORMAT_ERROR": "Por favor, insira um nome de domínio válido (ex: exemplo.com)",
+            "DUPLICATE_ERROR": "O domínio '{domain}' já existe no Resend. Use o modo 'Domínio existente'."
+          },
+          "REGION": {
+            "LABEL": "Região",
+            "SUBTITLE": "Selecione a região do Resend mais próxima dos seus destinatários para velocidade ideal de entrega."
+          },
+          "FROM_EMAIL_SUBTITLE": "O endereço de e-mail para envio. Deve usar o domínio que está criando acima.",
+          "WEBHOOK_WARNING": "Caixa de entrada criada com sucesso, mas a configuração automática do webhook falhou. Você pode configurá-lo manualmente nas configurações da caixa de entrada."
         },
         "SUBMIT_BUTTON": "Criar Caixa de Entrada Resend",
         "API_CALLBACK": {
@@ -1489,7 +1510,42 @@
       "FROM_NAME_LABEL": "Nome do Remetente (Opcional)",
       "FROM_NAME_PLACEHOLDER": "Digite o nome do remetente (ex: Equipe de Suporte)",
       "UPDATE_SENDER_SETTINGS": "Atualizar Configurações do Remetente",
-      "SENDER_SETTINGS_SAVED": "Configurações do remetente salvas com sucesso"
+      "SENDER_SETTINGS_SAVED": "Configurações do remetente salvas com sucesso",
+      "SFTP_CAMPAIGNS_TITLE": "Campanhas SFTP",
+      "SFTP_CAMPAIGNS_SUBTITLE": "Permite que esta caixa de entrada receba lotes de campanhas enviados via SFTP. As campanhas são correspondidas automaticamente: o domínio do remetente no arquivo .mtr deve corresponder ao domínio desta caixa de entrada, e o CompanyName deve corresponder ao nome da conta.",
+      "SFTP_CAMPAIGNS_ENABLED_LABEL": "Permitir Campanhas SFTP",
+      "SFTP_CAMPAIGNS_INFO": "Campanhas enviadas via SFTP serão direcionadas para esta caixa de entrada quando o domínio do remetente corresponder a {domain}. O campo CompanyName no arquivo .mtr também deve corresponder ao nome da conta para que a campanha seja processada.",
+      "SFTP_CAMPAIGNS_SAVED": "Configuração de campanhas SFTP salva com sucesso",
+      "SFTP_MATCH_DOMAIN": "O domínio do remetente deve corresponder a:",
+      "SFTP_MATCH_COMPANY": "CompanyName deve corresponder a:",
+      "DOMAIN_STATUS_TITLE": "Status do Domínio",
+      "DOMAIN_STATUS_SUBTITLE": "Visualize e gerencie o status de verificação DNS do seu domínio Resend.",
+      "STATUS_VERIFIED": "Verificado",
+      "STATUS_PENDING": "Pendente",
+      "CHECK_STATUS": "Verificar Status",
+      "VERIFY_RECORDS": "Já adicionei os registros",
+      "DNS_RECORDS_TITLE": "Registros DNS",
+      "DNS_RECORDS_INSTRUCTIONS": "Adicione os registros abaixo nas configurações de DNS do seu domínio. Isso geralmente é feito pelo seu registrador de domínio ou provedor de DNS (ex: Cloudflare, Route 53, GoDaddy). Após adicionar todos os registros, clique em \"Já adicionei os registros\" acima para iniciar a verificação.",
+      "DNS_TYPE": "Tipo",
+      "DNS_NAME": "Nome",
+      "DNS_VALUE": "Valor",
+      "DNS_PRIORITY": "Prioridade",
+      "DNS_STATUS": "Status",
+      "SEND_DNS_TITLE": "Enviar Instruções DNS",
+      "SEND_DNS_PLACEHOLDER": "Digite o endereço de e-mail do destinatário",
+      "SEND_DNS_BUTTON": "Enviar Instruções",
+      "DOMAIN_VERIFIED_SUCCESS": "O domínio está verificado e pronto para enviar e-mails!",
+      "DOMAIN_STATUS_ERROR": "Falha ao verificar o status do domínio. Por favor, tente novamente.",
+      "VERIFY_TRIGGERED": "Verificação do domínio iniciada. A propagação DNS pode levar algumas horas.",
+      "VERIFY_ERROR": "Falha ao iniciar a verificação do domínio.",
+      "DNS_SENT_SUCCESS": "Instruções DNS enviadas com sucesso!",
+      "DNS_SENT_ERROR": "Falha ao enviar instruções DNS.",
+      "WEBHOOK_AUTO_SUBTITLE": "O webhook foi configurado automaticamente quando esta caixa de entrada foi criada.",
+      "WEBHOOK_CONFIGURED": "Configurado automaticamente",
+      "WEBHOOK_MANUAL": "Configuração manual necessária",
+      "CONFIGURE_WEBHOOK": "Auto-configurar",
+      "WEBHOOK_CONFIGURE_SUCCESS": "Webhook configurado com sucesso!",
+      "WEBHOOK_CONFIGURE_ERROR": "Falha ao configurar webhook. Verifique se o FRONTEND_URL está definido."
     }
   },
   "TEMPLATES": {

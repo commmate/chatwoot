@@ -155,10 +155,13 @@ export const getters = {
     );
   },
   getResendInboxes($state) {
-    return $state.records.filter(
-      item =>
-        item.channel_type === INBOX_TYPES.EMAIL && item.provider === 'resend'
-    );
+    return $state.records.filter(item => {
+      if (item.channel_type !== INBOX_TYPES.EMAIL || item.provider !== 'resend')
+        return false;
+      const domainStatus = item.provider_config?.resend_domain_status;
+      // Allow legacy inboxes without domain status tracking, and verified domains
+      return !domainStatus || domainStatus === 'verified';
+    });
   },
   dialogFlowEnabledInboxes($state) {
     return $state.records.filter(
