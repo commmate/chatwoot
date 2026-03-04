@@ -103,6 +103,13 @@ const statusConfig = computed(() => {
       icon: 'i-lucide-check-circle',
     };
   }
+  if (campaignStatus === 'sending') {
+    return {
+      text: t('CAMPAIGN.SMS.CARD.STATUS.SENDING'),
+      color: 'bg-n-blue-3 text-n-blue-11',
+      icon: 'i-lucide-loader',
+    };
+  }
   return {
     text: t('CAMPAIGN.SMS.CARD.STATUS.SCHEDULED'),
     color: 'bg-n-amber-3 text-n-amber-11',

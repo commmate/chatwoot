@@ -7,6 +7,8 @@ class Sftp::BatchCampaignService
     @batch_path = batch_path
   end
 
+  CHECKPOINT_INTERVAL = 25
+
   def perform
     mtr_files = Dir.glob(File.join(@batch_path, '*.mtr'))
     return notify_invalid_upload(reason: :no_mtr_files) if mtr_files.empty?
@@ -20,7 +22,6 @@ class Sftp::BatchCampaignService
     return unless inbox
 
     send_campaign(inbox, mtr_files, sample)
-  ensure
     FileUtils.rm_rf(@batch_path)
   end
 
@@ -62,27 +63,65 @@ class Sftp::BatchCampaignService
 
   def send_campaign(inbox, mtr_files, sample)
     preview = build_preview(mtr_files)
-    campaign = create_campaign(inbox, mtr_files, sample, preview)
-    report = create_delivery_report(campaign, mtr_files.size)
+    campaign = find_or_create_campaign(inbox, mtr_files, sample, preview)
+    report = find_or_create_delivery_report(campaign, mtr_files.size)
+
+    already_sent_job_ids = report.message_mappings.where.not(external_job_id: nil).pluck(:external_job_id).to_set
+    remaining_files = mtr_files.reject { |f| already_sent_job_ids.include?(job_id_from_mtr(f)) }
+
+    if already_sent_job_ids.any?
+      Rails.logger.info("[SFTP] Resuming batch #{sample[:batch_id]}: #{already_sent_job_ids.size} already sent, #{remaining_files.size} remaining")
+    end
 
     client = build_sender(inbox)
-    mtr_files.each { |mtr_path| deliver_email(client, campaign, report, mtr_path) }
+    entries = prepare_entries(remaining_files)
+    sends_since_checkpoint = 0
+
+    Resend::BatchSenderService.new(client: client).send_all(entries) do |entry, result|
+      if result[:ok]
+        record_success(campaign, report, entry[:meta][:data], result)
+      else
+        Rails.logger.error("[SFTP] Failed to send email #{entry[:meta][:mtr_path]}: #{result[:error_message]}")
+        report.failed += 1
+        report.record_error(code: result[:error_code], message: result[:error_message], details: "MTR: #{entry[:meta][:mtr_path]}")
+      end
+      sends_since_checkpoint += 1
+      if sends_since_checkpoint >= CHECKPOINT_INTERVAL
+        report.save!
+        sends_since_checkpoint = 0
+      end
+    end
     report.finalize!
+    campaign.completed!
   end
 
-  def create_campaign(inbox, mtr_files, sample, preview)
-    campaign = inbox.account.campaigns.create!(
+  def prepare_entries(mtr_files)
+    mtr_files.map do |mtr_path|
+      data = Sftp::MtrParser.new(mtr_path).parse
+      payload = build_email_payload(data, mtr_path)
+      { payload: payload, meta: { mtr_path: mtr_path, data: data } }
+    end
+  end
+
+  def find_or_create_campaign(inbox, mtr_files, sample, preview)
+    batch_id = sample[:batch_id]
+    if batch_id.present?
+      existing = inbox.account.campaigns
+                      .where(campaign_status: :sending)
+                      .find_by("additional_attributes->>'sftp_batch_id' = ?", batch_id)
+      return existing if existing
+    end
+
+    inbox.account.campaigns.create!(
       inbox: inbox,
-      title: "SFTP — #{sample[:company_name]} — #{sample[:batch_id]&.slice(0, 8)}",
+      title: "SFTP — #{sample[:company_name]} — #{batch_id&.slice(0, 8)}",
       description: sftp_description(preview, mtr_files.size),
       campaign_type: :one_off,
-      campaign_status: :active,
+      campaign_status: :sending,
       message: preview[:html_body].presence || 'SFTP batch campaign',
       audience: [],
       additional_attributes: campaign_attributes(sample, preview, mtr_files.size)
     )
-    campaign.completed!
-    campaign
   end
 
   def campaign_attributes(sample, preview, email_count)
@@ -100,13 +139,16 @@ class Sftp::BatchCampaignService
     }
   end
 
-  def create_delivery_report(campaign, total)
-    campaign.create_delivery_report!(
-      provider: 'resend',
-      status: 'running',
-      total: total,
-      started_at: Time.current
+  def find_or_create_delivery_report(campaign, total)
+    campaign.delivery_report || campaign.create_delivery_report!(
+      provider: 'resend', status: 'running', total: total, started_at: Time.current
     )
+  end
+
+  def job_id_from_mtr(mtr_path)
+    Sftp::MtrParser.new(mtr_path).parse[:job_id]
+  rescue StandardError
+    nil
   end
 
   def build_sender(inbox)
@@ -114,22 +156,10 @@ class Sftp::BatchCampaignService
     Resend::Client.new(api_key: config['api_key'])
   end
 
-  def deliver_email(client, campaign, report, mtr_path)
-    data = Sftp::MtrParser.new(mtr_path).parse
-    payload = build_email_payload(data, mtr_path)
-    response = client.send_email(**payload)
-
-    record_success(campaign, report, data, response)
-  rescue Resend::Client::ApiError => e
-    Rails.logger.error("[SFTP] Failed to send email #{mtr_path}: #{e.message}")
-    report.failed += 1
-    report.record_error(code: e.error_code, message: e.message, details: "MTR: #{mtr_path}")
-  end
-
   def build_email_payload(data, mtr_path)
     payload = {
       from: data[:from],
-      to: data[:to_email],
+      to: Array(data[:to_email]),
       subject: data[:subject] || '(No subject)',
       html: data[:html_body].presence || '<p></p>'
     }
@@ -149,11 +179,11 @@ class Sftp::BatchCampaignService
     }]
   end
 
-  def record_success(campaign, report, data, response)
+  def record_success(campaign, report, data, result)
     contact = find_or_create_contact(campaign.account, data)
     mapping_attrs = {
       campaign_delivery_report: report, contact: contact,
-      resend_email_id: response['id'], status: 'sent'
+      resend_email_id: result[:email_id], status: 'sent'
     }
     mapping_attrs[:external_job_id] = data[:job_id] if data[:job_id].present? && external_job_id_column?
 
