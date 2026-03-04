@@ -1384,7 +1384,7 @@
       "SFTP_PATH_LABEL": "Path:",
       "SFTP_PATH_VALUE": "/campaigns/",
       "SFTP_UPLOAD_EXAMPLE": "Example upload command:",
-      "SFTP_UPLOAD_COMMAND": "sftp -P {port} sftp_user@{host}\nput -r your_batch_folder /campaigns/",
+      "SFTP_UPLOAD_COMMAND": "sftp -P {port} sftp_user{'@'}{host}\nput -r your_batch_folder /campaigns/",
       "DOMAIN_STATUS_TITLE": "Domain Status",
       "DOMAIN_STATUS_SUBTITLE": "View and manage the DNS verification status of your Resend domain.",
       "STATUS_VERIFIED": "Verified",
