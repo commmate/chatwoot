@@ -27,6 +27,8 @@ export default {
       isUpdatingSenderSettings: false,
       isUpdatingSigningSecret: false,
       isUpdatingSftpCampaigns: false,
+      isUpdatingSftpKey: false,
+      sftpPrivateKey: '',
       isCheckingDomainStatus: false,
       isVerifyingDomain: false,
       isConfiguringWebhook: false,
@@ -63,6 +65,12 @@ export default {
     },
     currentSftpCampaignsEnabled() {
       return this.inbox.provider_config?.sftp_campaigns_enabled === true;
+    },
+    currentSftpPrivateKey() {
+      return this.inbox.provider_config?.sftp_private_key || '';
+    },
+    hasSftpKey() {
+      return !!this.currentSftpPrivateKey;
     },
     sftpHost() {
       return window.chatwootConfig?.sftpCampaignsHost || '';
@@ -254,6 +262,39 @@ export default {
     async copyDnsValue(value) {
       await copyTextToClipboard(value);
       useAlert(this.$t('CONTACT_PANEL.COPY_SUCCESSFUL'));
+    },
+    async updateSftpKey() {
+      this.isUpdatingSftpKey = true;
+      try {
+        const payload = {
+          id: this.inbox.id,
+          formData: false,
+          channel: {
+            provider_config: {
+              ...this.inbox.provider_config,
+              sftp_private_key: this.sftpPrivateKey,
+            },
+          },
+        };
+        await this.$store.dispatch('inboxes/updateInbox', payload);
+        useAlert(this.$t('INBOX_MGMT.RESEND_SETTINGS.SFTP_KEY_SAVED'));
+      } catch (error) {
+        useAlert(this.$t('INBOX_MGMT.EDIT.API.ERROR_MESSAGE'));
+      } finally {
+        this.isUpdatingSftpKey = false;
+      }
+    },
+    downloadSftpKey() {
+      const key = this.currentSftpPrivateKey;
+      if (!key) return;
+
+      const blob = new Blob([key], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `sftp_key_inbox_${this.inbox.id}`;
+      a.click();
+      URL.revokeObjectURL(url);
     },
     async updateSftpCampaigns(enabled) {
       this.isUpdatingSftpCampaigns = true;
@@ -640,6 +681,46 @@ export default {
               }}</strong>
               {{ accountName || '—' }}
             </span>
+          </div>
+        </div>
+
+        <!-- SFTP SSH Key -->
+        <div
+          v-if="currentSftpCampaignsEnabled"
+          class="flex flex-col gap-3 p-4 rounded-lg bg-n-background border border-n-weak"
+        >
+          <h4 class="text-sm font-medium text-n-slate-12">
+            {{ $t('INBOX_MGMT.RESEND_SETTINGS.SFTP_KEY_TITLE') }}
+          </h4>
+          <p class="text-xs text-n-slate-11">
+            {{ $t('INBOX_MGMT.RESEND_SETTINGS.SFTP_KEY_DESCRIPTION') }}
+          </p>
+          <textarea
+            v-model="sftpPrivateKey"
+            :placeholder="
+              hasSftpKey
+                ? $t('INBOX_MGMT.RESEND_SETTINGS.SFTP_KEY_CONFIGURED')
+                : $t('INBOX_MGMT.RESEND_SETTINGS.SFTP_KEY_PLACEHOLDER')
+            "
+            class="w-full rounded-lg border border-n-weak bg-n-alpha-1 p-3 font-mono text-xs text-n-slate-12 min-h-[100px] resize-y"
+          />
+          <div class="flex items-center gap-2">
+            <NextButton
+              :label="$t('INBOX_MGMT.RESEND_SETTINGS.SFTP_KEY_SAVE')"
+              :is-loading="isUpdatingSftpKey"
+              :disabled="!sftpPrivateKey"
+              size="sm"
+              @click="updateSftpKey"
+            />
+            <NextButton
+              v-if="hasSftpKey"
+              :label="$t('INBOX_MGMT.RESEND_SETTINGS.SFTP_KEY_DOWNLOAD')"
+              variant="faded"
+              color="slate"
+              size="sm"
+              icon="i-lucide-download"
+              @click="downloadSftpKey"
+            />
           </div>
         </div>
 
