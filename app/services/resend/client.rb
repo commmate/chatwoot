@@ -76,7 +76,7 @@ module Resend
     # @param attachments [Array<Hash>] Attachments with { filename:, content: } (optional)
     # @param tags [Array<Hash>] Tags for tracking with { name:, value: } (optional)
     # @return [Hash] Response with { id: 'email_id' }
-    def send_email(from:, to:, subject:, html: nil, text: nil, **options)
+    def send_email(from:, to:, subject:, html: nil, text: nil, priority: :high, **options)
       body = {
         from: from,
         to: Array(to),
@@ -92,16 +92,17 @@ module Resend
       body[:attachments] = options[:attachments] if options[:attachments].present?
       body[:tags] = options[:tags] if options[:tags].present?
 
-      request(:post, '/emails', body)
+      request(:post, '/emails', body, priority: priority)
     end
 
     # Send batch emails (up to 100 at once)
     # @param emails [Array<Hash>] Array of email objects (same structure as send_email)
+    # @param priority [Symbol] :high for interactive, :normal for background campaign sends
     # @return [Hash] Response with { data: [{ id: 'email_id' }, ...] }
-    def send_batch(emails:)
+    def send_batch(emails:, priority: :high)
       raise ArgumentError, 'Batch size cannot exceed 100 emails' if emails.size > 100
 
-      request(:post, '/emails/batch', emails)
+      request(:post, '/emails/batch', emails, priority: priority)
     end
 
     # Get email details by ID
@@ -190,7 +191,7 @@ module Resend
       raise ConfigurationError, 'Resend API key is not configured' if @api_key.blank?
     end
 
-    def request(method, path, body = nil)
+    def request(method, path, body = nil, priority: :high)
       url = "#{BASE_URL}#{path}"
       options = {
         headers: headers,
@@ -201,23 +202,32 @@ module Resend
       Rails.logger.debug { "[Resend API] #{method.upcase} #{url}" }
       Rails.logger.debug { "[Resend API] Body: #{body.inspect}" } if body.present?
 
-      response = case method
-                 when :get
-                   HTTParty.get(url, options)
-                 when :post
-                   HTTParty.post(url, options)
-                 when :put
-                   HTTParty.put(url, options)
-                 when :patch
-                   HTTParty.patch(url, options)
-                 when :delete
-                   HTTParty.delete(url, options)
-                 else
-                   raise ArgumentError, "Unsupported HTTP method: #{method}"
-                 end
+      Resend::RateLimiter.throttle!(priority: priority)
+      response = execute_http(method, url, options)
+
+      if response.code == 429
+        retry_after = response.headers['retry-after']
+        Rails.logger.warn("[Resend API] Rate limited (429), retry-after: #{retry_after || 'nil'}")
+        Resend::RateLimiter.backoff!(retry_after)
+        Resend::RateLimiter.throttle!(priority: priority)
+        response = execute_http(method, url, options)
+      end
+
+      Resend::RateLimiter.update_from_headers!(response.headers)
 
       Rails.logger.debug { "[Resend API] Response code: #{response.code}" }
       handle_response(response)
+    end
+
+    def execute_http(method, url, options)
+      case method
+      when :get    then HTTParty.get(url, options)
+      when :post   then HTTParty.post(url, options)
+      when :put    then HTTParty.put(url, options)
+      when :patch  then HTTParty.patch(url, options)
+      when :delete then HTTParty.delete(url, options)
+      else raise ArgumentError, "Unsupported HTTP method: #{method}"
+      end
     end
 
     def headers

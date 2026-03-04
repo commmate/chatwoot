@@ -11,12 +11,14 @@
 class Resend::OneoffCampaignService
   pattr_initialize [:campaign!]
 
+  CHECKPOINT_INTERVAL = 25
+
   def perform
     validate_basic_campaign!
-    # Mark campaign completed immediately to prevent duplicate job pickups
-    campaign.completed!
+    campaign.sending! unless campaign.sending?
     validate_api_key!
     execute_delivery
+    campaign.completed!
   rescue Resend::Client::ConfigurationError => e
     handle_configuration_error(e)
   end
@@ -56,19 +58,75 @@ class Resend::OneoffCampaignService
     Rails.logger.info("[Resend Campaign] provider_config present?: #{channel.provider_config.present?}")
 
     api_key = channel.provider_config&.dig('api_key')
-    if api_key.blank?
-      raise Resend::Client::ConfigurationError,
-            "Resend API key is not configured for inbox '#{inbox.name}' (ID: #{inbox.id}). Please update inbox settings with your Resend API key."
-    end
+    return if api_key.present?
+
+    raise Resend::Client::ConfigurationError,
+          "Resend API key is not configured for inbox '#{inbox.name}' (ID: #{inbox.id}). Please update inbox settings with your Resend API key."
   end
 
   def execute_delivery
     contacts = fetch_audience_contacts
-    report = initialize_delivery_report(contacts.count)
+    report = find_or_create_delivery_report(contacts.count)
 
-    Rails.logger.info("[Resend Campaign] Processing #{contacts.count} contacts for campaign #{campaign.id}")
-    contacts.each { |contact| process_contact_with_tracking(contact, report) }
+    already_sent_ids = report.message_mappings.pluck(:contact_id).to_set
+    remaining = contacts.reject { |c| already_sent_ids.include?(c.id) }
+
+    if already_sent_ids.any?
+      Rails.logger.info("[Resend Campaign] Resuming campaign #{campaign.id}: #{already_sent_ids.size} already sent, #{remaining.size} remaining")
+    else
+      Rails.logger.info("[Resend Campaign] Processing #{contacts.count} contacts for campaign #{campaign.id}")
+    end
+
+    entries = prepare_entries(remaining, report)
+    sends_since_checkpoint = 0
+
+    Resend::BatchSenderService.new(client: client).send_all(entries) do |entry, result|
+      contact = entry[:meta][:contact]
+      if result[:ok]
+        report.succeeded += 1
+        create_message_mapping(report, contact, result[:email_id]) if result[:email_id].present?
+      else
+        report.failed += 1
+        report.record_error(code: result[:error_code], message: result[:error_message])
+      end
+      sends_since_checkpoint += 1
+      if sends_since_checkpoint >= CHECKPOINT_INTERVAL
+        report.save!
+        sends_since_checkpoint = 0
+      end
+    end
     finalize_delivery(report)
+  end
+
+  def prepare_entries(contacts, report)
+    contacts.filter_map do |contact|
+      if contact.email.blank?
+        record_skip_error(report, contact, 'No email address')
+        next
+      end
+
+      content = render_email_content(contact)
+      payload = build_email_payload(contact, content)
+      { payload: payload, meta: { contact: contact } }
+    rescue StandardError => e
+      handle_processing_error(report, contact, e)
+      nil
+    end
+  end
+
+  def build_email_payload(contact, content)
+    {
+      from: from_address,
+      to: [contact.email],
+      subject: content[:subject],
+      html: content[:html],
+      text: content[:text],
+      reply_to: reply_to_address,
+      tags: [
+        { name: 'campaign_id', value: campaign.id.to_s },
+        { name: 'contact_id', value: contact.id.to_s }
+      ]
+    }
   end
 
   def fetch_audience_contacts
@@ -81,18 +139,10 @@ class Resend::OneoffCampaignService
     campaign.account.labels.where(id: audience_label_ids).pluck(:title)
   end
 
-  def initialize_delivery_report(total_count)
-    campaign.create_delivery_report!(provider: 'resend', status: 'running', total: total_count, started_at: Time.current)
-  end
-
-  def process_contact_with_tracking(contact, report)
-    Rails.logger.info("[Resend Campaign] Processing contact: #{contact.name} (#{contact.email})")
-
-    return record_skip_error(report, contact, 'No email address') if contact.email.blank?
-
-    send_and_track(contact, report)
-  rescue StandardError => e
-    handle_processing_error(report, contact, e)
+  def find_or_create_delivery_report(total_count)
+    campaign.delivery_report || campaign.create_delivery_report!(
+      provider: 'resend', status: 'running', total: total_count, started_at: Time.current
+    )
   end
 
   def record_skip_error(report, contact, reason)
@@ -106,19 +156,6 @@ class Resend::OneoffCampaignService
     Rails.logger.error("Backtrace: #{error.backtrace.first(5).join('\n')}")
     report.failed += 1
     report.record_error(code: nil, message: "Processing error: #{error.class.name}", details: error.message)
-  end
-
-  def send_and_track(contact, report)
-    email_content = render_email_content(contact)
-    result = send_email(contact, email_content)
-
-    if result[:ok]
-      report.succeeded += 1
-      create_message_mapping(report, contact, result[:email_id]) if result[:email_id].present?
-    else
-      report.failed += 1
-      report.record_error(code: result[:error_code], message: result[:error_message])
-    end
   end
 
   def render_email_content(contact)
@@ -143,25 +180,6 @@ class Resend::OneoffCampaignService
   def campaign_text_body
     # Strip HTML for plain text version
     ActionView::Base.full_sanitizer.sanitize(campaign.message)
-  end
-
-  def send_email(contact, content)
-    response = client.send_email(
-      from: from_address,
-      to: contact.email,
-      subject: content[:subject],
-      html: content[:html],
-      text: content[:text],
-      reply_to: reply_to_address,
-      tags: [
-        { name: 'campaign_id', value: campaign.id.to_s },
-        { name: 'contact_id', value: contact.id.to_s }
-      ]
-    )
-
-    { ok: true, email_id: response['id'] }
-  rescue Resend::Client::ApiError => e
-    { ok: false, error_code: e.error_code, error_message: e.message }
   end
 
   def client
@@ -240,4 +258,3 @@ class Resend::OneoffCampaignService
     }
   end
 end
-

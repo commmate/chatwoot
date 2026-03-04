@@ -90,6 +90,7 @@
         "STATUS": {
           "COMPLETED": "Completed",
           "COMPLETED_WITH_ERRORS": "Completed with errors",
+          "SENDING": "Sending",
           "SCHEDULED": "Scheduled"
         },
         "FAILED_COUNT": "{count} failed",
@@ -150,6 +151,7 @@
         "STATUS": {
           "COMPLETED": "Completed",
           "COMPLETED_WITH_ERRORS": "Completed with errors",
+          "SENDING": "Sending",
           "SCHEDULED": "Scheduled"
         },
         "FAILED_COUNT": "{count} failed",
@@ -259,6 +261,7 @@
         "STATUS": {
           "COMPLETED": "Completed",
           "COMPLETED_WITH_ERRORS": "Completed with errors",
+          "SENDING": "Sending",
           "SCHEDULED": "Scheduled"
         },
         "FAILED_COUNT": "{count} failed",

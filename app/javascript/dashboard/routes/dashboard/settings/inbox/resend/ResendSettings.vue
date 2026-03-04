@@ -64,6 +64,12 @@ export default {
     currentSftpCampaignsEnabled() {
       return this.inbox.provider_config?.sftp_campaigns_enabled === true;
     },
+    sftpHost() {
+      return window.chatwootConfig?.sftpCampaignsHost || '';
+    },
+    sftpPort() {
+      return window.chatwootConfig?.sftpCampaignsPort || '22';
+    },
     sftpCampaignsDomain() {
       const email =
         this.inbox.provider_config?.from_email || this.inbox.email || '';
@@ -480,58 +486,6 @@ export default {
       </div>
     </SettingsSection>
 
-    <!-- SFTP Campaigns (only when both Resend and SFTP Campaigns are enabled globally) -->
-    <SettingsSection
-      v-if="showSftpToggle"
-      :title="$t('INBOX_MGMT.RESEND_SETTINGS.SFTP_CAMPAIGNS_TITLE')"
-      :sub-title="$t('INBOX_MGMT.RESEND_SETTINGS.SFTP_CAMPAIGNS_SUBTITLE')"
-    >
-      <div class="flex flex-col gap-4">
-        <div class="flex items-center gap-2">
-          <input
-            :id="'sftp-campaigns-' + inbox.id"
-            type="checkbox"
-            class="h-4 w-4 rounded border-n-slate-8"
-            :checked="currentSftpCampaignsEnabled"
-            :disabled="isUpdatingSftpCampaigns"
-            @change="updateSftpCampaigns($event.target.checked)"
-          />
-          <label
-            :for="'sftp-campaigns-' + inbox.id"
-            class="text-sm font-medium text-n-slate-12"
-          >
-            {{ $t('INBOX_MGMT.RESEND_SETTINGS.SFTP_CAMPAIGNS_ENABLED_LABEL') }}
-          </label>
-        </div>
-        <div
-          v-if="currentSftpCampaignsEnabled && sftpCampaignsDomain"
-          class="flex flex-col gap-2 p-3 rounded-lg bg-n-amber-2 border border-n-amber-6"
-        >
-          <p class="text-sm text-n-slate-12">
-            {{
-              $t('INBOX_MGMT.RESEND_SETTINGS.SFTP_CAMPAIGNS_INFO', {
-                domain: sftpCampaignsDomain,
-              })
-            }}
-          </p>
-          <div class="flex flex-col gap-1 text-xs text-n-slate-11">
-            <span>
-              <strong>{{
-                $t('INBOX_MGMT.RESEND_SETTINGS.SFTP_MATCH_DOMAIN')
-              }}</strong>
-              {{ sftpCampaignsDomain }}
-            </span>
-            <span>
-              <strong>{{
-                $t('INBOX_MGMT.RESEND_SETTINGS.SFTP_MATCH_COMPANY')
-              }}</strong>
-              {{ accountName || '—' }}
-            </span>
-          </div>
-        </div>
-      </div>
-    </SettingsSection>
-
     <!-- Current API Key (read-only display) -->
     <SettingsSection
       :title="$t('INBOX_MGMT.RESEND_SETTINGS.API_KEY_TITLE')"
@@ -636,6 +590,109 @@ export default {
         >
           {{ $t('INBOX_MGMT.RESEND_SETTINGS.UPDATE_SIGNING_SECRET') }}
         </NextButton>
+      </div>
+    </SettingsSection>
+
+    <!-- SFTP Campaigns (only when both Resend and SFTP Campaigns are enabled globally) -->
+    <SettingsSection
+      v-if="showSftpToggle"
+      :title="$t('INBOX_MGMT.RESEND_SETTINGS.SFTP_CAMPAIGNS_TITLE')"
+      :sub-title="$t('INBOX_MGMT.RESEND_SETTINGS.SFTP_CAMPAIGNS_SUBTITLE')"
+    >
+      <div class="flex flex-col gap-4">
+        <div class="flex items-center gap-2">
+          <input
+            :id="'sftp-campaigns-' + inbox.id"
+            type="checkbox"
+            class="h-4 w-4 rounded border-n-slate-8"
+            :checked="currentSftpCampaignsEnabled"
+            :disabled="isUpdatingSftpCampaigns"
+            @change="updateSftpCampaigns($event.target.checked)"
+          />
+          <label
+            :for="'sftp-campaigns-' + inbox.id"
+            class="text-sm font-medium text-n-slate-12"
+          >
+            {{ $t('INBOX_MGMT.RESEND_SETTINGS.SFTP_CAMPAIGNS_ENABLED_LABEL') }}
+          </label>
+        </div>
+        <div
+          v-if="currentSftpCampaignsEnabled && sftpCampaignsDomain"
+          class="flex flex-col gap-2 p-3 rounded-lg bg-n-amber-2 border border-n-amber-6"
+        >
+          <p class="text-sm text-n-slate-12">
+            {{
+              $t('INBOX_MGMT.RESEND_SETTINGS.SFTP_CAMPAIGNS_INFO', {
+                domain: sftpCampaignsDomain,
+              })
+            }}
+          </p>
+          <div class="flex flex-col gap-1 text-xs text-n-slate-11">
+            <span>
+              <strong>{{
+                $t('INBOX_MGMT.RESEND_SETTINGS.SFTP_MATCH_DOMAIN')
+              }}</strong>
+              {{ sftpCampaignsDomain }}
+            </span>
+            <span>
+              <strong>{{
+                $t('INBOX_MGMT.RESEND_SETTINGS.SFTP_MATCH_COMPANY')
+              }}</strong>
+              {{ accountName || '—' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- SFTP Upload Instructions -->
+        <div
+          v-if="currentSftpCampaignsEnabled && sftpHost"
+          class="flex flex-col gap-3 p-4 rounded-lg bg-n-background border border-n-weak"
+        >
+          <h4 class="text-sm font-medium text-n-slate-12">
+            {{ $t('INBOX_MGMT.RESEND_SETTINGS.SFTP_UPLOAD_TITLE') }}
+          </h4>
+          <div class="flex flex-col gap-2 text-xs text-n-slate-11">
+            <div class="flex items-center gap-2">
+              <strong class="min-w-[80px]">{{
+                $t('INBOX_MGMT.RESEND_SETTINGS.SFTP_HOST_LABEL')
+              }}</strong>
+              <code
+                class="rounded bg-n-alpha-1 px-2 py-0.5 font-mono text-n-slate-12"
+              >
+                {{ sftpHost }}
+              </code>
+            </div>
+            <div class="flex items-center gap-2">
+              <strong class="min-w-[80px]">{{
+                $t('INBOX_MGMT.RESEND_SETTINGS.SFTP_PORT_LABEL')
+              }}</strong>
+              <code
+                class="rounded bg-n-alpha-1 px-2 py-0.5 font-mono text-n-slate-12"
+              >
+                {{ sftpPort }}
+              </code>
+            </div>
+            <div class="flex items-center gap-2">
+              <strong class="min-w-[80px]">{{
+                $t('INBOX_MGMT.RESEND_SETTINGS.SFTP_PATH_LABEL')
+              }}</strong>
+              <code
+                class="rounded bg-n-alpha-1 px-2 py-0.5 font-mono text-n-slate-12"
+              >
+                {{ $t('INBOX_MGMT.RESEND_SETTINGS.SFTP_PATH_VALUE') }}
+              </code>
+            </div>
+          </div>
+          <div class="mt-1">
+            <p class="text-xs text-n-slate-11 mb-1">
+              {{ $t('INBOX_MGMT.RESEND_SETTINGS.SFTP_UPLOAD_EXAMPLE') }}
+            </p>
+            <!-- prettier-ignore -->
+            <pre
+              class="overflow-x-auto rounded-lg bg-n-alpha-1 p-3 font-mono text-xs text-n-slate-12 border border-n-weak"
+            >{{ $t('INBOX_MGMT.RESEND_SETTINGS.SFTP_UPLOAD_COMMAND', { port: sftpPort, host: sftpHost }) }}</pre>
+          </div>
+        </div>
       </div>
     </SettingsSection>
   </div>
