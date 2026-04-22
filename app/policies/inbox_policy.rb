@@ -93,4 +93,8 @@ class InboxPolicy < ApplicationPolicy
   def has_campaign_permission?
     @account_user.permissions.include?('campaign_manage')
   end
+
+  def reset_secret?
+    @account_user.administrator?
+  end
 end

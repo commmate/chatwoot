@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { vOnClickOutside } from '@vueuse/components';
 import Button from 'dashboard/components-next/button/Button.vue';
 import Input from 'dashboard/components-next/input/Input.vue';
 import SelectMenu from 'dashboard/components-next/selectmenu/SelectMenu.vue';
@@ -46,12 +47,12 @@ const handlePageChange = page => emit('update:currentPage', page);
 
 <template>
   <section class="flex flex-col w-full h-full overflow-hidden bg-n-surface-1">
-    <header class="sticky top-0 z-10 px-6 lg:px-0">
-      <div class="w-full max-w-[60rem] mx-auto">
+    <header class="sticky top-0 z-10 px-6">
+      <div class="w-full max-w-5xl mx-auto">
         <div
           class="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full py-6 gap-2"
         >
-          <span class="text-xl font-medium text-n-slate-12">
+          <span class="text-heading-1 text-n-slate-12">
             {{ headerTitle }}
           </span>
           <div class="flex items-center gap-3">
@@ -78,7 +79,10 @@ const handlePageChange = page => emit('update:currentPage', page);
               @update:model-value="handleInboxChange"
             />
             <div
-              v-on-clickaway="() => emit('close')"
+              v-on-click-outside="[
+                () => emit('close'),
+                { ignore: ['dialog.ProseMirror-prompt-backdrop'] },
+              ]"
               class="relative group/campaign-button"
             >
               <Button
@@ -94,8 +98,8 @@ const handlePageChange = page => emit('update:currentPage', page);
         </div>
       </div>
     </header>
-    <main class="flex-1 px-6 overflow-y-auto lg:px-0">
-      <div class="w-full max-w-[60rem] mx-auto py-4">
+    <main class="flex-1 px-6 overflow-y-auto">
+      <div class="w-full max-w-5xl mx-auto py-4">
         <slot name="default" />
       </div>
     </main>

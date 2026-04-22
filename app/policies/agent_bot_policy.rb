@@ -39,4 +39,8 @@ class AgentBotPolicy < ApplicationPolicy
   def has_agent_bots_manage_permission?
     @account_user.permissions.include?('settings_agent_bots_manage')
   end
+
+  def reset_secret?
+    @account_user.administrator?
+  end
 end
