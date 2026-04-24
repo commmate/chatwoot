@@ -13,7 +13,10 @@ echo "✅ Database is ready"
 
 # Use Chatwoot's smart prepare task (handles fresh vs existing intelligently)
 echo "📦 Preparing database (using Chatwoot's db:chatwoot_prepare)..."
-bundle exec rails db:chatwoot_prepare
+bundle exec rails db:chatwoot_prepare || {
+  echo "⚠️  db:chatwoot_prepare had errors, running migrations separately..."
+  bundle exec rails db:migrate
+}
 
 # CommMate branding is applied automatically by initializer during Rails startup
 # No additional rake task needed - initializer handles it
