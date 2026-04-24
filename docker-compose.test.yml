@@ -1,0 +1,73 @@
+services:
+  rails:
+    image: localhost/commmate/commmate:v4.13.0-test
+    container_name: commmate-test-rails
+    ports:
+      - '3033:3000'
+    entrypoint: ['/bin/sh', '-c', 'until PGPASSWORD=$$POSTGRES_PASSWORD psql -h $$POSTGRES_HOST -U $$POSTGRES_USERNAME -d $$POSTGRES_DATABASE -c "\\q" 2>/dev/null; do sleep 2; done && bundle exec rails db:migrate && (bundle exec rails db:seed || echo "Seed failed, continuing...") && exec bundle exec rails s -b 0.0.0.0']
+    environment:
+      - RAILS_ENV=production
+      - NODE_ENV=production
+      - INSTALLATION_ENV=docker
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DATABASE=commmate_test
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=testpass123
+      - REDIS_URL=redis://redis:6379
+      - SECRET_KEY_BASE=test_secret_key_base_for_smoke_testing_only_do_not_use_in_prod
+      - FRONTEND_URL=http://localhost:3033
+      - INSTALLATION_NAME=CommMate
+      - BRAND_NAME=CommMate
+      - DISABLE_TELEMETRY=true
+      - ENABLE_ACCOUNT_SIGNUP=true
+      - RAILS_LOG_TO_STDOUT=true
+      - DEFAULT_LOCALE=en
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  sidekiq:
+    image: localhost/commmate/commmate:v4.13.0-test
+    container_name: commmate-test-sidekiq
+    environment:
+      - RAILS_ENV=production
+      - NODE_ENV=production
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DATABASE=commmate_test
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=testpass123
+      - REDIS_URL=redis://redis:6379
+      - SECRET_KEY_BASE=test_secret_key_base_for_smoke_testing_only_do_not_use_in_prod
+      - FRONTEND_URL=http://localhost:3033
+      - DISABLE_TELEMETRY=true
+      - RAILS_LOG_TO_STDOUT=true
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ['bundle', 'exec', 'sidekiq', '-C', 'config/sidekiq.yml']
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: commmate-test-postgres
+    environment:
+      - POSTGRES_DB=commmate_test
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=testpass123
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:8-alpine
+    container_name: commmate-test-redis
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 3s
+      timeout: 3s
+      retries: 10
