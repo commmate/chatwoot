@@ -2,10 +2,10 @@
 # Just adds CommMate branding customizations
 
 # pre-build stage
-FROM node:23-alpine as node
+FROM node:24-alpine as node
 FROM ruby:3.4.4-alpine3.21 AS pre-builder
 
-ARG NODE_VERSION="23.7.0"
+ARG NODE_VERSION="24.13.0"
 ARG PNPM_VERSION="10.2.0"
 ENV NODE_VERSION=${NODE_VERSION}
 ENV PNPM_VERSION=${PNPM_VERSION}
@@ -14,7 +14,7 @@ ENV PNPM_VERSION=${PNPM_VERSION}
 # For development docker-compose file overrides ARGS
 ARG BUNDLE_WITHOUT="development:test"
 ENV BUNDLE_WITHOUT ${BUNDLE_WITHOUT}
-ENV BUNDLER_VERSION=2.5.11
+ENV BUNDLER_VERSION=2.5.16
 
 ARG RAILS_SERVE_STATIC_FILES=true
 ENV RAILS_SERVE_STATIC_FILES ${RAILS_SERVE_STATIC_FILES}
@@ -114,26 +114,28 @@ COPY custom/config/initializers/commmate_version.rb /app/config/initializers/
 # Copy CommMate styles (will be compiled during asset precompilation)
 COPY custom/styles /app/custom/styles
 
-# Apply branding to source files
-RUN sed -i 's/#1f93ff/#107e44/g' app/javascript/shared/components/emoji/EmojiInput.vue && \
-    sed -i 's/#1f93ff/#107e44/g' app/javascript/sdk/sdk.js && \
-    sed -i 's/#1f93ff/#107e44/g' app/javascript/dashboard/routes/dashboard/settings/inbox/WidgetBuilder.vue && \
-    sed -i 's/#1F93FF/#107e44/g' app/javascript/dashboard/components/widgets/WootWriter/AudioRecorder.vue && \
-    sed -i 's/#2781F6/#107e44/g' app/javascript/dashboard/components/widgets/conversation/conversation/LabelSuggestion.vue && \
-    sed -i 's/#2781F6/#107e44/g' app/javascript/dashboard/components-next/message/bubbles/Dyte.vue && \
-    sed -i 's/#2781F6/#107e44/g' app/javascript/dashboard/components-next/icon/Logo.vue && \
-    sed -i 's/#2781F6/#107e44/g' app/javascript/dashboard/components-next/HelpCenter/PortalSwitcher/CreatePortalDialog.vue && \
-    sed -i "s/#27264D', '#A19EFF/#0d6636', '#59b44b/g" app/javascript/dashboard/components-next/avatar/Avatar.vue && \
-    sed -i "s/#1D2E62', '#9EB1FF/#0a4d2a', '#8cc540/g" app/javascript/dashboard/components-next/avatar/Avatar.vue && \
-    sed -i "s/#EBEBFE', '#4747C2/#d7eee1', '#107e44/g" app/javascript/dashboard/components-next/avatar/Avatar.vue && \
-    sed -i "s/#E1E9FF', '#3A5BC7/#c3e6d2', '#0d6636/g" app/javascript/dashboard/components-next/avatar/Avatar.vue && \
-    sed -i 's/#47A7F6/#107e44/g' public/brand-assets/logo.svg && \
-    sed -i 's/#47A7F6/#107e44/g' public/brand-assets/logo_dark.svg && \
-    sed -i 's/#2781F6/#107e44/g' public/brand-assets/logo_thumbnail.svg && \
-    sed -i 's/#4B7DFB/#107e44/g' public/assets/images/dashboard/profile/hot-key-*.svg && \
-    sed -i 's/#1f93ff/#107e44/g' app/views/layouts/vueapp.html.erb && \
-    sed -i 's/"Chatwoot"/"CommMate"/g' public/manifest.json && \
-    sed -i 's/#1f93ff/#107e44/g' public/manifest.json
+# Apply branding to source files (use || true for files that may not exist in newer versions)
+RUN (sed -i 's/#1f93ff/#107e44/g' app/javascript/shared/components/emoji/EmojiInput.vue || true) && \
+    (sed -i 's/#1f93ff/#107e44/g' app/javascript/sdk/sdk.js || true) && \
+    (sed -i 's/#1f93ff/#107e44/g' app/javascript/dashboard/routes/dashboard/settings/reports/CampaignReports.vue || true) && \
+    (sed -i 's/#1F93FF/#107e44/g' app/javascript/dashboard/components/widgets/WootWriter/AudioRecorder.vue || true) && \
+    (sed -i 's/#2781F6/#107e44/g' app/javascript/dashboard/components/widgets/conversation/conversation/LabelSuggestion.vue || true) && \
+    (sed -i 's/#2781F6/#107e44/g' app/javascript/dashboard/components-next/message/bubbles/Dyte.vue || true) && \
+    (sed -i 's/#2781F6/#107e44/g' app/javascript/dashboard/components-next/icon/Logo.vue || true) && \
+    (sed -i 's/#2781F6/#107e44/g' app/javascript/dashboard/components-next/HelpCenter/PortalSwitcher/CreatePortalDialog.vue || true) && \
+    (sed -i "s/#27264D', '#A19EFF/#0d6636', '#59b44b/g" app/javascript/dashboard/components-next/avatar/Avatar.vue || true) && \
+    (sed -i "s/#1D2E62', '#9EB1FF/#0a4d2a', '#8cc540/g" app/javascript/dashboard/components-next/avatar/Avatar.vue || true) && \
+    (sed -i "s/#EBEBFE', '#4747C2/#d7eee1', '#107e44/g" app/javascript/dashboard/components-next/avatar/Avatar.vue || true) && \
+    (sed -i "s/#E1E9FF', '#3A5BC7/#c3e6d2', '#0d6636/g" app/javascript/dashboard/components-next/avatar/Avatar.vue || true) && \
+    (sed -i 's/#47A7F6/#107e44/g' public/brand-assets/logo.svg || true) && \
+    (sed -i 's/#47A7F6/#107e44/g' public/brand-assets/logo_dark.svg || true) && \
+    (sed -i 's/#2781F6/#107e44/g' public/brand-assets/logo_thumbnail.svg || true) && \
+    (sed -i 's/#47A7F6/#107e44/g' app/javascript/widget/assets/images/logo.svg || true) && \
+    (sed -i 's/#47A7F6/#107e44/g' app/javascript/design-system/images/logo-thumbnail.svg || true) && \
+    (sed -i 's/#4B7DFB/#107e44/g' public/assets/images/dashboard/profile/hot-key-*.svg || true) && \
+    (sed -i 's/#1f93ff/#107e44/g' app/views/layouts/vueapp.html.erb || true) && \
+    (sed -i 's/"Chatwoot"/"CommMate"/g' public/manifest.json || true) && \
+    (sed -i 's/#1f93ff/#107e44/g' public/manifest.json || true)
 
 # Update theme/colors.js
 RUN sed -i 's/25: blue\.blue2/25: green.green2/g' theme/colors.js && \
@@ -164,10 +166,11 @@ RUN echo "" >> app/javascript/dashboard/assets/scss/app.scss && \
 # https://github.com/chatwoot/chatwoot/issues/701
 RUN mkdir -p /app/log
 
-# Precompile assets (requires enterprise fix to be already in code)
-RUN SECRET_KEY_BASE=precompile_placeholder \
-    POSTGRES_DATABASE=none \
-    bundle exec rails assets:precompile
+# Precompile assets and clean up build artifacts
+RUN if [ "$RAILS_ENV" = "production" ]; then \
+  SECRET_KEY_BASE=precompile_placeholder RAILS_LOG_TO_STDOUT=enabled bundle exec rake assets:precompile \
+  && rm -rf spec node_modules tmp/cache; \
+  fi
 
 # Generate .git_sha file with current commit hash
 RUN git rev-parse HEAD > /app/.git_sha && \
@@ -182,14 +185,14 @@ RUN rm -rf /gems/ruby/3.4.0/cache/*.gem \
 # final build stage
 FROM ruby:3.4.4-alpine3.21
 
-ARG NODE_VERSION="23.7.0"
+ARG NODE_VERSION="24.13.0"
 ARG PNPM_VERSION="10.2.0"
 ENV NODE_VERSION=${NODE_VERSION}
 ENV PNPM_VERSION=${PNPM_VERSION}
 
 ARG BUNDLE_WITHOUT="development:test"
 ENV BUNDLE_WITHOUT ${BUNDLE_WITHOUT}
-ENV BUNDLER_VERSION=2.5.11
+ENV BUNDLER_VERSION=2.5.16
 
 ARG EXECJS_RUNTIME="Disabled"
 ENV EXECJS_RUNTIME ${EXECJS_RUNTIME}
