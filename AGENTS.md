@@ -62,6 +62,14 @@
 - The setup workflow in `.codex/environments/environment.toml` should dynamically generate per-worktree DB/port values (Rails, Vite, Redis DB index) to avoid collisions.
 - Start each worktree with its own Overmind socket/title so multiple instances can run at the same time.
 
+## Deployment Workflow
+
+- **Golden Rule**: Never deploy directly to production — always deploy and test on staging first
+- **Staging URL**: https://staging.commmate.com (server: `ssh tutorialsbot`, path: `/opt/staging-commmate/`)
+- **Staging uses `:latest`** tag; production uses **pinned version tags** (e.g., `v4.11.1.7`)
+- **Flow**: Build image → Push to Hub → Deploy staging → Test staging → Deploy production
+- **Docs**: See `custom/docs/DEPLOYMENT-WORKFLOW.md` for full process, `custom/docs/STAGING-ENVIRONMENT.md` for infrastructure
+
 ## Commit Messages
 
 - Prefer Conventional Commits: `type(scope): subject` (scope optional)

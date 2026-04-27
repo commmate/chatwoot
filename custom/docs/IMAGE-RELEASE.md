@@ -436,11 +436,24 @@ git push origin v4.8.0-commmate
 
 ---
 
-## Phase 6: Production Deployment (Optional)
+## Phase 6: Deploy to Staging and Production
 
-**Note**: This section is for deploying to your production server.
+**IMPORTANT**: Always deploy to staging first and verify before production.  
+See `DEPLOYMENT-WORKFLOW.md` for the full staging → production process.
 
-### A. Test Pull on Production
+### A. Deploy to Staging (MANDATORY)
+
+```bash
+ssh tutorialsbot
+cd /opt/staging-commmate
+docker compose pull
+docker compose up -d rails sidekiq
+docker compose exec rails bundle exec rails db:migrate
+```
+
+Verify at https://staging.commmate.com — see `DEPLOYMENT-WORKFLOW.md` for the test checklist.
+
+### B. Test Pull on Production
 
 ```bash
 # SSH to production server
