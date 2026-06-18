@@ -649,6 +649,22 @@ podman manifest push commmate/commmate:v4.8.0 docker://commmate/commmate:latest
 
 **See**: `DOCKER-SETUP.md` for production deployment details
 
+### 4. Post-Deploy Branding Check
+
+After every upstream merge + deploy, verify `LOGO_THUMBNAIL` in production. Upstream merges can disrupt branding because `Logo.vue` falls back to a Chatwoot-shaped SVG when `LOGO_THUMBNAIL` is empty.
+
+```bash
+# Verify
+curl -sS https://crm.commmate.com/app/login | grep -o '"LOGO_THUMBNAIL":"[^"]*"'
+# Must be: "LOGO_THUMBNAIL":"/brand-assets/logo-icon.png"
+
+# Fix if needed (stop sidekiq to free DB pool connections first)
+ssh root@200.98.72.137 'cd /opt/evolution-chatwoot && docker compose stop sidekiq && sleep 3 && \
+  docker compose exec -T chatwoot bundle exec rails runner \
+  "InstallationConfig.find_by(name: %q{LOGO_THUMBNAIL}).update!(value: %q{/brand-assets/logo-icon.png})" && \
+  docker compose start sidekiq'
+```
+
 ---
 
 ## Version Numbering
