@@ -114,7 +114,7 @@ const channelList = computed(() => {
 });
 
 const initializeEnabledFeatures = async () => {
-  enabledFeatures.value = currentAccount.value.features;
+  enabledFeatures.value = currentAccount.value.features || {};
 };
 
 const checkEvolutionHealth = async () => {
