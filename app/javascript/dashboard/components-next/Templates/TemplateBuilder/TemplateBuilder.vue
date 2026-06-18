@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import NextButton from 'dashboard/components-next/button/Button.vue';
 import WhatsappTemplatesAPI from 'dashboard/api/whatsappTemplates';
 import TemplatePreview from './TemplatePreview.vue';
-import EmojiInput from 'shared/components/emoji/EmojiInput.vue';
+import EmojiPicker from 'shared/components/emoji/EmojiPicker.vue';
 import {
   validateTemplate,
   VALIDATION_KEYS,
@@ -858,7 +858,7 @@ const insertVariable = () => {
                   v-if="showEmojiPicker"
                   class="absolute z-50 left-0 top-full mt-1 emoji-picker-override"
                 >
-                  <EmojiInput :on-click="insertEmoji" />
+                  <EmojiPicker @select="insertEmoji" />
                 </div>
               </div>
 
@@ -1222,11 +1222,3 @@ const insertVariable = () => {
   </div>
 </template>
 
-<style>
-/* Override EmojiInput's default absolute positioning */
-.emoji-picker-override .emoji-dialog {
-  position: static !important;
-  top: auto !important;
-  right: auto !important;
-}
-</style>

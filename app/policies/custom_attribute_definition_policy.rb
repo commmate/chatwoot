@@ -1,13 +1,9 @@
-# CommMate: Policy for Custom Attribute Definitions
-# Allows administrators or users with settings_custom_attributes_manage permission
 class CustomAttributeDefinitionPolicy < ApplicationPolicy
   def index?
-    # Allow all agents to read custom attribute definitions (needed for forms)
     @account_user.administrator? || @account_user.agent?
   end
 
   def show?
-    # Allow all agents to read custom attribute definitions (needed for forms)
     @account_user.administrator? || @account_user.agent?
   end
 

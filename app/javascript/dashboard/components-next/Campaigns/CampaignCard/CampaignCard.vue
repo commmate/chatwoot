@@ -26,7 +26,7 @@ const emit = defineEmits(['edit', 'viewDetails', 'toggle']);
 const { t } = useI18n();
 
 const STATUS_COMPLETED = 'completed';
-const STATUS_SENDING = 'sending';
+const STATUS_PROCESSING = 'processing';
 const DELIVERY_STATUS_COMPLETED_WITH_ERRORS = 'completed_with_errors';
 
 const hasDeliveryErrors = computed(
@@ -41,7 +41,7 @@ const statusBadgeClass = computed(() => {
       : 'bg-n-alpha-2 text-n-slate-11';
   }
   if (props.status === STATUS_COMPLETED) return 'bg-n-teal-3 text-n-teal-11';
-  if (props.status === STATUS_SENDING) return 'bg-n-blue-3 text-n-blue-11';
+  if (props.status === STATUS_PROCESSING) return 'bg-n-blue-3 text-n-blue-11';
   return 'bg-n-amber-3 text-n-amber-11';
 });
 
@@ -54,10 +54,12 @@ const campaignStatus = computed(() => {
   if (hasDeliveryErrors.value) {
     return t('CAMPAIGN.SMS.CARD.STATUS.COMPLETED_WITH_ERRORS');
   }
-  if (props.status === STATUS_COMPLETED)
+  if (props.status === STATUS_COMPLETED) {
     return t('CAMPAIGN.SMS.CARD.STATUS.COMPLETED');
-  if (props.status === STATUS_SENDING)
-    return t('CAMPAIGN.SMS.CARD.STATUS.SENDING');
+  }
+  if (props.status === STATUS_PROCESSING) {
+    return t('CAMPAIGN.SMS.CARD.STATUS.PROCESSING');
+  }
   return t('CAMPAIGN.SMS.CARD.STATUS.SCHEDULED');
 });
 

@@ -15,7 +15,7 @@ class Resend::OneoffCampaignService
 
   def perform
     validate_basic_campaign!
-    campaign.sending! unless campaign.sending?
+    campaign.processing! unless campaign.processing?
     validate_api_key!
     execute_delivery
     campaign.completed!

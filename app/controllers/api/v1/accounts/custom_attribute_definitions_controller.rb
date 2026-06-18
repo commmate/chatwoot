@@ -1,8 +1,7 @@
 class Api::V1::Accounts::CustomAttributeDefinitionsController < Api::V1::Accounts::BaseController
   before_action :fetch_custom_attributes_definitions, except: [:create]
   before_action :fetch_custom_attribute_definition, only: [:show, :update, :destroy]
-  # CommMate: Add authorization for custom attribute management
-  before_action :check_authorization, only: [:create, :update, :destroy]
+  before_action :check_authorization
   DEFAULT_ATTRIBUTE_MODEL = 'conversation_attribute'.freeze
 
   def index; end
@@ -51,7 +50,6 @@ class Api::V1::Accounts::CustomAttributeDefinitionsController < Api::V1::Account
     params.permit(:id, :filter_type, :attribute_model)
   end
 
-  # CommMate: Authorization check for custom attribute management
   def check_authorization
     authorize(CustomAttributeDefinition)
   end

@@ -88,6 +88,7 @@
       },
       "CARD": {
         "STATUS": {
+          "PROCESSING": "Processando",
           "COMPLETED": "Concluído",
           "COMPLETED_WITH_ERRORS": "Concluído com erros",
           "SCHEDULED": "Agendada"
@@ -148,6 +149,7 @@
       },
       "CARD": {
         "STATUS": {
+          "PROCESSING": "Processando",
           "COMPLETED": "Concluído",
           "COMPLETED_WITH_ERRORS": "Concluído com erros",
           "SCHEDULED": "Agendada"

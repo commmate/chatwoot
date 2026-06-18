@@ -3,7 +3,6 @@ class Whatsapp::OneoffCampaignService
 
   def perform
     validate_campaign!
-    # Mark campaign completed immediately to prevent duplicate job pickups
     campaign.completed!
     execute_delivery
   end

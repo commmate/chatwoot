@@ -68,11 +68,18 @@ const isActive = computed(() => {
   }
 
   if (key === 'evolution') {
-    // Evolution requires: enabled in config AND health check passed
     return (
       hasEvolutionConfigured.value &&
       props.evolutionHealth.checked &&
       props.evolutionHealth.healthy
+    );
+  }
+
+  if (key === 'whatsapp_call') {
+    return (
+      props.enabledFeatures.channel_voice &&
+      !!window.chatwootConfig?.whatsappAppId &&
+      window.chatwootConfig.whatsappAppId !== 'none'
     );
   }
 
@@ -97,7 +104,6 @@ const isComingSoon = computed(() => {
   return ['voice'].includes(key) && !isActive.value;
 });
 
-// Show "Unavailable" for Evolution when enabled but health check failed
 const isUnavailable = computed(() => {
   const { key } = props.channel;
   if (key === 'evolution') {
@@ -110,12 +116,22 @@ const isUnavailable = computed(() => {
   return false;
 });
 
-// Custom description for unavailable Evolution
 const channelDescription = computed(() => {
   if (isUnavailable.value) {
     return t('INBOX_MGMT.ADD.AUTH.CHANNEL.EVOLUTION.UNAVAILABLE');
   }
   return props.channel.description;
+});
+
+const isBeta = computed(() => {
+  return ['tiktok', 'voice', 'whatsapp_call'].includes(props.channel.key);
+});
+
+const hasVoiceBadge = computed(() => {
+  return (
+    ['voice', 'whatsapp_call'].includes(props.channel.key) &&
+    !!props.enabledFeatures.channel_voice
+  );
 });
 
 const onItemClick = () => {
@@ -132,6 +148,8 @@ const onItemClick = () => {
     :icon="channel.icon"
     :is-coming-soon="isComingSoon"
     :is-unavailable="isUnavailable"
+    :is-beta="isBeta"
+    :has-voice-badge="hasVoiceBadge"
     :disabled="!isActive"
     @click="onItemClick"
   />
