@@ -1,4 +1,9 @@
-import { INBOX_TYPES, TWILIO_CHANNEL_MEDIUM } from 'dashboard/helper/inbox';
+import {
+  INBOX_TYPES,
+  TWILIO_CHANNEL_MEDIUM,
+  isVoiceCallEnabled,
+  getInboxVoiceIcon,
+} from 'dashboard/helper/inbox';
 import { computed } from 'vue';
 
 const channelTypeIconMap = {
@@ -71,14 +76,8 @@ export function useChannelIcon(inbox) {
       icon = 'i-woot-whatsapp';
     }
 
-    const voiceEnabled =
-      inboxDetails.voice_enabled || inboxDetails.voiceEnabled;
-    if (
-      type === INBOX_TYPES.TWILIO &&
-      voiceEnabled &&
-      inboxDetails.medium !== TWILIO_CHANNEL_MEDIUM.WHATSAPP
-    ) {
-      icon = 'i-woot-voice';
+    if (isVoiceCallEnabled(inboxDetails)) {
+      icon = getInboxVoiceIcon(type, inboxDetails.medium);
     }
 
     return icon ?? 'i-ri-global-fill';

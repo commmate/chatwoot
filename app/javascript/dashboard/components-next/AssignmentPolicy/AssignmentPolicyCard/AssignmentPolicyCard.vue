@@ -32,7 +32,8 @@ const inboxes = computed(() => {
         inbox.channelType,
         inbox.medium,
         'line',
-        inbox.additionalAttributes
+        inbox.additionalAttributes,
+        inbox.voiceEnabled
       ),
     };
   });

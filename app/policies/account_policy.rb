@@ -24,6 +24,10 @@ class AccountPolicy < ApplicationPolicy
     @account_user.administrator?
   end
 
+  def select_billing_currency?
+    @account_user.administrator?
+  end
+
   def checkout?
     @account_user.administrator?
   end
@@ -36,9 +40,12 @@ class AccountPolicy < ApplicationPolicy
     @account_user.administrator?
   end
 
+  def topup_options?
+    @account_user.administrator?
+  end
+
   private
 
-  # CommMate: Check if user has settings_account_manage permission
   def has_account_manage_permission?
     @account_user.permissions.include?('settings_account_manage')
   end

@@ -118,7 +118,6 @@ const initializeEnabledFeatures = async () => {
 };
 
 const checkEvolutionHealth = async () => {
-  // Only check if Evolution is enabled in config
   if (window.chatwootConfig?.evolutionApiEnabled !== 'true') {
     evolutionHealth.value = { healthy: false, checked: true };
     return;

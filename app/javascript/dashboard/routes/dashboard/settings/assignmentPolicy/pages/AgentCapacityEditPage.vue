@@ -73,6 +73,7 @@ const allInboxes = computed(
           channelType,
           medium,
           additionalAttributes,
+          voiceEnabled,
         }) => ({
           name,
           id,
@@ -82,7 +83,8 @@ const allInboxes = computed(
             channelType,
             medium,
             'line',
-            additionalAttributes
+            additionalAttributes,
+            voiceEnabled
           ),
         })
       ) || []

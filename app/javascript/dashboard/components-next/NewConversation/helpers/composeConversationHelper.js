@@ -49,10 +49,11 @@ const transformInbox = ({
   phoneNumber,
   medium,
   additionalAttributes,
+  voiceEnabled,
   ...rest
 }) => ({
   id,
-  icon: getInboxIconByType(channelType, medium, 'line', additionalAttributes),
+  icon: getInboxIconByType(channelType, medium, 'line', additionalAttributes, voiceEnabled),
   label: generateLabelForContactableInboxesList({
     name,
     email,
@@ -68,6 +69,7 @@ const transformInbox = ({
   channelType,
   medium,
   additionalAttributes,
+  voiceEnabled,
   ...rest,
 });
 

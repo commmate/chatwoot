@@ -2,18 +2,16 @@
 import { h, ref, computed, onMounted, watch } from 'vue';
 import { provideSidebarContext, useSidebarResize } from './provider';
 import { useAccount } from 'dashboard/composables/useAccount';
+import { useConfig } from 'dashboard/composables/useConfig';
 import { useKbd } from 'dashboard/composables/utils/useKbd';
 import { useMapGetter } from 'dashboard/composables/store';
 import { useStore } from 'vuex';
-import { INBOX_TYPES } from 'dashboard/helper/inbox';
 import { useI18n } from 'vue-i18n';
-import { useStorage } from '@vueuse/core';
 import { useSidebarKeyboardShortcuts } from './useSidebarKeyboardShortcuts';
 import { vOnClickOutside } from '@vueuse/components';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
+import { INBOX_TYPES } from 'dashboard/helper/inbox';
 import { useWindowSize, useEventListener } from '@vueuse/core';
-import { emitter } from 'shared/helpers/mitt';
-import { BUS_EVENTS } from 'shared/constants/busEvents';
 import {
   hasPermissions,
   getUserPermissions,
@@ -51,7 +49,14 @@ const emit = defineEmits([
 ]);
 
 const { accountScopedRoute, isOnChatwootCloud } = useAccount();
+const { isEnterprise } = useConfig();
 const store = useStore();
+
+// Calls run on the enterprise-only API (cloud runs enterprise); hide the entry
+// on community so it doesn't lead to a dashboard/CTA the backend can't serve.
+const isCallsAvailable = computed(
+  () => isOnChatwootCloud.value || isEnterprise
+);
 const searchShortcut = useKbd([`$mod`, 'k']);
 const { t } = useI18n();
 
@@ -94,6 +99,23 @@ const hasConversationUnreadCounts = computed(() => {
   );
 });
 
+const hasFilteredUnreadCounts = computed(() => {
+  return (
+    hasConversationUnreadCounts.value &&
+    isFeatureEnabledonAccount.value(
+      accountId.value,
+      FEATURE_FLAGS.UNREAD_COUNT_FOR_FILTERS
+    )
+  );
+});
+
+const hasDataImport = computed(() => {
+  return isFeatureEnabledonAccount.value(
+    accountId.value,
+    FEATURE_FLAGS.DATA_IMPORT
+  );
+});
+
 const fetchConversationUnreadCounts = ([currentAccountId, isEnabled]) => {
   if (!currentAccountId) return;
 
@@ -120,14 +142,7 @@ const toggleShortcutModalFn = show => {
 
 useSidebarKeyboardShortcuts(toggleShortcutModalFn);
 
-// We're using localStorage to store the expanded item in the sidebar
-// This helps preserve context when navigating between portal and dashboard layouts
-// and also when the user refreshes the page
-const expandedItem = useStorage(
-  'next-sidebar-expanded-item',
-  null,
-  sessionStorage
-);
+const expandedItem = ref(null);
 
 const setExpandedItem = name => {
   expandedItem.value = expandedItem.value === name ? null : name;
@@ -225,6 +240,18 @@ const getLabelUnreadCount = useMapGetter(
 const getTeamUnreadCount = useMapGetter(
   'conversationUnreadCounts/getTeamUnreadCount'
 );
+const mentionsUnreadCount = useMapGetter(
+  'conversationUnreadCounts/getMentionsUnreadCount'
+);
+const participatingUnreadCount = useMapGetter(
+  'conversationUnreadCounts/getParticipatingUnreadCount'
+);
+const unattendedUnreadCount = useMapGetter(
+  'conversationUnreadCounts/getUnattendedUnreadCount'
+);
+const getFolderUnreadCount = useMapGetter(
+  'conversationUnreadCounts/getFolderUnreadCount'
+);
 const teams = useMapGetter('teams/getMyTeams');
 const contactCustomViews = useMapGetter('customViews/getContactCustomViews');
 const conversationCustomViews = useMapGetter(
@@ -234,79 +261,6 @@ const getSidebarSectionSort = useMapGetter(
   'sidebarSortPreferences/getSectionSort'
 );
 
-onMounted(() => {
-  store.dispatch('labels/get');
-  store.dispatch('inboxes/get');
-  store.dispatch('notifications/unReadCount');
-  store.dispatch('teams/get');
-  store.dispatch('attributes/get');
-  store.dispatch('customViews/get', 'conversation');
-  store.dispatch('customViews/get', 'contact');
-});
-
-watch([accountId, hasConversationUnreadCounts], fetchConversationUnreadCounts, {
-  immediate: true,
-});
-
-watch([accountId, currentUserId], fetchSidebarSortPreferences, {
-  immediate: true,
-});
-
-const getSortOptionsForSection = section =>
-  getSidebarSortOptions(section, {
-    hasUnreadCounts: hasConversationUnreadCounts.value,
-  });
-
-const getSortForSection = section =>
-  resolveSidebarSort(section, getSidebarSectionSort.value(section), {
-    hasUnreadCounts: hasConversationUnreadCounts.value,
-  });
-
-const updateSortPreference = (section, sortBy) => {
-  store.dispatch('sidebarSortPreferences/setSectionSort', {
-    section,
-    sortBy,
-  });
-};
-
-const buildSortConfig = section => ({
-  sortOptions: getSortOptionsForSection(section),
-  activeSort: getSortForSection(section),
-  onSortChange: sortBy => updateSortPreference(section, sortBy),
-});
-
-const sortedFolders = computed(() =>
-  sortSidebarItems(conversationCustomViews.value, {
-    sortBy: getSortForSection(SIDEBAR_SORT_SECTIONS.FOLDERS),
-    labelKey: view => view.name,
-  })
-);
-
-const sortedTeams = computed(() =>
-  sortSidebarItems(teams.value, {
-    sortBy: getSortForSection(SIDEBAR_SORT_SECTIONS.TEAMS),
-    labelKey: team => team.name,
-    unreadCountKey: team => getTeamUnreadCount.value(team.id),
-  })
-);
-
-const sortedInboxes = computed(() =>
-  sortSidebarItems(inboxes.value, {
-    sortBy: getSortForSection(SIDEBAR_SORT_SECTIONS.CHANNELS),
-    labelKey: inbox => inbox.name,
-    unreadCountKey: inbox => getInboxUnreadCount.value(inbox.id),
-  })
-);
-
-const sortedLabels = computed(() =>
-  sortSidebarItems(labels.value, {
-    sortBy: getSortForSection(SIDEBAR_SORT_SECTIONS.LABELS),
-    labelKey: label => label.title,
-    unreadCountKey: label => getLabelUnreadCount.value(label.id),
-  })
-);
-
-// CommMate: Filter WhatsApp Cloud inboxes for Templates menu
 const whatsAppCloudInboxes = computed(() =>
   inboxes.value
     .filter(
@@ -317,7 +271,6 @@ const whatsAppCloudInboxes = computed(() =>
     .sort((a, b) => a.name.localeCompare(b.name))
 );
 
-// CommMate: Filter inboxes by type for campaign menu visibility
 const websiteInboxes = computed(() =>
   inboxes.value.filter(inbox => inbox.channel_type === INBOX_TYPES.WEB)
 );
@@ -338,7 +291,6 @@ const resendInboxes = computed(() =>
   )
 );
 
-// CommMate: Build campaign menu children based on available inboxes
 const campaignMenuChildren = computed(() => {
   const children = [];
 
@@ -374,7 +326,6 @@ const campaignMenuChildren = computed(() => {
     });
   }
 
-  // If no campaign-compatible inboxes, show getting started
   if (children.length === 0) {
     children.push({
       name: 'Getting Started',
@@ -385,6 +336,87 @@ const campaignMenuChildren = computed(() => {
 
   return children;
 });
+
+onMounted(() => {
+  store.dispatch('labels/get');
+  store.dispatch('inboxes/get');
+  store.dispatch('notifications/unReadCount');
+  store.dispatch('teams/get');
+  store.dispatch('attributes/get');
+  store.dispatch('customViews/get', 'conversation');
+  store.dispatch('customViews/get', 'contact');
+});
+
+watch([accountId, hasConversationUnreadCounts], fetchConversationUnreadCounts, {
+  immediate: true,
+});
+
+watch([accountId, currentUserId], fetchSidebarSortPreferences, {
+  immediate: true,
+});
+
+const hasUnreadCountsForSection = section => {
+  if (section === SIDEBAR_SORT_SECTIONS.FOLDERS) {
+    return hasFilteredUnreadCounts.value;
+  }
+
+  return hasConversationUnreadCounts.value;
+};
+
+const getSortOptionsForSection = section =>
+  getSidebarSortOptions(section, {
+    hasUnreadCounts: hasUnreadCountsForSection(section),
+  });
+
+const getSortForSection = section =>
+  resolveSidebarSort(section, getSidebarSectionSort.value(section), {
+    hasUnreadCounts: hasUnreadCountsForSection(section),
+  });
+
+const updateSortPreference = (section, sortBy) => {
+  store.dispatch('sidebarSortPreferences/setSectionSort', {
+    section,
+    sortBy,
+  });
+};
+
+const buildSortConfig = section => ({
+  sortOptions: getSortOptionsForSection(section),
+  activeSort: getSortForSection(section),
+  onSortChange: sortBy => updateSortPreference(section, sortBy),
+});
+
+const sortedFolders = computed(() =>
+  sortSidebarItems(conversationCustomViews.value, {
+    sortBy: getSortForSection(SIDEBAR_SORT_SECTIONS.FOLDERS),
+    labelKey: view => view.name,
+    unreadCountKey: view => getFolderUnreadCount.value(view.id),
+  })
+);
+
+const sortedTeams = computed(() =>
+  sortSidebarItems(teams.value, {
+    sortBy: getSortForSection(SIDEBAR_SORT_SECTIONS.TEAMS),
+    labelKey: team => team.name,
+    unreadCountKey: team => getTeamUnreadCount.value(team.id),
+  })
+);
+
+const sortedInboxes = computed(() =>
+  sortSidebarItems(inboxes.value, {
+    sortBy: getSortForSection(SIDEBAR_SORT_SECTIONS.CHANNELS),
+    labelKey: inbox => inbox.name,
+    unreadCountKey: inbox => getInboxUnreadCount.value(inbox.id),
+  })
+);
+
+const sortedLabels = computed(() =>
+  sortSidebarItems(labels.value, {
+    sortBy: getSortForSection(SIDEBAR_SORT_SECTIONS.LABELS),
+    labelKey: label => label.title,
+    unreadCountKey: label => getLabelUnreadCount.value(label.id),
+  })
+);
 
 const closeMobileSidebar = () => {
   if (!props.isMobileSidebarOpen) return;
@@ -448,6 +480,9 @@ const menuItems = computed(() => {
           name: 'Mentions',
           label: t('SIDEBAR.MENTIONED_CONVERSATIONS'),
           icon: 'i-lucide-at-sign',
+          badgeCount: hasFilteredUnreadCounts.value
+            ? mentionsUnreadCount.value
+            : 0,
           activeOn: ['conversation_through_mentions'],
           to: accountScopedRoute('conversation_mentions'),
         },
@@ -455,6 +490,9 @@ const menuItems = computed(() => {
           name: 'Participating',
           label: t('SIDEBAR.PARTICIPATING_CONVERSATIONS'),
           icon: 'i-lucide-user-round-check',
+          badgeCount: hasFilteredUnreadCounts.value
+            ? participatingUnreadCount.value
+            : 0,
           activeOn: ['conversation_through_participating'],
           to: accountScopedRoute('conversation_participating'),
         },
@@ -463,6 +501,9 @@ const menuItems = computed(() => {
           activeOn: ['conversation_through_unattended'],
           label: t('SIDEBAR.UNATTENDED_CONVERSATIONS'),
           icon: 'i-lucide-clock-alert',
+          badgeCount: hasFilteredUnreadCounts.value
+            ? unattendedUnreadCount.value
+            : 0,
           to: accountScopedRoute('conversation_unattended'),
         },
         {
@@ -476,6 +517,9 @@ const menuItems = computed(() => {
           children: sortedFolders.value.map(view => ({
             name: `${view.name}-${view.id}`,
             label: view.name,
+            badgeCount: hasFilteredUnreadCounts.value
+              ? getFolderUnreadCount.value(view.id)
+              : 0,
             to: accountScopedRoute('folder_conversations', { id: view.id }),
           })),
         },
@@ -547,11 +591,19 @@ const menuItems = computed(() => {
       activeOn: ['captain_assistants_create_index'],
       children: [
         {
+          name: 'Overview',
+          label: t('SIDEBAR.CAPTAIN_OVERVIEW'),
+          activeOn: ['captain_assistants_overview_index'],
+          to: accountScopedRoute('captain_assistants_index', {
+            navigationPath: 'captain_assistants_overview_index',
+          }),
+        },
+        {
           name: 'FAQs',
           label: t('SIDEBAR.CAPTAIN_RESPONSES'),
           activeOn: [
             'captain_assistants_responses_index',
-            'captain_assistants_responses_pending',
+            'captain_assistants_faq_suggestions',
           ],
           to: accountScopedRoute('captain_assistants_index', {
             navigationPath: 'captain_assistants_responses_index',
@@ -611,6 +663,17 @@ const menuItems = computed(() => {
         },
       ],
     },
+    ...(isCallsAvailable.value
+      ? [
+          {
+            name: 'Calls',
+            label: t('SIDEBAR.CALLS'),
+            icon: 'i-lucide-phone',
+            to: accountScopedRoute('calls_dashboard_index'),
+            activeOn: ['calls_dashboard_index'],
+          },
+        ]
+      : []),
     ...(hasMenuPermission(['administrator', 'contact_manage'])
       ? [
           {
@@ -699,7 +762,6 @@ const menuItems = computed(() => {
         },
       ],
     },
-    // CommMate: Reports requires report_manage permission
     ...(hasMenuPermission(['administrator', 'report_manage'])
       ? [
           {
@@ -733,16 +795,10 @@ const menuItems = computed(() => {
                 label: t('SIDEBAR.REPORTS_BOT'),
                 to: accountScopedRoute('bot_reports'),
               },
-              {
-                name: 'Reports Campaigns',
-                label: t('SIDEBAR.REPORTS_CAMPAIGNS'),
-                to: accountScopedRoute('campaign_reports'),
-              },
             ],
           },
         ]
       : []),
-    // CommMate: Campaigns requires campaign_manage permission and filters by available inboxes
     ...(hasMenuPermission(['administrator', 'campaign_manage'])
       ? [
           {
@@ -753,7 +809,6 @@ const menuItems = computed(() => {
           },
         ]
       : []),
-    // CommMate: Templates menu for WhatsApp Cloud inboxes - requires templates_manage permission
     ...(whatsAppCloudInboxes.value.length > 0 &&
     hasMenuPermission(['administrator', 'templates_manage'])
       ? [
@@ -823,7 +878,6 @@ const menuItems = computed(() => {
       name: 'Settings',
       label: t('SIDEBAR.SETTINGS'),
       icon: 'i-lucide-bolt',
-      // CommMate: Filter settings children based on per-user permissions
       children: [
         ...(hasMenuPermission(['administrator', 'settings_account_manage'])
           ? [
@@ -951,7 +1005,6 @@ const menuItems = computed(() => {
           icon: 'i-lucide-toy-brick',
           to: accountScopedRoute('macros_wrapper'),
         },
-        // Canned Responses - accessible to all agents (no permission required)
         {
           name: 'Settings Canned Responses',
           label: t('SIDEBAR.CANNED_RESPONSES'),
@@ -968,6 +1021,17 @@ const menuItems = computed(() => {
               },
             ]
           : []),
+        ...(hasDataImport.value &&
+        hasMenuPermission(['administrator', 'settings_data_manage'])
+          ? [
+              {
+                name: 'Settings Data',
+                label: t('SIDEBAR.DATA'),
+                icon: 'i-lucide-database',
+                to: accountScopedRoute('settings_data_imports'),
+              },
+            ]
+          : []),
         ...(hasMenuPermission(['administrator'])
           ? [
               {
@@ -975,6 +1039,16 @@ const menuItems = computed(() => {
                 label: t('SIDEBAR.AUDIT_LOGS'),
                 icon: 'i-lucide-briefcase',
                 to: accountScopedRoute('auditlogs_list'),
+              },
+            ]
+          : []),
+        ...(hasMenuPermission(['administrator', 'settings_custom_roles_manage'])
+          ? [
+              {
+                name: 'Settings Custom Roles',
+                label: t('SIDEBAR.CUSTOM_ROLES'),
+                icon: 'i-lucide-shield-plus',
+                to: accountScopedRoute('custom_roles_list'),
               },
             ]
           : []),
@@ -1001,7 +1075,7 @@ const menuItems = computed(() => {
               },
             ]
           : []),
-        ...(hasMenuPermission(['administrator'])
+        ...(hasMenuPermission(['administrator', 'settings_security_manage'])
           ? [
               {
                 name: 'Settings Security',
@@ -1011,7 +1085,7 @@ const menuItems = computed(() => {
               },
             ]
           : []),
-        ...(hasMenuPermission(['administrator'])
+        ...(hasMenuPermission(['administrator', 'settings_billing_manage'])
           ? [
               {
                 name: 'Settings Billing',

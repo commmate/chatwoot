@@ -54,6 +54,7 @@ class Campaign < ApplicationRecord
 
   before_validation :ensure_correct_campaign_attributes
   after_commit :set_display_id, unless: :display_id?
+  after_destroy_commit :invalidate_filtered_unread_count_filters
 
   def trigger!
     return unless one_off?
@@ -89,6 +90,15 @@ class Campaign < ApplicationRecord
     when 'Email'
       Resend::OneoffCampaignService.new(campaign: self).perform if inbox.channel.resend?
     end
+  end
+
+  def invalidate_filtered_unread_count_filters
+    filters_changed = ::Conversations::UnreadCounts::FilteredCountInvalidator.new(account).conversation_changed!
+    dispatch_account_cache_invalidated if filters_changed
+  end
+
+  def dispatch_account_cache_invalidated
+    Rails.configuration.dispatcher.dispatch(ACCOUNT_CACHE_INVALIDATED, Time.zone.now, account: account, cache_keys: account.cache_keys)
   end
 
   def set_display_id

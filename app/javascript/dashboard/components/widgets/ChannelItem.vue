@@ -63,7 +63,7 @@ const isActive = computed(() => {
     return props.enabledFeatures.channel_tiktok && hasTiktokConfigured.value;
   }
 
-  if (key === 'voice') {
+  if (key === 'voice' || key === 'whatsapp_call') {
     return props.enabledFeatures.channel_voice;
   }
 
@@ -72,14 +72,6 @@ const isActive = computed(() => {
       hasEvolutionConfigured.value &&
       props.evolutionHealth.checked &&
       props.evolutionHealth.healthy
-    );
-  }
-
-  if (key === 'whatsapp_call') {
-    return (
-      props.enabledFeatures.channel_voice &&
-      !!window.chatwootConfig?.whatsappAppId &&
-      window.chatwootConfig.whatsappAppId !== 'none'
     );
   }
 
